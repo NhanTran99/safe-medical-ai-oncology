@@ -645,7 +645,7 @@ Testing generates molecular findings. Interpretation is a separate downstream pr
 | PP-0107 | Variant Interpretation |
 | PP-0233 | Clinical Genomics |
 | PP-0234 | Germline Genetic Testing |
-| PP-0114 | Genomic Biomarkers |
+| PP-0239| Genomic Biomarkers |
 | PP-0187 | NGS Biomarker Testing |
 
 ---

@@ -27,7 +27,9 @@
 
 Explain the major clinically relevant genomic or genome-derived biomarkers in gastric cancer, what types of molecular changes they represent, why they may matter clinically, and how they differ from protein-expression biomarkers, germline hereditary-risk markers, and blood-based ctDNA.
 
-The package is intentionally biomarker-centric rather than profiling-centric. PP-0113 explains the broader molecular tumor profiling concept; PP-0114 focuses on the genomic findings that may emerge from such testing.
+The package is intentionally biomarker-centric rather than profiling-centric. 
+PP-0238 explains the broader molecular tumor profiling concept; 
+PP-0239 focuses on the genomic findings that may emerge from such testing.
 
 ---
 
@@ -110,7 +112,7 @@ Provides broader molecular-oncology terminology and distinguishes different geno
 
 # Biomarker Classification Matrix
 
-| Biomarker | Main Molecular Concept | PP-0114 Role |
+| Biomarker | Main Molecular Concept | PP-0239 Role |
 |-----------|------------------------|--------------|
 | HER2/ERBB2 | Gene amplification / protein overexpression | Core genomic example; protein dimension acknowledged |
 | MSI/dMMR | Genomic instability / mismatch-repair status | Core |
@@ -131,7 +133,7 @@ Provides broader molecular-oncology terminology and distinguishes different geno
 
 HER2 is a useful boundary example because gastric-cancer HER2 status can involve both protein overexpression and gene amplification.
 
-PP-0114 therefore treats **ERBB2 amplification** as the genomic dimension while avoiding a full HER2 testing/treatment package.
+PP-0239 therefore treats **ERBB2 amplification** as the genomic dimension while avoiding a full HER2 testing/treatment package.
 
 ## 2. MSI/dMMR
 
@@ -267,7 +269,7 @@ The Source Materials also do not support detailed comparative performance claims
 
 | Adjacent Topic | Boundary |
 |---------------|----------|
-| PP-0238 Molecular Tumor Profiling | Profiling concept and strategy; PP-0114 focuses on genomic biomarker findings |
+| PP-0238 Molecular Tumor Profiling | Profiling concept and strategy; PP-0239 focuses on genomic biomarker findings |
 | PP-0097 Biomarker Testing | General biomarker-testing foundation |
 | PP-0235 Somatic Genetic Testing | General somatic testing concept |
 | PP-0236 Liquid Biopsy | Liquid-biopsy concept |
@@ -306,7 +308,7 @@ Review when:
 
 **APPROVED**
 
-The evidence base is sufficient for the locked educational scope of PP-0114.
+The evidence base is sufficient for the locked educational scope of PP-0239. 
 
 The package deliberately avoids unsupported completeness claims and separates established clinical biomarkers from emerging and research-only molecular findings.
 

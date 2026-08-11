@@ -115,8 +115,8 @@ It is also a critical safety boundary because tumor-derived findings that may be
 
 ## Prerequisite Population Packages
 
-- PP-0015 — Hereditary Gastric Cancer
-- PP-0016 — Genetic Testing
+- PP-0015 — Biomarker Testing for Gastric Adenocarcinoma
+- PP-0016 — HER2 Testing for Gastric Adenocarcinoma
 - PP-0107 — Variant Interpretation
 - PP-0233 — Clinical Genomics
 - Molecular / genomic testing fundamentals
@@ -128,9 +128,9 @@ It is also a critical safety boundary because tumor-derived findings that may be
 | PP / Topic | Relationship |
 |------------|--------------|
 | PP-0097 | Biomarker Testing |
-| PP-0106 | Variant Interpretation |
-| PP-0107 | Clinical Genomics |
-| PP-0110 | Somatic Genetic Testing |
+| PP-0107 | Variant Interpretation |
+| PP-0233 | Clinical Genomics |
+| PP-0235 | Somatic Genetic Testing |
 | Hereditary Gastric Cancer | Disease context |
 | Genetic Counseling | Counseling/support process |
 | Cascade Genetic Testing | Family-testing workflow |

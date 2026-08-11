@@ -158,7 +158,7 @@ The project therefore treats:
 
 as a conceptual hierarchy.
 
-The dedicated PP-0112 package will address ctDNA in greater depth.
+The dedicated PP-0237 package will address ctDNA in greater depth.
 
 ---
 
@@ -208,7 +208,7 @@ The finding still requires appropriate interpretation and consideration of:
 - treatment context;
 - current clinical guidance.
 
-Treatment algorithms therefore remain outside PP-0111.
+Treatment algorithms therefore remain outside PP-0236
 
 ---
 
@@ -322,7 +322,7 @@ Review this Population Package when:
 - Major professional guidance changes the role of blood-based genomic testing.
 - New evidence materially changes the interpretation of negative liquid-biopsy results.
 - The clinical role of ctDNA changes substantially.
-- Downstream PP-0112 creates substantive scope overlap.
+- Downstream PP-0237 creates substantive scope overlap.
 
 ---
 

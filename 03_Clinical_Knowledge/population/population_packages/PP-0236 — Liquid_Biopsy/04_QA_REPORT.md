@@ -27,7 +27,7 @@
 | Logical organization | PASS |
 | Knowledge blocks complete | PASS |
 | Common misconceptions addressed | PASS |
-| No overlap with PP-0112 ctDNA | PASS |
+| No overlap with PP-0237 ctDNA | PASS |
 | No unauthorized expansion into other liquid-biopsy technologies | PASS |
 
 ---
@@ -181,7 +181,7 @@ The package now contains:
 - evidence traceability review;
 - package completeness review.
 
-The package remains intentionally atomic and does not absorb the dedicated PP-0112 ctDNA scope.
+The package remains intentionally atomic and does not absorb the dedicated PP-0237 ctDNA scope.
 
 ---
 

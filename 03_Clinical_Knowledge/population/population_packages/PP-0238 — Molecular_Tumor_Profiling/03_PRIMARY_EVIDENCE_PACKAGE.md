@@ -85,7 +85,7 @@ These subjects require dedicated Population Packages.
 | 3 | NCCN Gastric Cancer Version 2.2025 / JNCCN 2025 | Supporting gastric-cancer biomarker framework |
 | 4 | American Cancer Society — Stomach Cancer | Patient-facing clinical context and explanation |
 | 5 | NCI PDQ — Genetics of Gastric Cancer | Tumor/genetic context and germline boundary |
-| 6 | Project-approved PP-0106/0107/0110/0111/0112 materials | Architecture and scope boundary alignment |
+| 6 | Project-approved PP-0107/0233/0235/0236/0237 materials | Architecture and scope boundary alignment |
 
 ---
 
@@ -124,7 +124,7 @@ The package uses guideline-level evidence for clinical claims and patient-educat
 | Molecular information should be reviewed together with pathology and other diagnostic materials. | ESMO/ASCO Global Curriculum 2023 |
 | A molecular finding does not automatically determine treatment; clinical significance depends on context and evidence. | NCCN + ESMO/ASCO |
 | Tumor molecular characteristics can evolve and may differ between samples because of tumor heterogeneity and time. | NCCN molecular-testing framework + project molecular/ctDNA architecture |
-| Blood-based molecular information can complement tissue-based characterization in selected circumstances. | NCCN Gastric Cancer 2026 + PP-0111/PP-0112 boundary materials |
+| Blood-based molecular information can complement tissue-based characterization in selected circumstances. | NCCN Gastric Cancer 2026 + PP-0236/PP-0237 boundary materials |
 | Molecular profiling does not replace pathology, imaging, staging, or comprehensive clinical assessment. | NCCN + ESMO/ASCO |
 
 ---
@@ -225,7 +225,7 @@ The clinical meaning depends on:
 - available therapies;
 - current guidelines.
 
-Detailed interpretation is delegated to PP-0106 and downstream precision-oncology packages.
+Detailed interpretation is delegated to PP-0107 and downstream precision-oncology packages.
 
 ---
 
@@ -329,7 +329,7 @@ Review this package when:
 
 Evidence traceability is complete.
 
-The evidence supports the locked scope of **PP-0113 — Molecular Tumor Profiling** without requiring an architecture change.
+The evidence supports the locked scope of **PP-0238 — Molecular Tumor Profiling** without requiring an architecture change.
 
 ---
 
@@ -367,17 +367,17 @@ Key sections used:
 
 # Boundary Verification
 
-| Adjacent Package | PP-0113 Boundary |
+| Adjacent Package | PP-0238 Boundary |
 |------------------|------------------|
-| PP-0097 Biomarker Testing | Biomarker testing is the general testing concept; PP-0113 explains integrated tumor molecular characterization |
+| PP-0097 Biomarker Testing | Biomarker testing is the general testing concept; PP-0238 explains integrated tumor molecular characterization |
 | PP-0101 NGS | NGS is a technology that may generate profile information; detailed NGS is excluded |
 | PP-0102 Gene Panel Testing | Panel testing is a testing strategy; molecular profile is the integrated output/concept |
-| PP-0107 Variant Interpretation | PP-0113 may say findings require interpretation; it does not teach interpretation |
-| PP-0233 Clinical Genomics | Clinical genomics is the broader field; PP-0113 focuses on the tumor-profile concept |
-| PP-0235 Somatic Genetic Testing | PP-0110 focuses on the testing process; PP-0113 focuses on integrated molecular characterization |
-| PP-0236 Liquid Biopsy | PP-0111 introduces blood-based liquid biopsy; PP-0113 only defines its relationship to tumor profiling |
-| PP-0237 ctDNA | PP-0112 explains ctDNA specifically; PP-0113 only uses ctDNA as a complementary source of molecular information |
-| PP-0239 Genomic Biomarkers | PP-0113 describes the profile; PP-0114 should explain genomic biomarkers in greater depth |
+| PP-0107 Variant Interpretation | PP-0238 may say findings require interpretation; it does not teach interpretation |
+| PP-0233 Clinical Genomics | Clinical genomics is the broader field; PP-0238 focuses on the tumor-profile concept |
+| PP-0235 Somatic Genetic Testing | PP-0235 focuses on the testing process; PP-0238 focuses on integrated molecular characterization |
+| PP-0236 Liquid Biopsy | PP-0236 introduces blood-based liquid biopsy; PP-0238 only defines its relationship to tumor profiling |
+| PP-0237 ctDNA | PP-0237 explains ctDNA specifically; PP-0238 only uses ctDNA as a complementary source of molecular information |
+| PP-0239 Genomic Biomarkers | PP-0238 describes the profile; PP-0239 should explain genomic biomarkers in greater depth |
 
 ---
 
@@ -390,5 +390,5 @@ The Primary Evidence Package is:
 - evidence-supported;
 - scope-compliant;
 - traceable;
-- aligned with the locked PP-0113 architecture;
+- aligned with the locked PP-0238 architecture;
 - ready for repository integration.

@@ -196,7 +196,7 @@ The package also preserves the distinction between:
 - clinical actionability;
 - treatment selection.
 
-This prevents PP-0235 from duplicating PP-0106, PP-0109, biomarker-specific packages, liquid-biopsy/ctDNA packages, or treatment packages.
+This prevents PP-0235 from duplicating PP-0107, PP-0234, biomarker-specific packages, liquid-biopsy/ctDNA packages, or treatment packages.
 
 ---
 

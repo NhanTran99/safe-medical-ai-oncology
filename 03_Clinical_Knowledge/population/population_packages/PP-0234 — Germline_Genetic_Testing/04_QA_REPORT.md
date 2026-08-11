@@ -215,7 +215,7 @@ The package deliberately maintains the following boundaries:
 - Germline testing ≠ cascade testing.
 - Germline testing ≠ somatic tumor testing.
 
-This prevents duplication with PP-0106, PP-0107, PP-0110, and downstream hereditary-cancer packages.
+This prevents duplication with PP-0107, PP-0233, PP-0235, and downstream hereditary-cancer packages.
 
 ---
 

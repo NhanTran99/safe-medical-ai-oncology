@@ -156,7 +156,7 @@ The ESMO/ASCO curriculum identifies molecular-testing applications across oncolo
 - identification of resistance mechanisms;
 - evaluation for inherited conditions.
 
-For PP-0110, these indications are presented at a foundational level rather than converted into disease-specific treatment algorithms. fileciteturn60file0
+For PP-0235, these indications are presented at a foundational level rather than converted into disease-specific treatment algorithms. fileciteturn60file0
 
 In gastric cancer, molecular characterization is clinically relevant because molecular findings can contribute to diagnosis/classification and treatment-related decision-making within the appropriate clinical context.
 
@@ -241,7 +241,7 @@ Therefore:
 
 > **Tumor finding ≠ automatically somatic finding.**
 
-This is a core patient-safety message of PP-0110.
+This is a core patient-safety message of PP-0235.
 
 ---
 
@@ -262,7 +262,7 @@ The downstream sequence is:
 
 PP-0235 intentionally stops before detailed variant interpretation and treatment selection.
 
-This preserves the boundary with PP-0106 and with subsequent precision-oncology packages.
+This preserves the boundary with PP-0107 and with subsequent precision-oncology packages.
 
 ---
 
@@ -315,7 +315,7 @@ The evidence consistently supports the following educational messages:
 
 # Evidence Consistency Review
 
-No clinically meaningful disagreement was identified within the approved evidence framework used for PP-0110.
+No clinically meaningful disagreement was identified within the approved evidence framework used for PP-0235.
 
 The ESMO/ASCO curriculum provides the broad oncology framework for:
 

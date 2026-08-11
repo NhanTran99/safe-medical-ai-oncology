@@ -266,9 +266,9 @@ NCI emphasizes that genomic testing and interpretation are complex and supports 
 
 PP-0233 introduces this distinction only.
 
-Detailed germline testing is delegated to **PP-0109**.
+Detailed germline testing is delegated to **PP-0234**.
 
-Detailed somatic testing is delegated to **PP-0110**.
+Detailed somatic testing is delegated to **PP-0235**.
 
 ---
 
@@ -489,10 +489,10 @@ These subjects require dedicated Population Packages.
 | WGS | PP-0103 |
 | WES | PP-0104 |
 | RNA sequencing | PP-0105 |
-| Variant Interpretation | PP-0106 |
+| Variant Interpretation | PP-0107 |
 | Variant Classification | PP-0108 |
-| Germline Genetic Testing | PP-0109 |
-| Somatic Genetic Testing | PP-0110 |
+| Germline Genetic Testing | PP-0234|
+| Somatic Genetic Testing | PP-0235 |
 | Biomarker-specific testing | Dedicated biomarker PP |
 | ctDNA / liquid biopsy | Dedicated downstream PP |
 | Treatment algorithms | Treatment / precision-oncology PP |

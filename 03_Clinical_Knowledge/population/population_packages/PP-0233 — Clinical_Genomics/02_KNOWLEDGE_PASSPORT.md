@@ -183,7 +183,7 @@ It is therefore a central hub in the genomic knowledge graph.
 - PP-0101 — NGS
 - PP-0102 — Gene Panel Testing
 - PP-0103 — WGS
-- PP-0106 — Variant Interpretation
+- PP-0107 — Variant Interpretation
 
 ---
 

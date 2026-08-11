@@ -26,7 +26,7 @@
 | Logical organization | PASS |
 | Knowledge blocks complete | PASS |
 | No overlap with adjacent Population Packages | PASS |
-| Locked PP-0112 decisions implemented | PASS |
+| Locked PP-0237 decisions implemented | PASS |
 
 ---
 
@@ -36,7 +36,7 @@
 |-----------|--------|
 | Scientifically accurate | PASS |
 | Consistent with NCCN Gastric Cancer Version 2.2026 | PASS |
-| Consistent with the locked PP-0111 architecture | PASS |
+| Consistent with the locked PP-0236 architecture | PASS |
 | Appropriate explanation of ctDNA | PASS |
 | Appropriate distinction between ctDNA and liquid biopsy | PASS |
 | Appropriate distinction between ctDNA and cfDNA | PASS |
@@ -103,7 +103,7 @@
 
 # Educational Boundary Review
 
-The Population Package successfully remains within the locked PP-0112 educational boundary.
+The Population Package successfully remains within the locked PP-0237 educational boundary.
 
 ## Included
 
@@ -150,7 +150,7 @@ The **Atomic Knowledge Principle** has been preserved.
 | PP-0107 — Variant Interpretation | Interpretation/classification excluded |
 | PP-0233 — Clinical Genomics | Clinical-genomics concept extended specifically to ctDNA |
 | PP-0235 — Somatic Genetic Testing | ctDNA treated as a specimen/source-specific downstream application |
-| PP-0236 — Liquid Biopsy | Broader liquid-biopsy concept retained in PP-0111; ctDNA-specific content placed here |
+| PP-0236 — Liquid Biopsy | Broader liquid-biopsy concept retained in PP-0236; ctDNA-specific content placed here |
 
 ---
 
@@ -173,7 +173,7 @@ The package deliberately does not extrapolate these points into universal ctDNA 
 
 ## PASS
 
-PP-0112 satisfies the locked **Gold Population Package Specification v1.0** and the approved PP-0112 Discussion decisions.
+PP-0237 satisfies the locked **Gold Population Package Specification v1.0** and the approved PP-0237 Discussion decisions.
 
 Approved as the official Population Package for:
 

@@ -305,7 +305,8 @@ The uncertainty means that current evidence does not establish whether the varia
 
 This distinction protects patients from interpreting every genetic change as a disease-causing mutation.
 
-Detailed evidence assessment and variant reclassification are delegated to PP-0106 and downstream classification content.
+Detailed evidence assessment → PP-0107 Variant Interpretation
+Variant reclassification → PP-0114 Variant Reclassification
 
 ---
 

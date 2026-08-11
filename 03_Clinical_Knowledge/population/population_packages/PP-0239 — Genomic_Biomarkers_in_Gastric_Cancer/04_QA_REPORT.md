@@ -220,10 +220,10 @@ Execution order remains controlled by the Project Coordinator.
 
 # PASS
 
-PP-0114 satisfies the locked **Gold Population Package Specification v1.0**.
+PP-0239 satisfies the locked **Gold Population Package Specification v1.0**.
 
 Approved as the official Population Package for:
 
-> **PP-0114 — Genomic Biomarkers in Gastric Cancer**
+> **PP-0239 — Genomic Biomarkers in Gastric Cancer**
 
 The package is ready for Gold Package integration.

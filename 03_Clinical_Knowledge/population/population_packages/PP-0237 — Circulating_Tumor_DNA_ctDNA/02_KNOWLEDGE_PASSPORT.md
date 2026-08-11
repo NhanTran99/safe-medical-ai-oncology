@@ -292,4 +292,4 @@ This Knowledge Passport should be reviewed if:
 
 **APPROVED**
 
-This Knowledge Passport is the official governance metadata for **PP-0112** and is compliant with the locked **Gold Population Package Specification v1.0**.
+This Knowledge Passport is the official governance metadata for **PP-0237** and is compliant with the locked **Gold Population Package Specification v1.0**.

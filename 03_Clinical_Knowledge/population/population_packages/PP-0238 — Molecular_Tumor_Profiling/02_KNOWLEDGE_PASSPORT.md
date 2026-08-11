@@ -101,8 +101,8 @@ Molecular tumor profiling is a central bridge between foundational biomarker tes
 
 ## Prerequisite Population Packages
 
-- **PP-0107 — Clinical Genomics**
-- **PP-0110 — Somatic Genetic Testing**
+- PP-0233 — Clinical Genomics
+- PP-0235 — Somatic Genetic Testing
 - Foundational biomarker and molecular-testing concepts
 
 ---
@@ -117,15 +117,15 @@ Molecular tumor profiling is a central bridge between foundational biomarker tes
 | PP-0102 | Gene Panel Testing |
 | PP-0104 | Whole Exome Sequencing (WES) |
 | PP-0105 | RNA Sequencing |
-| PP-0106 | Variant Interpretation |
-| PP-0111 | Liquid Biopsy |
-| PP-0112 | Circulating Tumor DNA (ctDNA) |
+| PP-0107 | Variant Interpretation |
+| PP-0236 | Liquid Biopsy |
+| PP-0237 | Circulating Tumor DNA (ctDNA) |
 
 ---
 
 ## Recommended Next Population Package
 
-**PP-0114 — Genomic Biomarkers**
+PP-0239 — Genomic Biomarkers in Gastric Cancer
 
 ---
 
@@ -269,7 +269,7 @@ The package synthesizes high-authority gastric-cancer guidelines and oncology cu
 
 | Version | Date | Description |
 |----------|------|-------------|
-| 1.0.0 | 2026-08-08 | Initial Gold Release after approved PP-0113 scope lock |
+| 1.0.0 | 2026-08-08 | Initial Gold Release after approved PP-0238 scope lock |
 
 ---
 
@@ -277,4 +277,4 @@ The package synthesizes high-authority gastric-cancer guidelines and oncology cu
 
 **APPROVED**
 
-This Knowledge Passport is the official governance metadata for **PP-0113 — Molecular Tumor Profiling** and is compliant with the locked Gold Population Package workflow and specification.
+This Knowledge Passport is the official governance metadata for **PP-0238 — Molecular Tumor Profiling** and is compliant with the locked Gold Population Package workflow and specification.

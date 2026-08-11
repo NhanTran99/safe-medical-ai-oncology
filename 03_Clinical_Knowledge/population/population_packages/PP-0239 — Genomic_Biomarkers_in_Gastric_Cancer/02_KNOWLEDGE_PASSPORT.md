@@ -96,7 +96,7 @@ Genomic biomarkers may be assessed during gastric-cancer work-up and treatment p
 
 **Reason:**
 
-This package provides disease-specific genomic biomarker knowledge that connects the general molecular-profiling concept in PP-0113 with individual biomarker and treatment packages.
+This package provides disease-specific genomic biomarker knowledge that connects the general molecular-profiling concept in PP-0238 with individual biomarker and treatment packages.
 
 ---
 
@@ -232,4 +232,4 @@ The package prioritizes disease-specific guideline evidence and uses broader onc
 
 **APPROVED**
 
-This Knowledge Passport is the official governance metadata for **PP-0114 — Genomic Biomarkers in Gastric Cancer**.
+This Knowledge Passport is the official governance metadata for **PP-0239|— Genomic Biomarkers in Gastric Cancer**.

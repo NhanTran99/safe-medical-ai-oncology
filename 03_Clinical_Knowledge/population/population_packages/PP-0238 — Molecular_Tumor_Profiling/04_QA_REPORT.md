@@ -232,7 +232,7 @@ The four-artifact package is **Gold Release / Repository Ready**.
 
 # Reviewer Notes
 
-PP-0113 is an important **integration node** in the precision-oncology knowledge graph.
+PP-0238 is an important **integration node** in the precision-oncology knowledge graph.
 
 Its primary governance value is not to teach another testing technology. Its role is to explain how multiple molecular findings can be integrated into a **molecular description of the tumor**.
 

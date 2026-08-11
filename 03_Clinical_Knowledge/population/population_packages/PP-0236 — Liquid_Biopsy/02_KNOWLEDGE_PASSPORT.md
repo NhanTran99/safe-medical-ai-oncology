@@ -176,7 +176,7 @@ ctDNA is an important tumor-derived molecular application within liquid biopsy.
 
 PP-0236 introduces this relationship.
 
-PP-0112 provides the dedicated ctDNA knowledge layer.
+PP-0237 provides the dedicated ctDNA knowledge layer.
 
 ---
 
@@ -276,4 +276,4 @@ The package does not introduce a new clinical algorithm beyond what is supported
 
 **APPROVED**
 
-This Knowledge Passport is the official governance metadata for **PP-0111** and is fully compliant with the locked **Gold Population Package Specification v1.0**.
+This Knowledge Passport is the official governance metadata for **PP-0236** and is fully compliant with the locked **Gold Population Package Specification v1.0**.

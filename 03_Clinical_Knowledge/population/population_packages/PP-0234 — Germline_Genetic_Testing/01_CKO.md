@@ -723,10 +723,10 @@ Broader testing can identify more information but can also increase the chance o
 
 ## Prerequisite Population Packages
 
-- PP-0015 — Hereditary Gastric Cancer
-- PP-0016 — Genetic Testing
-- PP-0106 — Variant Interpretation
-- PP-0107 — Clinical Genomics
+- PP-0015 — Biomarker Testing for Gastric Adenocarcinoma
+- PP-0016 — HER2 Testing for Gastric Adenocarcinoma
+- PP-0107 — Variant Interpretation
+- PP-0233 — Clinical Genomics
 - Molecular / genomic testing fundamentals
 
 ---
