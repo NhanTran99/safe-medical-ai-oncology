@@ -1,0 +1,187 @@
+# Closing Note — Phase 4
+
+**Phase:** Phase 4 — Repository & Integration Verification  
+**Status:** CLOSED  
+**Population scope:** PP-0001 → PP-0239  
+**Canonical Gold artifacts:** 239 × 4 = 956
+
+---
+
+## 1. Purpose
+
+This Closing Note formally records completion of Phase 4 Repository &
+Integration Verification following completion and verification of Layers 4A–4D
+and Layer 3 Aggregate Verification.
+
+Phase 4 is the verification and integration phase following Phase 3 Knowledge
+Population. It does not reopen Phase 3 Gold production or substantive
+Population Package scope.
+
+---
+
+## 2. Verification Results
+
+### Layer 4A — Registry / Manifest Integration
+
+**PASS**
+
+The Population Package Integration Manifest was established as the Phase-4
+integration control artifact and reconciled against the population integration
+scope.
+
+### Layer 4B — Repository Resolution
+
+**PASS**
+
+Repository resolution established the expected Population Package structure
+and canonical artifact set for the 239-package population wave.
+
+Expected result:
+
+- 239 Population Packages
+- 4 canonical artifacts per package
+- 956 canonical artifacts total
+- no unresolved repository-resolution exception
+
+### Layer 4C — Governance Metadata
+
+**PASS**
+
+Governance metadata verification was completed using the controlled Layer 4C
+verification record.
+
+The controlled distinction between lifecycle, integration verification,
+repository status, and retrieval readiness remains preserved.
+
+### Layer 4D — Immutable Integration Evidence
+
+**PASS**
+
+Phase-4 integration evidence was committed to the repository on `main`.
+
+Phase-3 immutable baseline:
+
+`a838a9423fc3d14c46f8cd176bafed3b691e65c0`
+
+Phase-4 evidence integration baseline:
+
+`a20ad0147574c4d80ce06f3d152640f39b890d79`
+
+---
+
+## 3. Layer 3 — Aggregate Verification
+
+**PASS — 239 / 239**
+
+Final Layer 3 Audit v3 result:
+
+- Complete 4-artifact packages: **239 / 239**
+- Canonical filenames: **239 / 239**
+- Duplicate folder IDs: **0 / 239**
+- Explicit ID hard fail: **0 / 239**
+- Explicit version hard fail: **0 / 239**
+- Final pass: **239 / 239**
+- Cross-artifact exceptions: **0 / 239**
+- Hard fails: **0 / 239**
+
+The single initial PP-0195 cross-artifact title exception was resolved by a
+metadata-only normalization of `01_CKO.md`, followed by a successful rerun of
+the Layer 3 audit.
+
+Final correction / verification commit:
+
+`533e572926a3752cfe02ffa27c60742597bd0e7b`
+
+---
+
+## 4. Evidence Package
+
+Controlled Phase-4 evidence is maintained under:
+
+`09_Evaluation/validation/population_integration/`
+
+Including:
+
+- Layer 4A Manifest Reconciliation Record
+- Layer 4B Repository Resolution Verification Record
+- Layer 4C Governance Metadata Verification Record
+- Layer 4D Immutable Integration Evidence Record
+- Layer 3 Aggregate Verification Record v0.2
+- Layer 3 audit output files
+
+The historical Layer 3 Verification Record v0.1 has been archived.
+
+---
+
+## 5. Git / Release Boundary
+
+The Phase-3 immutable baseline remains:
+
+`a838a9423fc3d14c46f8cd176bafed3b691e65c0`
+
+Phase-4 evidence integration was established at:
+
+`a20ad0147574c4d80ce06f3d152640f39b890d79`
+
+The final post-integration correction and Layer 3 verification state is:
+
+`533e572926a3752cfe02ffa27c60742597bd0e7b`
+
+Repository branch at final verification:
+
+`main`
+
+**Git Tag / Release ID: UNASSIGNED**
+
+No Git milestone/tag or formal release is created by this Closing Note.
+
+---
+
+## 6. Retrieval and Runtime Boundary
+
+Phase 4 closure establishes verified repository/integration state.
+
+It does **not** automatically declare the Population Knowledge Base
+Retrieval-Ready, runtime/RAG-ready, or AI-reasoning-ready unless the relevant
+governance gate is separately satisfied.
+
+The architectural distinction remains:
+
+**Primary Evidence Package ≠ Runtime Evidence Package**
+
+Phase 5 / AI reasoning integration is therefore a subsequent phase and is not
+declared complete by this Closing Note.
+
+---
+
+## 7. Phase 4 Closure Decision
+
+All defined Phase-4 verification layers have passed:
+
+```text
+Layer 4A — PASS
+Layer 4B — PASS
+Layer 4C — PASS
+Layer 4D — PASS
+Layer 3  — PASS (239/239)
+```
+
+The final repository/integration verification state is therefore accepted.
+
+# PHASE 4 — CLOSED
+
+**Closure basis:** verified 239-package Population Wave, 956 canonical Gold
+artifacts, completed Layer 4A–4D integration verification, final Layer 3
+aggregate PASS, and traceable post-integration PP-0195 correction.
+
+---
+
+## 8. Transition
+
+Phase 4 is closed.
+
+The next phase may begin only from this verified integration baseline and
+should preserve all Phase-3 and Phase-4 immutable evidence.
+
+**Next phase:** downstream Retrieval / Runtime / AI Reasoning Integration,
+subject to its own governance and readiness gates.
