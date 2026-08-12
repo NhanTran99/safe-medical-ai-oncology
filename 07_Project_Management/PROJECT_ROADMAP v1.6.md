@@ -8,7 +8,7 @@ Document ID:
 DOC-FND-003
 
 Version:
-1.5
+1.6
 
 Status:
 LOCKED
@@ -36,7 +36,7 @@ PROJECT_STATUS.md
 All Architecture Documents
 
 Last Updated:
-2026-08-10
+2026-08-12
 
 ---
 
@@ -271,6 +271,33 @@ Phase 4 shall be completed when:
 - downstream retrieval readiness requirements are verified;
 - Phase 4 verification evidence has been reviewed and approved.
 
+### Phase 4 Closure Result
+
+Status:
+CLOSED
+
+Verification Result:
+PASS
+
+Completed Verification Layers:
+
+- Layer 4A — Registry Integration — PASS
+- Layer 4B — Repository Resolution — PASS
+- Layer 4C — Governance Metadata — PASS
+- Layer 4D — Immutable Integration Evidence — PASS
+- Layer 3 Aggregate Verification — PASS
+
+Closure Evidence
+
+Phase 4 closing commit:
+70067d020420eb1792419bb7d7308da524f0031c
+
+Post-integration archive correction:
+d4c2994e390d746c37276b7d29d0ba57ebae0d53
+
+Phase 4 is formally closed and does not require further execution unless
+a specific defect or corrective action is identified.
+
 ---
 
 ## Phase 5 — Implementation
@@ -291,6 +318,19 @@ Implement the approved architecture.
 
 - MVP completed.
 - Internal review completed.
+
+
+### Phase 5 Entry Basis
+
+Phase 3 — Knowledge Population & Clinical Content Development: CLOSED
+
+Phase 4 — Repository & Integration Verification: CLOSED
+
+The project may now transition from governed knowledge production and
+repository verification into controlled implementation planning.
+
+Phase 5 shall not modify the approved architecture without governed
+architectural amendment.
 
 ---
 
@@ -400,16 +440,13 @@ The roadmap aims to ensure that the project progresses through:
 
 Current Phase
 
-Phase 4 — Repository & Integration Verification
+Phase 5 — Implementation
 
 Current Status
 
 Phase 3 — CLOSED
-Phase 4 — ACTIVE
-
-Current Step
-
-Phase 4 — Repository & Integration Verification
+Phase 4 — CLOSED
+Phase 5 — PLANNED
 
 Completed Phase 3 Population Wave
 
@@ -432,42 +469,77 @@ Phase 3 Closure
 
 Formal closure locked under LD-P4-001.
 
-Phase 4 Verification Model
+Phase 4 Closure
 
-Population Package
-→ Registry
-→ Exact Repository Path
-→ Four Gold Artifacts
-→ Governance Metadata
-→ Integration Evidence
-→ Retrieval Readiness
+Repository & Integration Verification formally CLOSED.
 
-Phase 4 Execution Layers
+Phase 4 Verification Result
+
+PASS
+
+Completed Phase 4 Layers
 
 - Layer 4A — Registry Integration
 - Layer 4B — Repository Resolution
 - Layer 4C — Governance Metadata
 - Layer 4D — Immutable Integration Evidence
+- Layer 3 Aggregate Verification
 
-Phase 4 Verification Status Vocabulary
+Phase 4 Closing Commit
 
-Locked under LD-P4-002:
+70067d020420eb1792419bb7d7308da524f0031c
 
-- PENDING
-- PASS
-- FAIL
+Post-integration Archive Correction
+
+d4c2994e390d746c37276b7d29d0ba57ebae0d53
 
 Current Strategic Priority
 
-Complete deterministic repository and integration verification without
-reopening substantive Phase 3 Population Package production.
+Prepare Phase 5 implementation under the approved architecture and
+preserve the completed Phase 3 and Phase 4 baselines.
 
 Next Major Phase
 
 Phase 5 — Implementation
 
+---
 
 # 9. AMENDMENT HISTORY
+
+## Version 1.6
+
+Updated following formal closure of Phase 4.
+
+Amendments
+
+### Phase 4
+
+Updated status to:
+
+- CLOSED
+- Layer 4A — PASS
+- Layer 4B — PASS
+- Layer 4C — PASS
+- Layer 4D — PASS
+- Layer 3 Aggregate Verification — PASS
+
+Recorded Phase 4 closing commit:
+
+70067d020420eb1792419bb7d7308da524f0031c
+
+Recorded post-integration archive correction:
+
+d4c2994e390d746c37276b7d29d0ba57ebae0d53
+
+### Phase 5
+
+Updated current project position to:
+
+Phase 5 — Implementation — Planned
+
+No major architectural restructuring introduced.
+
+---
 
 ## Version 1.5
 

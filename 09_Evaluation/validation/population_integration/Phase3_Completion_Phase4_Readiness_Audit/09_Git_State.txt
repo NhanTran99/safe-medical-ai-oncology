@@ -1,0 +1,22 @@
+GIT HEAD
+a838a9423fc3d14c46f8cd176bafed3b691e65c0
+
+GIT STATUS
+?? .vscode/
+?? 01_Foundation/
+?? 02_Architecture/
+?? 03_Clinical_Knowledge/architecture/
+?? 03_Clinical_Knowledge/population/framework/
+?? 03_Clinical_Knowledge/population/strategy/
+?? 04_Knowledge_Governance/
+?? 05_Operations/
+?? 06_Governance/
+?? 07_Project_Management/
+?? archive/
+?? sources/
+?? tatus
+?? working/
+
+GIT REMOTE
+origin	https://github.com/NhanTran99/safe-medical-ai-oncology.git (fetch)
+origin	https://github.com/NhanTran99/safe-medical-ai-oncology.git (push)

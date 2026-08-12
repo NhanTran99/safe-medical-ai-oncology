@@ -1,0 +1,12 @@
+"Gate","Result"
+"Layer 3 objective integrity",TRUE
+"239 PP folders present",TRUE
+"239 x 4 canonical artifacts",TRUE
+"Manifest found",TRUE
+"Manifest contains 239 unique PP IDs",TRUE
+"Manifest PP IDs reconcile to repository folders",TRUE
+"Manifest paths reconcile to repository folders",FALSE
+"Git HEAD is expected Phase 3 commit",TRUE
+"Git remote is official repository",TRUE
+"Git contains 239 x 4 Gold artifacts",FALSE
+"Git working tree clean",FALSE
