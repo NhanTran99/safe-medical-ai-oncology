@@ -8,7 +8,7 @@
 |---|---|
 | CKO ID | CKO-PP-0195 |
 | PP ID | PP-0195 |
-| Title | Endoscopic Submucosal Dissection (ESD) |
+| Title | ESD / Endoscopic Submucosal Dissection |
 | Clinical Domain | Treatment / Early Gastric Cancer / Endoscopic Resection |
 | Population Wave | Population Wave — Gastric Cancer |
 | Version | 1.0.0 |

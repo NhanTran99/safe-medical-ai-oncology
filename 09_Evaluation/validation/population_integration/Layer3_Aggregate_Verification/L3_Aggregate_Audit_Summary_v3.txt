@@ -1,0 +1,32 @@
+PHASE 3C — LAYER 3 AGGREGATE ARTIFACT AUDIT v3
+================================================
+Repository root: D:/GIT hub/safe-medical-ai-oncology
+Population Package root: D:/GIT hub/safe-medical-ai-oncology/03_Clinical_Knowledge/population/population_packages
+
+Expected PP count: 239
+Audited PP rows: 239
+Complete 4-artifact packages: 239 / 239
+Canonical filename PASS: 239 / 239
+Duplicate folder IDs: 0 / 239
+
+Explicit ID PASS: 225 / 239
+Explicit ID not declared: 14 / 239
+Explicit ID hard contradiction: 0 / 239
+
+Explicit version PASS: 224 / 239
+Explicit version not declared: 15 / 239
+Explicit version hard contradiction: 0 / 239
+
+Explicit title review: 0 / 239
+
+FINAL PASS: 239 / 239
+CROSS_ARTIFACT: 0 / 239
+HARD_FAIL: 0 / 239
+
+SEMANTIC EVIDENCE IS REPORT/REVIEW SIGNAL ONLY.
+It is NOT used to fail a package.
+
+Depth/richness metrics are REPORT ONLY.
+
+PROVISIONAL RESULT: OBJECTIVE LAYER 3 INTEGRITY PASS.
+Semantic evidence remains available for strategist review.
