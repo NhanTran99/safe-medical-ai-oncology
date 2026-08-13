@@ -3,8 +3,9 @@
 Python implementation package for the Safe Medical AI Oncology system,
 established as Phase 5 Task #002 scaffolding and extended by Task #003
 (retrieval foundation), Task #004 (filesystem repository source),
-Task #005 (Runtime Evidence Package boundary), and Task #006 (Runtime
-Integration / GenerationContext boundary).
+Task #005 (Runtime Evidence Package boundary), Task #006 (Runtime
+Integration / GenerationContext boundary), and Task #007 (Generation
+boundary).
 
 ## Scope of the Task #002 scaffolding
 
@@ -55,6 +56,16 @@ Context, RTEP, runtime constraints) → `integrate_runtime_context` →
 clinical reasoning. See `integration/README.md` for the full contract,
 assembly semantics, and deferred scope.
 
+## Scope of the Task #007 Generation boundary
+
+`generation/` adds the boundary between the immutable `GenerationContext`
+and downstream Validation (not yet implemented): `GenerationContext` +
+an `LLMAdapter` provider → `generate_candidate_response` → typed
+`CandidateResponse`, never labeled final/clinically validated/safety
+approved/citation verified. No Validation, clinical/safety adjudication,
+retrieval, embeddings, or vector search. See `generation/README.md` for
+the full contract, provider boundary, and deferred scope.
+
 ## Directory layout
 
 ```text
@@ -88,6 +99,11 @@ assembly semantics, and deferred scope.
 │       │   ├── README.md
 │       │   ├── models.py
 │       │   └── integration.py
+│       ├── generation/
+│       │   ├── __init__.py
+│       │   ├── README.md
+│       │   ├── models.py
+│       │   └── generation.py
 │       └── api/
 │           ├── __init__.py
 │           └── main.py
@@ -103,7 +119,9 @@ assembly semantics, and deferred scope.
     ├── test_evidence_models.py
     ├── test_evidence_assembly.py
     ├── test_integration_models.py
-    └── test_integration.py
+    ├── test_integration.py
+    ├── test_generation_models.py
+    └── test_generation.py
 ```
 
 ## Running
