@@ -1,12 +1,13 @@
 # 08_Development/implementation/
 
 Python implementation package for the Safe Medical AI Oncology system,
-established as Phase 5 Task #002 scaffolding.
+established as Phase 5 Task #002 scaffolding and extended by Task #003 with
+a controlled repository retrieval foundation.
 
-## Scope of this scaffolding
+## Scope of the Task #002 scaffolding
 
-This package currently contains **no retrieval, runtime, or clinical
-business logic**. It establishes only:
+This package contains **no runtime generation or clinical business logic**.
+It establishes only:
 
 - a reproducible Python 3.12 project (`uv` + `pyproject.toml` at the
   repository root);
@@ -26,6 +27,13 @@ business logic**. It establishes only:
   no concrete provider implementation;
 - a pytest baseline (`tests/`) proving the scaffold imports and runs.
 
+## Scope of the Task #003 retrieval foundation
+
+`retrieval/` adds a deterministic, provider/engine-agnostic navigation-first
+retrieval foundation (no embeddings, vector search, or LLM integration — see
+`retrieval/README.md` for the full interface description, result semantics,
+and deferred scope).
+
 ## Directory layout
 
 ```text
@@ -42,6 +50,12 @@ business logic**. It establishes only:
 │       ├── llm/
 │       │   ├── __init__.py
 │       │   └── base.py
+│       ├── retrieval/
+│       │   ├── __init__.py
+│       │   ├── README.md
+│       │   ├── models.py
+│       │   ├── source.py
+│       │   └── service.py
 │       └── api/
 │           ├── __init__.py
 │           └── main.py
@@ -50,7 +64,9 @@ business logic**. It establishes only:
     ├── test_imports.py
     ├── test_config.py
     ├── test_trace.py
-    └── test_app.py
+    ├── test_app.py
+    ├── test_retrieval_models.py
+    └── test_retrieval_service.py
 ```
 
 ## Running
