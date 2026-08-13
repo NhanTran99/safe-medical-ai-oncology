@@ -4,8 +4,8 @@ Python implementation package for the Safe Medical AI Oncology system,
 established as Phase 5 Task #002 scaffolding and extended by Task #003
 (retrieval foundation), Task #004 (filesystem repository source),
 Task #005 (Runtime Evidence Package boundary), Task #006 (Runtime
-Integration / GenerationContext boundary), and Task #007 (Generation
-boundary).
+Integration / GenerationContext boundary), Task #007 (Generation
+boundary), and Task #008 (Validation boundary).
 
 ## Scope of the Task #002 scaffolding
 
@@ -66,6 +66,18 @@ approved/citation verified. No Validation, clinical/safety adjudication,
 retrieval, embeddings, or vector search. See `generation/README.md` for
 the full contract, provider boundary, and deferred scope.
 
+## Scope of the Task #008 Validation boundary
+
+`validation/` adds the downstream boundary that evaluates a `CandidateResponse`
+(Task #007) against the authoritative RTEP/evidence context: `ValidationInput`
+(`CandidateResponse` + RTEP + validation policy version) →
+`validate_candidate_response` → typed `ValidationResult`. `VALID` means only
+that a `CandidateResponse` satisfies the locked Validation contract — never
+that a diagnosis is correct, a treatment is appropriate, or clinical/final
+approval has occurred. No retrieval, generation, provider invocation, clinical
+reasoning, or final delivery/approval. See `validation/README.md` for the
+full contract, failure semantics, and deferred scope.
+
 ## Directory layout
 
 ```text
@@ -104,6 +116,11 @@ the full contract, provider boundary, and deferred scope.
 │       │   ├── README.md
 │       │   ├── models.py
 │       │   └── generation.py
+│       ├── validation/
+│       │   ├── __init__.py
+│       │   ├── README.md
+│       │   ├── models.py
+│       │   └── validation.py
 │       └── api/
 │           ├── __init__.py
 │           └── main.py
@@ -121,7 +138,9 @@ the full contract, provider boundary, and deferred scope.
     ├── test_integration_models.py
     ├── test_integration.py
     ├── test_generation_models.py
-    └── test_generation.py
+    ├── test_generation.py
+    ├── test_validation_models.py
+    └── test_validation.py
 ```
 
 ## Running
