@@ -2,8 +2,9 @@
 
 Python implementation package for the Safe Medical AI Oncology system,
 established as Phase 5 Task #002 scaffolding and extended by Task #003
-(retrieval foundation), Task #004 (filesystem repository source), and
-Task #005 (Runtime Evidence Package boundary).
+(retrieval foundation), Task #004 (filesystem repository source),
+Task #005 (Runtime Evidence Package boundary), and Task #006 (Runtime
+Integration / GenerationContext boundary).
 
 ## Scope of the Task #002 scaffolding
 
@@ -45,6 +46,15 @@ No Generation, Output Validation, embeddings, vector search, or LLM
 integration. See `evidence/README.md` for the full contract, assembly
 semantics, and deferred scope.
 
+## Scope of the Task #006 Runtime Integration boundary
+
+`integration/` adds the boundary between the immutable RTEP and a future
+Generation layer: `RuntimeIntegrationInput` (request/intent, Navigation
+Context, RTEP, runtime constraints) → `integrate_runtime_context` →
+`GenerationContext`. No Generation, LLM invocation, output validation, or
+clinical reasoning. See `integration/README.md` for the full contract,
+assembly semantics, and deferred scope.
+
 ## Directory layout
 
 ```text
@@ -73,6 +83,11 @@ semantics, and deferred scope.
 │       │   ├── README.md
 │       │   ├── models.py
 │       │   └── assembly.py
+│       ├── integration/
+│       │   ├── __init__.py
+│       │   ├── README.md
+│       │   ├── models.py
+│       │   └── integration.py
 │       └── api/
 │           ├── __init__.py
 │           └── main.py
@@ -86,7 +101,9 @@ semantics, and deferred scope.
     ├── test_retrieval_service.py
     ├── test_retrieval_filesystem_source.py
     ├── test_evidence_models.py
-    └── test_evidence_assembly.py
+    ├── test_evidence_assembly.py
+    ├── test_integration_models.py
+    └── test_integration.py
 ```
 
 ## Running
