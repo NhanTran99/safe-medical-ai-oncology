@@ -1,8 +1,9 @@
 # 08_Development/implementation/
 
 Python implementation package for the Safe Medical AI Oncology system,
-established as Phase 5 Task #002 scaffolding and extended by Task #003 with
-a controlled repository retrieval foundation.
+established as Phase 5 Task #002 scaffolding and extended by Task #003
+(retrieval foundation), Task #004 (filesystem repository source), and
+Task #005 (Runtime Evidence Package boundary).
 
 ## Scope of the Task #002 scaffolding
 
@@ -27,12 +28,22 @@ It establishes only:
   no concrete provider implementation;
 - a pytest baseline (`tests/`) proving the scaffold imports and runs.
 
-## Scope of the Task #003 retrieval foundation
+## Scope of the Task #003/#004 retrieval foundation
 
 `retrieval/` adds a deterministic, provider/engine-agnostic navigation-first
-retrieval foundation (no embeddings, vector search, or LLM integration — see
+retrieval foundation, including a repository-backed `FilesystemRepositorySource`
+(Task #004) — no embeddings, vector search, or LLM integration. See
 `retrieval/README.md` for the full interface description, result semantics,
-and deferred scope).
+and deferred scope.
+
+## Scope of the Task #005 RTEP boundary
+
+`evidence/` adds the Runtime Evidence Package (RTEP) assembly boundary
+between Retrieval and a future Generation layer: `RetrievalResponse` →
+`assemble_runtime_evidence_package` → immutable `RuntimeEvidencePackage`.
+No Generation, Output Validation, embeddings, vector search, or LLM
+integration. See `evidence/README.md` for the full contract, assembly
+semantics, and deferred scope.
 
 ## Directory layout
 
@@ -55,7 +66,13 @@ and deferred scope).
 │       │   ├── README.md
 │       │   ├── models.py
 │       │   ├── source.py
+│       │   ├── filesystem_source.py
 │       │   └── service.py
+│       ├── evidence/
+│       │   ├── __init__.py
+│       │   ├── README.md
+│       │   ├── models.py
+│       │   └── assembly.py
 │       └── api/
 │           ├── __init__.py
 │           └── main.py
@@ -66,7 +83,10 @@ and deferred scope).
     ├── test_trace.py
     ├── test_app.py
     ├── test_retrieval_models.py
-    └── test_retrieval_service.py
+    ├── test_retrieval_service.py
+    ├── test_retrieval_filesystem_source.py
+    ├── test_evidence_models.py
+    └── test_evidence_assembly.py
 ```
 
 ## Running
