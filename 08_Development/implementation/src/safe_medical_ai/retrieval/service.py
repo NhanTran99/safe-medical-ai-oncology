@@ -20,13 +20,15 @@ does not require changing this class or its callers.
 
 from __future__ import annotations
 
-import re
-
 from ..trace import get_trace_id
-from .models import RetrievalOutcome, RetrievalRequest, RetrievalResponse, artifact_type_sort_key
+from .models import (
+    POPULATION_ID_PATTERN,
+    RetrievalOutcome,
+    RetrievalRequest,
+    RetrievalResponse,
+    artifact_type_sort_key,
+)
 from .source import RepositorySource
-
-_POPULATION_ID_PATTERN = re.compile(r"^PP-\d{4}$")
 
 
 class RetrievalService:
@@ -38,7 +40,7 @@ class RetrievalService:
     def retrieve(self, request: RetrievalRequest) -> RetrievalResponse:
         trace_id = get_trace_id()
 
-        if not _POPULATION_ID_PATTERN.match(request.population_id):
+        if not POPULATION_ID_PATTERN.match(request.population_id):
             return RetrievalResponse(
                 outcome=RetrievalOutcome.INVALID_REQUEST,
                 request=request,

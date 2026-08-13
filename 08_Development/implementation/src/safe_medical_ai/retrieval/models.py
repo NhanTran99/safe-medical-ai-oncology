@@ -10,9 +10,15 @@ redefined or overloaded here.
 
 from __future__ import annotations
 
+import re
 from enum import Enum
 
 from pydantic import BaseModel, Field
+
+#: Navigation-key format shared by every navigation-first entry point
+#: (RetrievalService and any RepositorySource implementation) so validation
+#: stays identical wherever a population_id is accepted.
+POPULATION_ID_PATTERN = re.compile(r"^PP-\d{4}$")
 
 
 class ArtifactType(str, Enum):

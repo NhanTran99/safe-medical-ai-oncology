@@ -1,4 +1,4 @@
-# Retrieval Foundation (Task #003)
+# Retrieval Foundation (Task #003 + Task #004)
 
 ## What this is
 
@@ -41,10 +41,11 @@ foundation deliberately does not lock.
   provider/engine agnostic. `list_artifacts(population_id)` returns the known
   artifacts for a population, or `None` if the population is not registered
   in the source at all.
-- **`InMemoryRepositorySource`** — the only concrete `RepositorySource`
-  shipped by this task: a deterministic, fixture-backed implementation for
-  tests/local development. It performs no filesystem or network access and
-  does not read the actual controlled repository.
+- **`InMemoryRepositorySource`** — deterministic, fixture-backed
+  `RepositorySource` for tests/local development. Performs no filesystem or
+  network access and does not read the actual controlled repository.
+- **`FilesystemRepositorySource`** (Task #004) — the first repository-backed
+  `RepositorySource`. See "Filesystem-backed source" below.
 - **`RetrievalService`** — orchestrator; `retrieve(request) -> RetrievalResponse`.
   Validates the request, resolves via the injected `RepositorySource`,
   applies hierarchical filtering, and returns a deterministically ordered
@@ -90,13 +91,52 @@ response = service.retrieve(RetrievalRequest(population_id="PP-0001"))
 # response.outcome == RetrievalOutcome.FOUND
 ```
 
+## Filesystem-backed source (Task #004)
+
+`FilesystemRepositorySource(source_root, *, provenance_prefix)` resolves
+population/PP artifact locations under an explicit, configured `source_root`
+directory boundary — e.g. it could be pointed at
+`03_Clinical_Knowledge/population/population_packages/` in a real
+deployment, or at a bounded temporary fixture tree in tests.
+
+It performs **no proactive, whole-repository ingestion or indexing**: each
+`list_artifacts(population_id)` call does one bounded, non-recursive lookup
+scoped to `source_root` and, at most, one resolved PP directory beneath it.
+
+Directory-name resolution (both conventions observed directly in the
+controlled repository or used by this task's own fixtures, not invented):
+1. **exact match** — a directory named exactly `population_id`;
+2. **prefix match** — a directory named `"{population_id} — {title}"`,
+   matching the real repository's `"PP-0001 — What_is_Cancer"` convention.
+   Zero or ambiguous (>1) prefix matches resolve to "not found" rather than
+   guessing.
+
+Within a resolved PP directory, only the four canonical Gold artifact
+filenames (`01_CKO.md` .. `04_QA_REPORT.md`, per
+`FREEZE GOLD POPULATION PACKAGE SPECIFICATION v1.1.md`) are recognized. A
+missing or malformed entry (e.g. a directory in place of a file) is skipped
+deterministically — never fabricated.
+
+`source_path` provenance is always `f"{provenance_prefix}/{pp_dir_name}/{filename}"`
+— repository-relative, never an absolute local filesystem path.
+
+A missing or unavailable `source_root` raises `RepositorySourceUnavailableError`
+(checked at construction and again on every `list_artifacts` call) rather
+than silently returning "not found" — a broken/missing source is a
+configuration failure, distinct from a population genuinely being absent.
+
+`list_artifacts` also independently re-validates `population_id` against the
+same navigation-format pattern `RetrievalService` uses, so a caller invoking
+`FilesystemRepositorySource` directly (bypassing `RetrievalService`) still
+cannot path-traverse outside `source_root`.
+
+Not wired into `api/main.py` or any default configuration by this task —
+using it in a running service remains a later, explicitly authorized step.
+
 ## Deliberately deferred (not implemented by this task)
 
-- A real filesystem- or database-backed `RepositorySource` that reads the
-  actual controlled `03_Clinical_Knowledge/population/population_packages/`
-  content. Only the fixture-backed `InMemoryRepositorySource` exists so far;
-  autonomous ingestion of the real 239-PP repository is explicitly out of
-  scope for Task #003.
+- Wiring `FilesystemRepositorySource` into the API layer or a default
+  production configuration.
 - Embeddings, vector database/engine, semantic-search provider, hybrid
   ranking.
 - LLM provider/model integration.
