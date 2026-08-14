@@ -4,3 +4,12 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .env
+
+# Local clinical evidence corpus — never commit source materials
+/sources/
+
+# Local compressed repository snapshots / transfer artifacts
+/*.rar
+
+# Local editor state
+/.vscode/

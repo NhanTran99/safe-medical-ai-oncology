@@ -1,0 +1,250 @@
+1. Overall disposition
+
+AUDIT STATUS: PASS — NO IMMEDIATE REPOSITORY CLEANUP REQUIRED
+
+Repository hiện tại đạt trạng thái chấp nhận được để làm Phase 6 entry baseline:
+
+Phase 5 governance chỉ có 01 active version:
+PHASE_5_IMPLEMENTATION_READINESS_DECISION_RECORD_v12.0.md
+Phase_5_Governance_Consolidated_Decision_Record_v12.0.md
+Không còn v11.0/v10.0/... trên active HEAD cho hai Phase 5 governance families.
+Không phát hiện Task #009 artifact riêng bị duplicate trên active tree.
+Không có evidence cho thấy các version cũ của Phase 5 governance đang lẫn trong active GitHub surface.
+Historical evidence có version cũ trong archive/ là hợp lệ về mặt auditability.
+2. Finding C1 — Canonical active documents
+
+Các document family sau hiện có một active version duy nhất và không cần thay đổi.
+
+Ví dụ:
+
+01_Foundation/CORE_WORKING_RULES v1.9.md
+01_Foundation/DOCUMENT_ARCHITECTURE v2.2.md
+01_Foundation/PROJECT_FOUNDATION v2.0.md
+
+
+02_Architecture/...
+03_Clinical_Knowledge/...
+04_Knowledge_Governance/...
+05_Operations/...
+06_Governance/...
+Disposition
+
+KEEP / CANONICAL
+
+Không rename chỉ để làm version đẹp hơn.
+
+Version hiện tại của từng document family là governance/content decision, không phải repository-cleanup decision.
+
+3. Finding C2 — Layer 3 historical/current pair
+
+Audit phát hiện:
+
+09_Evaluation/.../Layer3_Aggregate_Verification_Record_v0.2.md
+archive/09_Evaluation/.../Layer3_Aggregate_Verification_Record_v0.1.md
+
+Đây là trường hợp hợp lệ:
+
+ACTIVE
+v0.2
+  ↑
+supersedes
+  ↑
+ARCHIVE
+v0.1
+
+Tương tự các Phase 4 records:
+
+Layer4A v0.2
+Layer4B v0.1
+Layer4C v0.1
+Layer4D v0.2
+Disposition
+
+KEEP BOTH
+
+Không merge, không delete, không đổi version.
+
+Đây chính là kiểu historical evidence mà repository cần giữ để auditability.
+
+4. Finding C3 — Duplicate content trong PP package
+
+Audit phát hiện:
+
+PP-0045
+03_PRIMARY_EVIDENCE_PACKAGE.md
+04_QA_REPORT.md
+
+có identical SHA-256.
+
+PP-0123
+03_PRIMARY_EVIDENCE_PACKAGE.md
+04_QA_REPORT.md
+
+cũng có identical SHA-256.
+
+Đây không phải canonical-version duplicate.
+
+Nó là một finding khác:
+
+Potential artifact-content integrity issue
+
+Vì 03_PRIMARY_EVIDENCE_PACKAGE.md và 04_QA_REPORT.md là hai artifact types khác nhau, việc chúng byte-for-byte identical là bất thường.
+
+Nhưng audit hiện tại chỉ chứng minh identical content, chưa chứng minh file nào sai.
+
+Disposition
+
+DO NOT DELETE / DO NOT REPLACE
+
+Đưa vào Phase 6 inherited review backlog:
+
+PP-0045
+  03_PRIMARY_EVIDENCE_PACKAGE.md
+  04_QA_REPORT.md
+
+
+PP-0123
+  03_PRIMARY_EVIDENCE_PACKAGE.md
+  04_QA_REPORT.md
+
+Phase 6 cần xác định:
+
+Đây có phải intentional duplication không?
+Nếu không, artifact nào là canonical?
+Có phải QA report bị populate nhầm bằng Primary Evidence Package không?
+Có ảnh hưởng tới Knowledge Asset Registry / Gold status / population integrity không?
+
+Không được sửa chỉ dựa trên SHA-256.
+
+5. Finding C4 — Phase 5 governance
+
+Audit xác nhận:
+
+working/
+├── PHASE_5_IMPLEMENTATION_READINESS_DECISION_RECORD_v12.0.md
+└── Phase_5_Governance_Consolidated_Decision_Record_v12.0.md
+
+và không có v11.0 trên HEAD.
+
+Disposition
+
+PASS — CANONICAL v12.0
+
+Đây là trạng thái chính thức Phase 6 phải kế thừa.
+
+6. Finding C5 — Task #009
+
+Search:
+
+Task.?009
+009.*Architecture
+009.*Implementation
+009.*Closeout
+
+không trả output.
+
+Disposition
+
+PASS — NOT A GAP
+
+Task #009 không bắt buộc phải có một filename riêng.
+
+Task #009 implementation surface đã được commit:
+
+08_Development/implementation/src/safe_medical_ai/safety/
+08_Development/implementation/tests/test_safety_*.py
+
+với:
+
+0f413c9
+
+Còn decision/closeout đã được consolidated vào:
+
+PHASE_5_IMPLEMENTATION_READINESS_DECISION_RECORD_v12.0.md
+Phase_5_Governance_Consolidated_Decision_Record_v12.0.md
+
+Do đó không tạo thêm Task_009 document chỉ để làm repository đẹp hơn.
+
+7. Phase 6 phải kế thừa chính xác những gì?
+
+Tôi đề xuất Phase 6 Entry Baseline như sau:
+
+PHASE 5 CLOSED
+        │
+        ├── Governance canonical
+        │     └── v12.0
+        │
+        ├── Implementation baseline
+        │     └── commit 0f413c9
+        │
+        ├── Runtime chain
+        │     ├── Retrieval
+        │     ├── RTEP
+        │     ├── Runtime Integration
+        │     ├── Generation
+        │     ├── Validation
+        │     └── Safety Enforcement
+        │
+        ├── Technical acceptance
+        │     ├── 287/287 PASS
+        │     └── Task #009 47/47 PASS
+        │
+        ├── Remote baseline
+        │     └── phase5/task002-scaffolding
+        │         SHA = 23aa646...
+        │
+        ├── Repository canonical-version state
+        │     └── AUDIT PASS
+        │
+        └── Deferred repository cleanup
+              └── final-project cleanup only
+8. Phase 6 inherited backlog
+
+Chỉ có một finding cụ thể cần carry forward từ audit này:
+
+CANONICAL-AUDIT-FINDING-001
+
+PP-0045 / PP-0123 — identical Primary Evidence Package and QA Report content
+
+Status:
+
+OPEN — INVESTIGATION REQUIRED
+
+Priority:
+
+Phase 6 review
+
+Action:
+
+Verify artifact semantics before any modification.
+
+Không nên gọi đây là bug ngay lúc này.
+
+9. Repository cleanup policy cho toàn project
+
+Tôi ghi nhận thành quy tắc handover:
+
+Trong quá trình Phase 6+
+
+Không cleanup GitHub chỉ vì thấy version cũ.
+
+Giữ:
+
+active canonical version
++
+intentional historical/archive evidence
+Khi toàn project hoàn tất
+
+Thực hiện một Final Repository Organization / Canonicalization pass:
+
+review
+→ classify
+→ archive historical versions
+→ remove true accidental duplicates
+→ normalize active tree
+→ verify links/references
+→ full regression
+→ final Git cleanup
+→ release baseline
+
+Như vậy tránh lặp lại việc reorganize GitHub sau mỗi phase.

@@ -1,0 +1,21 @@
+PHASE 6 PRE-EXECUTION — RESIDUE DISPOSITION
+Captured: 2026-08-14T15:55:10+02:00
+
+=== RAR HASHES ===
+7f42e9966e3501f9f84ead74e9602284dc0d03281fe51da3305635b29fd5f1dd *./01_Foundation.rar
+bc846755c658a8653c8250dbc2c3b3d0604b5b14e9ae39fa8b62d86e82a3b9f4 *./02_Architecture.rar
+ba9423b0f7e902324c5aa8fee37cf6a068e3e26f87244290385c7661449dc903 *./03_Clinical_Knowledge.rar
+43345c0c7ea58ffa44ca78987aedff8796b77fc7f3e0ea81f31bf73fd7690bbe *./04_Knowledge_Governance.rar
+ae898df27d3ef9f3ccbe5cbfd4951112a94f620043b5ab56747c15623ceac91f *./05_Operations.rar
+80947e52bb2c7cd3e100525ada72ae253f57d062b4da2a20013fdaeafa7a144c *./06_Governance.rar
+fea71c83331129a8a7e3da74b779553adb631f62bce97321cbdad695fb9a2b58 *./07_Project_Management.rar
+3f2da29d09be2f091c9bfa457c36f3f4673bd64948e82a6f296b861f4dfda61e *./08_Development.rar
+9f213a08fb7da7583583e8cb9319221e43c8486aaec3e1445f72feb87cbbdb0e *./09_Evaluation.rar
+3d731298ef1198cc872b507c912fed2baf8a2e2cf2327dd0279198acac0ce9a2 *./safe-medical-ai-oncology.rar
+
+=== tatus HASH ===
+eb9eb0228543f5fc063aa5891d16e8d5242b39e4e68701e29b1c050af4b2cd90 *tatus
+
+=== VSCODE ===
+.vscode/settings.json
+f16e72043f83ad8646ceab2eca3245b672b2db203b97b1b9642f45f60a591bef *.vscode/settings.json

@@ -1,0 +1,29 @@
+]633;E;{   echo "============================================================"\x3b   echo "PHASE 6 — EXACT STAGING MANIFEST"\x3b   echo "Captured: $(date -Iseconds)"\x3b   echo "============================================================"\x3b   echo\x3b   echo "=== STAGED COUNT ==="\x3b   git diff --cached --name-only | wc -l\x3b   echo\x3b   echo "=== STATUS BREAKDOWN ==="\x3b   git diff --cached --name-status |     awk '{print $1}' |     sort | uniq -c\x3b   echo\x3b   echo "=== TOP-LEVEL DISTRIBUTION ==="\x3b   git diff --cached --name-only |     awk -F/ '{print $1}' |     sort | uniq -c | sort -nr\x3b   echo\x3b   echo "=== FORBIDDEN MATERIAL CHECK ==="\x3b   git diff --cached --name-only |     grep -E '(^|/)(sources/|.*\\.rar$|\\.vscode/)' || true\x3b   echo\x3b   echo "=== POLICY FILE ==="\x3b   git diff --cached --name-only -- .gitignore\x3b } > working/phase6_pre_execution/provenance/EXACT_STAGING_MANIFEST.txt;45fb0d59-0ecb-44e1-a57b-85f9b2b65380]633;C============================================================
+PHASE 6 — EXACT STAGING MANIFEST
+Captured: 2026-08-14T16:37:51+02:00
+============================================================
+
+=== STAGED COUNT ===
+212
+
+=== STATUS BREAKDOWN ===
+    205 A
+      1 M
+      6 R100
+
+=== TOP-LEVEL DISTRIBUTION ===
+    158 archive
+     21 working
+     20 08_Development
+      6 07_Project_Management
+      2 06_Governance
+      1 09_Evaluation
+      1 01_Foundation
+      1 .gitignore
+      1 "working
+      1 "archive
+
+=== FORBIDDEN MATERIAL CHECK ===
+
+=== POLICY FILE ===
+.gitignore

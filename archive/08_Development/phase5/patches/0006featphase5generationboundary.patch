@@ -1,0 +1,1209 @@
+diff --git a/08_Development/implementation/README.md b/08_Development/implementation/README.md
+index 5385a16..3d512dc 100644
+--- a/08_Development/implementation/README.md
++++ b/08_Development/implementation/README.md
+@@ -3,8 +3,9 @@
+ Python implementation package for the Safe Medical AI Oncology system,
+ established as Phase 5 Task #002 scaffolding and extended by Task #003
+ (retrieval foundation), Task #004 (filesystem repository source),
+-Task #005 (Runtime Evidence Package boundary), and Task #006 (Runtime
+-Integration / GenerationContext boundary).
++Task #005 (Runtime Evidence Package boundary), Task #006 (Runtime
++Integration / GenerationContext boundary), and Task #007 (Generation
++boundary).
+ 
+ ## Scope of the Task #002 scaffolding
+ 
+@@ -55,6 +56,16 @@ Context, RTEP, runtime constraints) → `integrate_runtime_context` →
+ clinical reasoning. See `integration/README.md` for the full contract,
+ assembly semantics, and deferred scope.
+ 
++## Scope of the Task #007 Generation boundary
++
++`generation/` adds the boundary between the immutable `GenerationContext`
++and downstream Validation (not yet implemented): `GenerationContext` +
++an `LLMAdapter` provider → `generate_candidate_response` → typed
++`CandidateResponse`, never labeled final/clinically validated/safety
++approved/citation verified. No Validation, clinical/safety adjudication,
++retrieval, embeddings, or vector search. See `generation/README.md` for
++the full contract, provider boundary, and deferred scope.
++
+ ## Directory layout
+ 
+ ```text
+@@ -88,6 +99,11 @@ assembly semantics, and deferred scope.
+ │       │   ├── README.md
+ │       │   ├── models.py
+ │       │   └── integration.py
++│       ├── generation/
++│       │   ├── __init__.py
++│       │   ├── README.md
++│       │   ├── models.py
++│       │   └── generation.py
+ │       └── api/
+ │           ├── __init__.py
+ │           └── main.py
+@@ -103,7 +119,9 @@ assembly semantics, and deferred scope.
+     ├── test_evidence_models.py
+     ├── test_evidence_assembly.py
+     ├── test_integration_models.py
+-    └── test_integration.py
++    ├── test_integration.py
++    ├── test_generation_models.py
++    └── test_generation.py
+ ```
+ 
+ ## Running
+diff --git a/08_Development/implementation/src/safe_medical_ai/generation/README.md b/08_Development/implementation/src/safe_medical_ai/generation/README.md
+new file mode 100644
+index 0000000..43dc8a7
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/generation/README.md
+@@ -0,0 +1,179 @@
++# Generation Boundary (Task #007)
++
++## What this is
++
++The controlled boundary between the immutable `GenerationContext`
++(Task #006) and downstream Validation (not yet implemented), per the
++locked architecture:
++
++```text
++Repository
++  ↓
++Retrieval
++  ↓
++Runtime Evidence Package
++  ↓
++Runtime Integration
++  ↓
++GenerationContext
++  ↓
++Generation                        (this module)
++  ↓
++CandidateResponse
++  ↓
++Validation (future/downstream)
++```
++
++Generation is **not** Validation, clinical/safety adjudication, retrieval,
++or final response approval. A `CandidateResponse` is never labeled final,
++clinically validated, safety approved, or citation verified.
++
++## Interfaces
++
++- **`GenerationOutcome`** — `GENERATED` / `EMPTY_EVIDENCE_RESPONSE` /
++  `INVALID_CONTEXT` / `CONTEXT_MISSING_RTEP` / `PROVIDER_FAILURE` /
++  `PROVIDER_TIMEOUT` / `MALFORMED_PROVIDER_OUTPUT` / `PARTIAL_GENERATION` /
++  `INTERNAL_FAILURE`. A distinct vocabulary from `RetrievalOutcome`,
++  `RTEPAssemblyOutcome`, `RuntimeIntegrationOutcome`, and OUTPUT_CONTRACT's
++  `ValidationOutcome` — deliberately spelled differently from
++  `RuntimeIntegrationOutcome.EMPTY_EVIDENCE`/`.MISSING_RTEP` even though
++  they describe related upstream states, so no two layers ever share a
++  literal outcome name.
++- **`CandidateResponse`** — `candidate_response_id`, `generation_timestamp`
++  (both generated at creation, the same "legitimately runtime-generated
++  identity/timestamp" pattern established in Tasks #005/#006), `content`,
++  `evidence_state` (carried from `GenerationContext`), `provider_name`
++  (`None` for the policy branch), plus traceability identifiers
++  (`integration_id`, `retrieval_id`, `navigation_context_id`,
++  `evidence_package_id`) sourced from the upstream context/RTEP — never the
++  full context/RTEP/evidence objects re-embedded.
++- **`GenerationResult`** — the atomic result: `outcome`, `response`
++  (`None` unless `outcome` is `GENERATED` or `EMPTY_EVIDENCE_RESPONSE`),
++  `message`.
++- **`ProviderGenerationRequest`** — the typed, locked contract passed to the
++  provider: `request_text`, `navigation_context`, `evidence`
++  (`tuple[EvidenceItem, ...]`, the exact `context.rtep.evidence` — the
++  authoritative governed evidence), `evidence_metadata`
++  (`context.rtep.metadata`), `runtime_constraints`. See "Provider boundary"
++  below.
++- **`generate_candidate_response(context, provider)`** — the one explicit,
++  deterministic entry point (spec section 5). `provider` is an `LLMAdapter`
++  (Task #002's existing provider-agnostic interface — reused, not
++  reinvented, per the handoff's "reuse existing types" instruction).
++- **`ProviderError`** / **`ProviderTimeoutError`** / **`ProviderPartialOutputError`**
++  — the typed exceptions a concrete `LLMAdapter` implementation raises to
++  signal the corresponding `GenerationOutcome`. No concrete provider
++  implementation exists in this module (spec section 7): production
++  provider selection/credentials/endpoints remain deferred.
++- **`EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT`** — the locked policy response
++  text. See "Locked EMPTY_EVIDENCE policy" below.
++
++## Locked EMPTY_EVIDENCE policy
++
++Status: **LOCKED**. This is a governed policy decision, not an
++implementation detail left to per-call discretion.
++
++When `context.evidence_state is EvidenceState.EMPTY`:
++
++1. **No provider is called.** The provider never sees this request at all.
++2. **`CandidateResponse.content` is exactly `EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT`**
++   (exported from `safe_medical_ai.generation`), a fixed constant string —
++   never model-generated, never templated per-request, never varied by
++   `request_text`.
++3. **`CandidateResponse.provider_name` is `None`** and
++   `GenerationResult.outcome` is `EMPTY_EVIDENCE_RESPONSE`, distinguishing
++   this from a real, evidence-backed `GENERATED` response.
++4. `test_empty_evidence_produces_fixed_policy_response_without_calling_provider`
++   proves the provider is never invoked (an exploding fake provider that
++   raises if called), and
++   `test_empty_evidence_policy_response_content_is_deterministic_across_calls`
++   proves the text is identical across repeated calls.
++
++Rationale (spec section 6): "Do not convert EMPTY into technical failure"
++(the same principle Tasks #005/#006 already applied to
++`RTEPAssemblyOutcome`/`RuntimeIntegrationOutcome`) — an empty-evidence
++`GenerationContext` is a legitimate, valid state, not an error, so a
++`CandidateResponse` is still produced. But Generation must not silently
++answer an unsupported clinical question from model knowledge, so the
++*only* implemented behavior for this branch is the one fixed policy
++response above — no graduated evidence-sufficiency adjudication is
++implemented or should be added without a separate, explicit governance
++decision.
++
++**Changing `EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT` is a policy change**, not
++a routine code edit, and requires the same governance approval as any
++other locked B1-B4 decision.
++
++## Why `CONTEXT_MISSING_RTEP` has no organic trigger through the typed API
++
++`GenerationContext.rtep` is a required (non-`Optional`) field — Runtime
++Integration only ever produces a `GenerationContext` when an RTEP is
++present (an integration result with a missing RTEP is `MISSING_RTEP` at
++*that* layer, with `context=None`, never a `GenerationContext`). The
++`context.rtep is None` check in `generate_candidate_response` is therefore
++a defensive completeness measure, not a normally reachable path. It is
++tested via `GenerationContext.model_construct(...)` (Pydantic's
++validation-bypass constructor) rather than any input a typed caller could
++produce — see `test_generation.py`.
++
++## Provider boundary
++
++`generate_candidate_response` depends only on the abstract `LLMAdapter`
++interface (`llm/base.py`), never a concrete vendor SDK, endpoint, or
++credential. `provider.generate(request=provider_request)` is the only call
++made, where `provider_request` is a `ProviderGenerationRequest` carrying:
++
++- `request_text` — the user request/intent;
++- `evidence` — the *exact* `context.rtep.evidence` tuple: the authoritative
++  governed `EvidenceItem`s (with their provenance), referenced unchanged,
++  in the exact order Retrieval/RTEP Assembly already produced them — never
++  reranked, reordered, deduplicated, or repaired;
++- `evidence_metadata` — the *exact* `context.rtep.metadata` object;
++- `navigation_context`, `runtime_constraints` — carried through unchanged.
++
++This is the fix for a reviewed architectural blocker: an earlier version of
++this module called `provider.generate(prompt=context.request_text)` alone,
++which did not actually supply the governed evidence to Generation. A
++provider now always receives the full governed evidence structure (not its
++clinical text content, which `EvidenceItem` does not carry yet — see
++`evidence/README.md`'s deferred-items list — but its identity, provenance,
++and ordering) alongside the request text, whenever `evidence_state` is
++`HAS_EVIDENCE`. Nothing is fabricated: constructing `ProviderGenerationRequest`
++is pure data assembly (referencing existing immutable objects), not a new
++retrieval, ranking, or evidence-construction layer.
++`test_provider_receives_authoritative_rtep_evidence` and
++`test_provider_receives_evidence_in_original_order_without_reranking` prove
++this end-to-end. A minimal fake provider used for tests (`FakeLLMAdapter`
++and friends) lives entirely inside `test_generation.py`; no test-only or
++placeholder provider configuration is shipped in this module.
++
++## Assembly semantics
++
++| `context` | `.rtep` | `.evidence_state` | provider call | Result |
++|---|---|---|---|---|
++| `None` | — | — | no | `INVALID_CONTEXT`, no response |
++| present | `None` (defensive-only) | — | no | `CONTEXT_MISSING_RTEP`, no response |
++| present | present | `EMPTY` | no | `EMPTY_EVIDENCE_RESPONSE`, fixed policy response |
++| present | present | `HAS_EVIDENCE` | yes, raises `ProviderTimeoutError` | `PROVIDER_TIMEOUT`, no response |
++| present | present | `HAS_EVIDENCE` | yes, raises `ProviderPartialOutputError` | `PARTIAL_GENERATION`, no response |
++| present | present | `HAS_EVIDENCE` | yes, raises `ProviderError` (other) | `PROVIDER_FAILURE`, no response |
++| present | present | `HAS_EVIDENCE` | yes, raises any other exception | `INTERNAL_FAILURE`, no response |
++| present | present | `HAS_EVIDENCE` | yes, returns non-`str`/blank | `MALFORMED_PROVIDER_OUTPUT`, no response |
++| present | present | `HAS_EVIDENCE` | yes, returns non-blank `str` | `GENERATED`, complete response |
++
++Generation never mutates `GenerationContext`, its RTEP, evidence items,
++provenance, runtime metadata, or Navigation Context — every one of those
++is already an immutable (frozen) object from Tasks #005/#006; Generation
++only ever reads them and constructs a brand-new `CandidateResponse`.
++
++## Not implemented by this task (deferred / out of scope)
++
++- Validation, clinical/safety adjudication, final response approval,
++  citation/factual verification, hallucination detection.
++- Any concrete `LLMAdapter` provider implementation, credentials, endpoint,
++  or production model/vendor selection.
++- Real prompt construction from evidence content (`PROMPTING_STRATEGY.md`)
++  — `EvidenceItem` carries no clinical text to build a richer prompt from
++  yet (same deferred item `evidence/README.md` already lists).
++- Reranking, deduplication, provenance repair, re-retrieval, embeddings,
++  vector search, external web search, autonomous/multi-agent orchestration.
+diff --git a/08_Development/implementation/src/safe_medical_ai/generation/__init__.py b/08_Development/implementation/src/safe_medical_ai/generation/__init__.py
+new file mode 100644
+index 0000000..cd8c129
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/generation/__init__.py
+@@ -0,0 +1,42 @@
++"""Generation boundary — Task #007.
++
++Public interface: `CandidateResponse`, `GenerationOutcome`, `GenerationResult`,
++`ProviderGenerationRequest`, `EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT`,
++`generate_candidate_response`, `ProviderError`, `ProviderTimeoutError`,
++`ProviderPartialOutputError`.
++
++Consumes an authoritative `GenerationContext` (Task #006) plus an explicit
++`LLMAdapter` provider (Task #002) and produces a typed `CandidateResponse`,
++never labeled final/clinically validated/safety approved/citation verified.
++The provider receives the authoritative governed evidence from
++`GenerationContext.rtep` via `ProviderGenerationRequest`, not only raw
++request text. Does not implement Validation, clinical reasoning, or safety
++adjudication. See `generation/README.md` for the full contract, the locked
++EMPTY_EVIDENCE policy, and deferred scope.
++"""
++
++from .generation import (
++    ProviderError,
++    ProviderPartialOutputError,
++    ProviderTimeoutError,
++    generate_candidate_response,
++)
++from .models import (
++    EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT,
++    CandidateResponse,
++    GenerationOutcome,
++    GenerationResult,
++    ProviderGenerationRequest,
++)
++
++__all__ = [
++    "EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT",
++    "CandidateResponse",
++    "GenerationOutcome",
++    "GenerationResult",
++    "ProviderError",
++    "ProviderGenerationRequest",
++    "ProviderPartialOutputError",
++    "ProviderTimeoutError",
++    "generate_candidate_response",
++]
+diff --git a/08_Development/implementation/src/safe_medical_ai/generation/generation.py b/08_Development/implementation/src/safe_medical_ai/generation/generation.py
+new file mode 100644
+index 0000000..66e1a4a
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/generation/generation.py
+@@ -0,0 +1,192 @@
++"""Generation boundary — Task #007.
++
++Implements the locked B1-B4 behavioral requirements as one explicit,
++deterministic entry point: `generate_candidate_response`.
++
++This module:
++- accepts an authoritative `GenerationContext` (Task #006) and an explicit
++  `LLMAdapter` provider (Task #002's provider-agnostic interface — reused,
++  not reinvented) and performs a local orchestration only;
++- passes the authoritative governed evidence from `context.rtep` to the
++  provider through a typed `ProviderGenerationRequest` (Change Request
++  review fix — see `models.py`), not merely the raw request text;
++- never constructs a `RepositorySource`, calls `RetrievalService`, or
++  otherwise re-retrieves;
++- never touches the filesystem;
++- never reranks, reorders, deduplicates, enriches, or repairs provenance —
++  the evidence handed to the provider is the exact `context.rtep.evidence`
++  tuple, unmodified;
++- never imports or calls anything from a Validation layer (none exists yet);
++- never performs clinical reasoning, safety adjudication, citation
++  verification, or hallucination detection — those remain downstream,
++  out of scope here.
++"""
++
++from __future__ import annotations
++
++import logging
++import uuid
++from datetime import UTC, datetime
++
++from ..integration import EvidenceState, GenerationContext
++from ..llm.base import LLMAdapter
++from .models import (
++    EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT,
++    CandidateResponse,
++    GenerationOutcome,
++    GenerationResult,
++    ProviderGenerationRequest,
++)
++
++logger = logging.getLogger(__name__)
++
++
++class ProviderError(Exception):
++    """Base class for provider-boundary failures raised by an `LLMAdapter`."""
++
++
++class ProviderTimeoutError(ProviderError):
++    """Raised by a provider implementation when it times out or is unavailable."""
++
++
++class ProviderPartialOutputError(ProviderError):
++    """Raised by a provider implementation when generation was interrupted/incomplete."""
++
++
++def generate_candidate_response(
++    context: GenerationContext | None,
++    provider: LLMAdapter,
++) -> GenerationResult:
++    """Generate a `CandidateResponse` from an authoritative `GenerationContext`.
++
++    Atomic: `outcome in {GENERATED, EMPTY_EVIDENCE_RESPONSE}` implies a
++    complete `CandidateResponse`; every other outcome implies
++    `response is None`.
++
++    `context is None` represents "no valid GenerationContext is available"
++    and deterministically produces `INVALID_CONTEXT`. `context.rtep is None`
++    is not reachable through the current typed `GenerationContext` contract
++    (its `rtep` field is required) but is defensively checked anyway and
++    produces `CONTEXT_MISSING_RTEP` rather than an uncaught `AttributeError`
++    — the same defensive-completeness pattern used for `INTEGRATION_FAILURE`
++    in Task #006.
++
++    Does not reconstruct or independently validate the upstream RTEP: the
++    evidence state is read directly from `context.evidence_state`, exactly
++    as Runtime Integration already determined it (spec section 6).
++
++    When `context.evidence_state` is `HAS_EVIDENCE`, the provider is called
++    with a `ProviderGenerationRequest` carrying the authoritative
++    `context.rtep.evidence`/`context.rtep.metadata` unchanged (see
++    `models.ProviderGenerationRequest`) — the provider never receives only
++    bare request text without the governed evidence behind it.
++    """
++    if context is None:
++        logger.warning("Generation failed: no GenerationContext supplied")
++        return GenerationResult(
++            outcome=GenerationOutcome.INVALID_CONTEXT,
++            response=None,
++            message="no CandidateResponse: GenerationContext was not supplied",
++        )
++
++    if context.rtep is None:
++        logger.warning("Generation failed: GenerationContext has no RTEP")
++        return GenerationResult(
++            outcome=GenerationOutcome.CONTEXT_MISSING_RTEP,
++            response=None,
++            message="no CandidateResponse: GenerationContext has no Runtime Evidence Package",
++        )
++
++    trace_ids = {
++        "integration_id": context.integration_id,
++        "retrieval_id": context.rtep.metadata.retrieval_id,
++        "navigation_context_id": context.rtep.metadata.navigation_context_id,
++        "evidence_package_id": context.rtep.metadata.evidence_package_id,
++    }
++
++    if context.evidence_state is EvidenceState.EMPTY:
++        logger.info("Generation: EMPTY_EVIDENCE_RESPONSE integration_id=%s", context.integration_id)
++        response = CandidateResponse(
++            candidate_response_id=uuid.uuid4().hex,
++            generation_timestamp=datetime.now(UTC),
++            content=EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT,
++            evidence_state=context.evidence_state,
++            provider_name=None,
++            **trace_ids,
++        )
++        return GenerationResult(
++            outcome=GenerationOutcome.EMPTY_EVIDENCE_RESPONSE,
++            response=response,
++            message="CandidateResponse is the fixed no-evidence policy response, not a provider generation",
++        )
++
++    # Pass the authoritative governed evidence through to the provider as
++    # part of the typed request — not just the raw request text. `evidence`
++    # and `evidence_metadata` are the same immutable objects already on
++    # `context.rtep`, referenced unchanged: no reranking, reordering,
++    # deduplication, or provenance repair happens here.
++    provider_request = ProviderGenerationRequest(
++        request_text=context.request_text,
++        navigation_context=context.navigation_context,
++        evidence=context.rtep.evidence,
++        evidence_metadata=context.rtep.metadata,
++        runtime_constraints=context.runtime_constraints,
++    )
++
++    try:
++        raw_output = provider.generate(request=provider_request)
++    except ProviderTimeoutError:
++        logger.warning("Generation failed: provider timeout/unavailable integration_id=%s", context.integration_id)
++        return GenerationResult(
++            outcome=GenerationOutcome.PROVIDER_TIMEOUT,
++            response=None,
++            message="no CandidateResponse: provider timed out or was unavailable",
++        )
++    except ProviderPartialOutputError:
++        logger.warning("Generation failed: partial/interrupted generation integration_id=%s", context.integration_id)
++        return GenerationResult(
++            outcome=GenerationOutcome.PARTIAL_GENERATION,
++            response=None,
++            message="no CandidateResponse: generation was interrupted/incomplete",
++        )
++    except ProviderError:
++        logger.warning("Generation failed: provider error integration_id=%s", context.integration_id)
++        return GenerationResult(
++            outcome=GenerationOutcome.PROVIDER_FAILURE,
++            response=None,
++            message="no CandidateResponse: the provider raised an error",
++        )
++    except Exception:
++        # Controlled unexpected/internal failure (spec section 8): anything
++        # not raised as a typed ProviderError is treated as Generation's own
++        # defensive safety net, not a provider-boundary failure.
++        logger.exception("Generation failed: unexpected internal failure integration_id=%s", context.integration_id)
++        return GenerationResult(
++            outcome=GenerationOutcome.INTERNAL_FAILURE,
++            response=None,
++            message="no CandidateResponse: an unexpected internal failure occurred",
++        )
++
++    if not isinstance(raw_output, str) or not raw_output.strip():
++        logger.warning("Generation failed: malformed provider output integration_id=%s", context.integration_id)
++        return GenerationResult(
++            outcome=GenerationOutcome.MALFORMED_PROVIDER_OUTPUT,
++            response=None,
++            message="no CandidateResponse: provider output was not a non-blank string",
++        )
++
++    response = CandidateResponse(
++        candidate_response_id=uuid.uuid4().hex,
++        generation_timestamp=datetime.now(UTC),
++        content=raw_output,
++        evidence_state=context.evidence_state,
++        provider_name=type(provider).__name__,
++        **trace_ids,
++    )
++
++    logger.info(
++        "Generation: GENERATED candidate_response_id=%s integration_id=%s",
++        response.candidate_response_id,
++        context.integration_id,
++    )
++    return GenerationResult(outcome=GenerationOutcome.GENERATED, response=response, message=None)
+diff --git a/08_Development/implementation/src/safe_medical_ai/generation/models.py b/08_Development/implementation/src/safe_medical_ai/generation/models.py
+new file mode 100644
+index 0000000..1a392cf
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/generation/models.py
+@@ -0,0 +1,137 @@
++"""Typed Generation contracts — Task #007.
++
++Implements the locked B1-B4 decision set: Generation consumes an
++authoritative `GenerationContext` (Task #006) and produces a typed
++`CandidateResponse`, or an explicit typed failure — never a mutated
++upstream object, never a claim of finality/clinical validation/safety
++approval/citation verification (spec section 5).
++
++Dependency direction (locked): `generation -> integration -> evidence ->
++retrieval`. Nothing in `retrieval/`, `evidence/`, or `integration/` is
++modified by this module.
++"""
++
++from __future__ import annotations
++
++from datetime import datetime
++from enum import Enum
++from typing import Final
++
++from pydantic import BaseModel, ConfigDict, Field
++
++from ..evidence import EvidenceItem, RuntimeEvidenceMetadata
++from ..integration import EvidenceState, RuntimeConstraints
++from ..models.output_contract import NavigationContextPlaceholder
++
++#: The single, locked, non-provider-generated response for the
++#: EMPTY_EVIDENCE policy branch (spec section 6). This is a governed
++#: policy decision, not an implementation detail: Generation must not
++#: silently answer an unsupported clinical question from model knowledge
++#: when no evidence was retrieved, and the exact wording is fixed rather
++#: than left to per-call discretion. Changing this text is a policy change
++#: and requires the same governance approval as any other locked B1-B4
++#: decision — it must not be silently edited as part of an unrelated code
++#: change.
++EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT: Final[str] = (
++    "No governed evidence was retrieved for this request. A candidate "
++    "response cannot be generated without supporting evidence."
++)
++
++
++class GenerationOutcome(str, Enum):
++    """Controlled Generation-result classification.
++
++    A distinct vocabulary from `RetrievalOutcome`, `RTEPAssemblyOutcome`,
++    `RuntimeIntegrationOutcome`, and OUTPUT_CONTRACT's `ValidationOutcome`
++    — never merged with any of them (same isolation principle established
++    by every prior boundary). In particular, member names are deliberately
++    distinct in spelling from `RuntimeIntegrationOutcome.EMPTY_EVIDENCE` /
++    `.MISSING_RTEP` even though they describe related upstream states —
++    `EMPTY_EVIDENCE_RESPONSE` and `CONTEXT_MISSING_RTEP` below — so no two
++    layers ever share a literal outcome name.
++
++    `GENERATED` and `EMPTY_EVIDENCE_RESPONSE` are the two outcomes that
++    produce a `CandidateResponse` (spec section 5's atomicity rule extended
++    to the locked EMPTY_EVIDENCE policy branch, which is a valid controlled
++    output, not a failure — spec section 6: "Do not convert EMPTY into
++    technical failure" carried forward from Task #005/#006's identical
++    principle). Every other outcome implies no `CandidateResponse`.
++    """
++
++    GENERATED = "GENERATED"
++    EMPTY_EVIDENCE_RESPONSE = "EMPTY_EVIDENCE_RESPONSE"
++    INVALID_CONTEXT = "INVALID_CONTEXT"
++    CONTEXT_MISSING_RTEP = "CONTEXT_MISSING_RTEP"
++    PROVIDER_FAILURE = "PROVIDER_FAILURE"
++    PROVIDER_TIMEOUT = "PROVIDER_TIMEOUT"
++    MALFORMED_PROVIDER_OUTPUT = "MALFORMED_PROVIDER_OUTPUT"
++    PARTIAL_GENERATION = "PARTIAL_GENERATION"
++    INTERNAL_FAILURE = "INTERNAL_FAILURE"
++
++
++class ProviderGenerationRequest(BaseModel):
++    """The typed, locked contract Generation passes to an `LLMAdapter` provider.
++
++    This is the fix for the reviewed architectural blocker: a provider must
++    receive the authoritative governed evidence from `GenerationContext.rtep`,
++    not only the raw request text. `evidence` and `evidence_metadata` are
++    the *same* immutable objects already produced by RTEP Assembly
++    (Task #005) and carried by `GenerationContext` (Task #006) — referenced
++    here, never copied, reordered, reranked, deduplicated, or repaired.
++    Constructing this object is pure data assembly with no retrieval calls
++    and no new retrieval/ranking layer.
++    """
++
++    model_config = ConfigDict(frozen=True)
++
++    request_text: str
++    navigation_context: NavigationContextPlaceholder
++    evidence: tuple[EvidenceItem, ...]
++    evidence_metadata: RuntimeEvidenceMetadata
++    runtime_constraints: RuntimeConstraints
++
++
++class CandidateResponse(BaseModel):
++    """A candidate generation output.
++
++    Never labeled or treated as final, clinically validated, safety
++    approved, or citation verified (spec section 5) — those are downstream
++    Validation-layer concerns this module does not implement or claim.
++
++    Carries traceability identifiers back to its generation attempt and
++    upstream runtime evidence/context (spec section 9), without re-embedding
++    the full `GenerationContext`/RTEP/evidence objects themselves — a
++    `CandidateResponse` is a new, independent output object, not a
++    decorated copy of its inputs.
++    """
++
++    model_config = ConfigDict(frozen=True)
++
++    candidate_response_id: str = Field(min_length=1)
++    generation_timestamp: datetime
++    content: str = Field(min_length=1)
++    evidence_state: EvidenceState
++    provider_name: str | None = None
++
++    # Traceability identifiers (spec section 9), sourced from the
++    # GenerationContext/RTEP this candidate was generated from.
++    integration_id: str = Field(min_length=1)
++    retrieval_id: str = Field(min_length=1)
++    navigation_context_id: str = Field(min_length=1)
++    evidence_package_id: str = Field(min_length=1)
++
++
++class GenerationResult(BaseModel):
++    """The atomic result of one Generation attempt.
++
++    `outcome in {GENERATED, EMPTY_EVIDENCE_RESPONSE}` if and only if
++    `response` is a complete `CandidateResponse`; every other outcome
++    implies `response is None` — Generation never returns a partial or
++    interrupted `CandidateResponse` as success (spec section 5/8).
++    """
++
++    model_config = ConfigDict(frozen=True)
++
++    outcome: GenerationOutcome
++    response: CandidateResponse | None = None
++    message: str | None = None
+diff --git a/08_Development/implementation/tests/test_generation_models.py b/08_Development/implementation/tests/test_generation_models.py
+new file mode 100644
+index 0000000..26cd9c1
+--- /dev/null
++++ b/08_Development/implementation/tests/test_generation_models.py
+@@ -0,0 +1,102 @@
++"""Contract tests for the Task #007 Generation models."""
++
++from datetime import UTC, datetime
++
++import pytest
++from pydantic import ValidationError
++
++from safe_medical_ai.evidence import RTEPAssemblyOutcome
++from safe_medical_ai.generation import CandidateResponse, GenerationOutcome, GenerationResult
++from safe_medical_ai.integration import EvidenceState, RuntimeIntegrationOutcome
++from safe_medical_ai.models.output_contract import ValidationOutcome
++from safe_medical_ai.retrieval import RetrievalOutcome
++
++
++def _candidate_response(**overrides) -> CandidateResponse:
++    fields = {
++        "candidate_response_id": "CR-1",
++        "generation_timestamp": datetime.now(UTC),
++        "content": "some generated text",
++        "evidence_state": EvidenceState.HAS_EVIDENCE,
++        "provider_name": "FakeProvider",
++        "integration_id": "INT-1",
++        "retrieval_id": "RID-1",
++        "navigation_context_id": "NAV-1",
++        "evidence_package_id": "EP-1",
++    }
++    fields.update(overrides)
++    return CandidateResponse(**fields)
++
++
++# --- controlled vocabulary --------------------------------------------------
++
++
++def test_generation_outcome_vocabulary():
++    assert {o.value for o in GenerationOutcome} == {
++        "GENERATED",
++        "EMPTY_EVIDENCE_RESPONSE",
++        "INVALID_CONTEXT",
++        "CONTEXT_MISSING_RTEP",
++        "PROVIDER_FAILURE",
++        "PROVIDER_TIMEOUT",
++        "MALFORMED_PROVIDER_OUTPUT",
++        "PARTIAL_GENERATION",
++        "INTERNAL_FAILURE",
++    }
++
++
++def test_generation_outcome_is_distinct_from_every_other_vocabulary():
++    assert set(GenerationOutcome.__members__) & set(RetrievalOutcome.__members__) == set()
++    assert set(GenerationOutcome.__members__) & set(RTEPAssemblyOutcome.__members__) == set()
++    assert set(GenerationOutcome.__members__) & set(RuntimeIntegrationOutcome.__members__) == set()
++    assert set(GenerationOutcome.__members__) & set(ValidationOutcome.__members__) == set()
++
++
++# --- required fields ---------------------------------------------------------
++
++
++@pytest.mark.parametrize(
++    "field",
++    ["candidate_response_id", "content", "integration_id", "retrieval_id", "navigation_context_id", "evidence_package_id"],
++)
++def test_candidate_response_requires_non_blank_fields(field):
++    with pytest.raises(ValidationError):
++        _candidate_response(**{field: ""})
++
++
++def test_candidate_response_provider_name_is_optional():
++    response = _candidate_response(provider_name=None)
++    assert response.provider_name is None
++
++
++def test_candidate_response_requires_all_fields():
++    with pytest.raises(ValidationError):
++        CandidateResponse(candidate_response_id="CR-1", generation_timestamp=datetime.now(UTC))
++
++
++# --- immutability ------------------------------------------------------------
++
++
++def test_candidate_response_is_frozen():
++    response = _candidate_response()
++    with pytest.raises(ValidationError):
++        response.content = "MUTATED"
++
++
++def test_generation_result_is_frozen():
++    result = GenerationResult(outcome=GenerationOutcome.INVALID_CONTEXT, response=None)
++    with pytest.raises(ValidationError):
++        result.outcome = GenerationOutcome.GENERATED
++
++
++# --- typed result semantics ---------------------------------------------------
++
++
++def test_result_with_failure_outcome_has_no_response():
++    result = GenerationResult(outcome=GenerationOutcome.PROVIDER_FAILURE)
++    assert result.response is None
++
++
++def test_result_with_success_outcome_carries_a_response():
++    result = GenerationResult(outcome=GenerationOutcome.GENERATED, response=_candidate_response())
++    assert result.response is not None
+diff --git a/08_Development/implementation/tests/test_generation.py b/08_Development/implementation/tests/test_generation.py
+new file mode 100644
+index 0000000..339d349
+--- /dev/null
++++ b/08_Development/implementation/tests/test_generation.py
+@@ -0,0 +1,465 @@
++"""Tests for the Task #007 Generation boundary (`generate_candidate_response`).
++
++Fake/in-memory `LLMAdapter` providers used for testing live entirely in
++this test module, per spec section 7 — no test-only provider configuration
++is shipped inside `generation/`.
++"""
++
++import inspect
++from datetime import UTC, datetime
++from typing import Any
++
++import pytest
++from pydantic import ValidationError
++
++from safe_medical_ai.evidence import (
++    EvidenceItem,
++    EvidenceItemProvenance,
++    RuntimeEvidenceMetadata,
++    RuntimeEvidencePackage,
++)
++from safe_medical_ai.generation import (
++    GenerationOutcome,
++    ProviderError,
++    ProviderPartialOutputError,
++    ProviderTimeoutError,
++    generate_candidate_response,
++)
++from safe_medical_ai.generation import generation as generation_module
++from safe_medical_ai.generation import models as generation_models_module
++from safe_medical_ai.integration import EvidenceState, GenerationContext, RuntimeConstraints
++from safe_medical_ai.llm.base import LLMAdapter
++from safe_medical_ai.models.output_contract import NavigationContextPlaceholder
++from safe_medical_ai.retrieval import ArtifactType
++
++
++# --- fake providers (test boundary only) --------------------------------------
++
++
++class FakeLLMAdapter(LLMAdapter):
++    def __init__(self, output: str = "a generated candidate answer"):
++        self._output = output
++
++    def generate(self, *args: Any, **kwargs: Any) -> Any:
++        return self._output
++
++
++class FakeTimeoutProvider(LLMAdapter):
++    def generate(self, *args: Any, **kwargs: Any) -> Any:
++        raise ProviderTimeoutError("simulated timeout")
++
++
++class FakePartialOutputProvider(LLMAdapter):
++    def generate(self, *args: Any, **kwargs: Any) -> Any:
++        raise ProviderPartialOutputError("simulated interruption")
++
++
++class FakeFailingProvider(LLMAdapter):
++    def generate(self, *args: Any, **kwargs: Any) -> Any:
++        raise ProviderError("simulated provider failure")
++
++
++class FakeUnexpectedlyBrokenProvider(LLMAdapter):
++    def generate(self, *args: Any, **kwargs: Any) -> Any:
++        raise RuntimeError("simulated unexpected internal error, not a ProviderError")
++
++
++class FakeMalformedOutputProvider(LLMAdapter):
++    def __init__(self, output: Any):
++        self._output = output
++
++    def generate(self, *args: Any, **kwargs: Any) -> Any:
++        return self._output
++
++
++class CapturingProvider(LLMAdapter):
++    """Records the kwargs it was called with, for asserting provider input."""
++
++    def __init__(self, output: str = "captured-output"):
++        self._output = output
++        self.received_kwargs: dict[str, Any] = {}
++
++    def generate(self, *args: Any, **kwargs: Any) -> Any:
++        self.received_kwargs = kwargs
++        return self._output
++
++
++# --- fixtures ------------------------------------------------------------------
++
++
++def _metadata(retrieval_id: str = "RID-1") -> RuntimeEvidenceMetadata:
++    return RuntimeEvidenceMetadata(
++        evidence_package_id="EP-1",
++        retrieval_id=retrieval_id,
++        navigation_context_id="NAV-1",
++        retrieval_policy_version="1.0",
++        knowledge_base_version="1.0",
++        generation_timestamp=datetime.now(UTC),
++    )
++
++
++def _evidence_item(suffix: str) -> EvidenceItem:
++    return EvidenceItem(
++        population_id="PP-0001",
++        artifact_type=ArtifactType.CKO,
++        source_path=f"03_Clinical_Knowledge/population/population_packages/PP-0001/01_CKO-{suffix}.md",
++        title=f"title-{suffix}",
++        provenance=EvidenceItemProvenance(
++            knowledge_object_id=f"KO-{suffix}",
++            knowledge_passport_id=f"KP-{suffix}",
++            source_id=f"SRC-{suffix}",
++            guideline_version=f"v{suffix}.0",
++        ),
++    )
++
++
++def _context(evidence_state: EvidenceState, rtep: RuntimeEvidencePackage | None = None) -> GenerationContext:
++    if rtep is None:
++        evidence = (_evidence_item("a"), _evidence_item("b")) if evidence_state is EvidenceState.HAS_EVIDENCE else ()
++        rtep = RuntimeEvidencePackage(metadata=_metadata(), evidence=evidence)
++    return GenerationContext(
++        integration_id="INT-1",
++        integration_timestamp=datetime.now(UTC),
++        request_text="what is gastric cancer?",
++        navigation_context=NavigationContextPlaceholder(),
++        rtep=rtep,
++        runtime_constraints=RuntimeConstraints(),
++        evidence_state=evidence_state,
++    )
++
++
++# --- 1/2. valid context, evidence-present generation --------------------------
++
++
++def test_evidence_present_generation_succeeds():
++    result = generate_candidate_response(_context(EvidenceState.HAS_EVIDENCE), FakeLLMAdapter("a real answer"))
++
++    assert result.outcome == GenerationOutcome.GENERATED
++    assert result.response is not None
++    assert result.response.content == "a real answer"
++    assert result.response.evidence_state == EvidenceState.HAS_EVIDENCE
++    assert result.response.provider_name == "FakeLLMAdapter"
++
++
++# --- regression: provider receives the authoritative governed RTEP evidence ----
++# (Change Request review fix — a prior version only passed `prompt=request_text`)
++
++
++def test_provider_receives_authoritative_rtep_evidence():
++    context = _context(EvidenceState.HAS_EVIDENCE)
++    provider = CapturingProvider()
++
++    generate_candidate_response(context, provider)
++
++    request = provider.received_kwargs.get("request")
++    assert request is not None
++    assert request.evidence == context.rtep.evidence
++    assert request.evidence_metadata == context.rtep.metadata
++    assert request.request_text == context.request_text
++    assert request.navigation_context == context.navigation_context
++    assert request.runtime_constraints == context.runtime_constraints
++    # Value-level check, not just structural presence: provenance actually
++    # reached the provider.
++    assert [item.provenance.knowledge_object_id for item in request.evidence] == [
++        item.provenance.knowledge_object_id for item in context.rtep.evidence
++    ]
++    assert [item.provenance.guideline_version for item in request.evidence] == [
++        item.provenance.guideline_version for item in context.rtep.evidence
++    ]
++
++
++def test_provider_receives_evidence_in_original_order_without_reranking():
++    # Deliberately not in any "natural"/alphabetical/canonical order.
++    items = (_evidence_item("z"), _evidence_item("a"), _evidence_item("m"))
++    rtep = RuntimeEvidencePackage(metadata=_metadata(), evidence=items)
++    context = _context(EvidenceState.HAS_EVIDENCE, rtep=rtep)
++    provider = CapturingProvider()
++
++    generate_candidate_response(context, provider)
++
++    request = provider.received_kwargs.get("request")
++    assert [item.source_path for item in request.evidence] == [item.source_path for item in items]
++
++
++def test_provider_request_evidence_items_are_the_same_objects_not_reconstructed():
++    # Pydantic validation builds a new *tuple container* when constructing
++    # ProviderGenerationRequest (an ordinary consequence of `tuple(...)`),
++    # but with the default `revalidate_instances="never"` behavior each
++    # already-valid EvidenceItem/RuntimeEvidenceMetadata *instance* inside
++    # is reused as-is, not rebuilt — that per-item identity is what actually
++    # proves no reconstruction/repair happened, so it's what this test checks.
++    context = _context(EvidenceState.HAS_EVIDENCE)
++    provider = CapturingProvider()
++
++    generate_candidate_response(context, provider)
++
++    request = provider.received_kwargs.get("request")
++    assert request.evidence == context.rtep.evidence
++    for original, passed in zip(context.rtep.evidence, request.evidence, strict=True):
++        assert passed is original
++    assert request.evidence_metadata is context.rtep.metadata
++
++
++# --- 3. EMPTY_EVIDENCE branch --------------------------------------------------
++
++
++def test_empty_evidence_produces_fixed_policy_response_without_calling_provider():
++    class ExplodingProvider(LLMAdapter):
++        def generate(self, *args: Any, **kwargs: Any) -> Any:
++            raise AssertionError("provider must not be called for EMPTY evidence_state")
++
++    result = generate_candidate_response(_context(EvidenceState.EMPTY), ExplodingProvider())
++
++    assert result.outcome == GenerationOutcome.EMPTY_EVIDENCE_RESPONSE
++    assert result.response is not None
++    assert result.response.evidence_state == EvidenceState.EMPTY
++    assert result.response.provider_name is None
++    assert "no" in result.response.content.lower() or "evidence" in result.response.content.lower()
++
++
++def test_empty_evidence_never_reaches_a_non_raising_capturing_provider():
++    # Complements the exploding-provider test above with positive evidence
++    # (an empty capture) rather than only a negative one (a raised error).
++    context = _context(EvidenceState.EMPTY)
++    provider = CapturingProvider()
++
++    generate_candidate_response(context, provider)
++
++    assert provider.received_kwargs == {}
++
++
++def test_empty_evidence_policy_response_content_is_deterministic_across_calls():
++    context = _context(EvidenceState.EMPTY)
++    first = generate_candidate_response(context, FakeLLMAdapter())
++    second = generate_candidate_response(context, FakeLLMAdapter())
++
++    assert first.response.content == second.response.content
++
++
++def test_empty_evidence_policy_response_matches_the_locked_public_constant():
++    from safe_medical_ai.generation import EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT
++
++    result = generate_candidate_response(_context(EvidenceState.EMPTY), FakeLLMAdapter())
++
++    assert result.response.content == EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT
++
++
++# --- 4. invalid/blocked context -------------------------------------------------
++
++
++def test_none_context_produces_invalid_context():
++    result = generate_candidate_response(None, FakeLLMAdapter())
++
++    assert result.outcome == GenerationOutcome.INVALID_CONTEXT
++    assert result.response is None
++
++
++# --- 5. missing RTEP (defensive-only, via model_construct bypass) --------------
++
++
++def test_context_with_missing_rtep_produces_context_missing_rtep():
++    broken_context = GenerationContext.model_construct(
++        integration_id="INT-1",
++        integration_timestamp=datetime.now(UTC),
++        request_text="q",
++        navigation_context=NavigationContextPlaceholder(),
++        rtep=None,
++        runtime_constraints=RuntimeConstraints(),
++        evidence_state=EvidenceState.HAS_EVIDENCE,
++    )
++
++    result = generate_candidate_response(broken_context, FakeLLMAdapter())
++
++    assert result.outcome == GenerationOutcome.CONTEXT_MISSING_RTEP
++    assert result.response is None
++
++
++# --- 6/7/8/9. provider failure modes --------------------------------------------
++
++
++def test_provider_failure_produces_no_response():
++    result = generate_candidate_response(_context(EvidenceState.HAS_EVIDENCE), FakeFailingProvider())
++
++    assert result.outcome == GenerationOutcome.PROVIDER_FAILURE
++    assert result.response is None
++
++
++def test_provider_timeout_produces_no_response():
++    result = generate_candidate_response(_context(EvidenceState.HAS_EVIDENCE), FakeTimeoutProvider())
++
++    assert result.outcome == GenerationOutcome.PROVIDER_TIMEOUT
++    assert result.response is None
++
++
++def test_provider_partial_output_produces_no_response():
++    result = generate_candidate_response(_context(EvidenceState.HAS_EVIDENCE), FakePartialOutputProvider())
++
++    assert result.outcome == GenerationOutcome.PARTIAL_GENERATION
++    assert result.response is None
++
++
++@pytest.mark.parametrize("malformed_output", [None, "", "   ", 12345, ["not", "a", "string"]])
++def test_malformed_provider_output_produces_no_response(malformed_output):
++    result = generate_candidate_response(
++        _context(EvidenceState.HAS_EVIDENCE), FakeMalformedOutputProvider(malformed_output)
++    )
++
++    assert result.outcome == GenerationOutcome.MALFORMED_PROVIDER_OUTPUT
++    assert result.response is None
++
++
++def test_unexpected_provider_exception_produces_internal_failure_not_a_crash():
++    result = generate_candidate_response(_context(EvidenceState.HAS_EVIDENCE), FakeUnexpectedlyBrokenProvider())
++
++    assert result.outcome == GenerationOutcome.INTERNAL_FAILURE
++    assert result.response is None
++
++
++# --- 10. atomic success/failure -------------------------------------------------
++
++
++@pytest.mark.parametrize(
++    "outcome,provider",
++    [
++        (GenerationOutcome.PROVIDER_FAILURE, FakeFailingProvider()),
++        (GenerationOutcome.PROVIDER_TIMEOUT, FakeTimeoutProvider()),
++        (GenerationOutcome.PARTIAL_GENERATION, FakePartialOutputProvider()),
++        (GenerationOutcome.MALFORMED_PROVIDER_OUTPUT, FakeMalformedOutputProvider(None)),
++        (GenerationOutcome.INTERNAL_FAILURE, FakeUnexpectedlyBrokenProvider()),
++    ],
++)
++def test_every_failure_outcome_has_no_response(outcome, provider):
++    result = generate_candidate_response(_context(EvidenceState.HAS_EVIDENCE), provider)
++    assert result.outcome == outcome
++    assert result.response is None
++
++
++def test_every_success_outcome_has_a_complete_response():
++    generated = generate_candidate_response(_context(EvidenceState.HAS_EVIDENCE), FakeLLMAdapter())
++    empty = generate_candidate_response(_context(EvidenceState.EMPTY), FakeLLMAdapter())
++
++    assert generated.outcome == GenerationOutcome.GENERATED and generated.response is not None
++    assert empty.outcome == GenerationOutcome.EMPTY_EVIDENCE_RESPONSE and empty.response is not None
++
++
++# --- 11. traceability -------------------------------------------------------------
++
++
++def test_generated_response_carries_traceability_identifiers():
++    context = _context(EvidenceState.HAS_EVIDENCE)
++    result = generate_candidate_response(context, FakeLLMAdapter())
++
++    response = result.response
++    assert response.integration_id == context.integration_id
++    assert response.retrieval_id == context.rtep.metadata.retrieval_id
++    assert response.navigation_context_id == context.rtep.metadata.navigation_context_id
++    assert response.evidence_package_id == context.rtep.metadata.evidence_package_id
++    assert response.candidate_response_id  # generated, non-empty
++
++
++# --- 12. immutability --------------------------------------------------------------
++
++
++def test_generation_does_not_mutate_the_context_or_its_rtep():
++    context = _context(EvidenceState.HAS_EVIDENCE)
++    generate_candidate_response(context, FakeLLMAdapter())
++
++    with pytest.raises(ValidationError):
++        context.request_text = "MUTATED"
++    with pytest.raises(ValidationError):
++        context.rtep.evidence = ()
++    with pytest.raises(ValidationError):
++        context.rtep.metadata.retrieval_id = "MUTATED"
++
++
++def test_generation_does_not_mutate_evidence_items_or_provenance():
++    context = _context(EvidenceState.HAS_EVIDENCE)
++    generate_candidate_response(context, FakeLLMAdapter())
++
++    with pytest.raises(ValidationError):
++        context.rtep.evidence[0].title = "MUTATED"
++    with pytest.raises(ValidationError):
++        context.rtep.evidence[0].provenance.knowledge_object_id = "MUTATED"
++
++
++def test_candidate_response_is_a_newly_created_object_not_the_context():
++    context = _context(EvidenceState.HAS_EVIDENCE)
++    result = generate_candidate_response(context, FakeLLMAdapter())
++
++    assert result.response is not context
++    assert not hasattr(result.response, "rtep")
++
++
++# --- 13/14. no retrieval, no filesystem/repository access (static) ----------------
++
++
++def test_generation_module_does_not_access_repository_or_retrieval():
++    source = inspect.getsource(generation_module)
++    assert "RepositorySource(" not in source
++    assert ".list_artifacts(" not in source
++    assert "RetrievalService(" not in source
++    assert ".retrieve(" not in source
++
++
++def test_generation_module_does_not_touch_filesystem():
++    source = inspect.getsource(generation_module)
++    assert "open(" not in source
++    assert "Path(" not in source
++    assert "pathlib" not in source
++
++
++# --- 15. no Validation coupling ---------------------------------------------------
++
++
++def test_generation_does_not_import_or_reference_validation():
++    # Check the actual module namespace, not raw source text: both modules'
++    # docstrings legitimately *mention* ValidationOutcome in prose (explaining
++    # why GenerationOutcome is a distinct vocabulary from it), which would
++    # false-positive a plain substring search.
++    assert "ValidationOutcome" not in dir(generation_module)
++    assert "ValidationOutcome" not in dir(generation_models_module)
++    source = inspect.getsource(generation_module) + inspect.getsource(generation_models_module)
++    assert "import validation" not in source.lower()
++    assert "from ..validation" not in source
++
++
++# --- 16. no vector/embedding/LLM-vendor prohibited path ---------------------------
++
++
++@pytest.mark.parametrize(
++    "forbidden_token",
++    [
++        "openai",
++        "anthropic",
++        "sentence_transformers",
++        "faiss",
++        "chromadb",
++        "pinecone",
++        "import torch",
++        "import requests",
++        "urllib",
++    ],
++)
++def test_generation_does_not_reference_llm_vendor_or_web_libraries(forbidden_token):
++    source = inspect.getsource(generation_module) + inspect.getsource(generation_models_module)
++    assert forbidden_token.lower() not in source.lower()
++
++
++# --- 17. deterministic orchestration behavior -------------------------------------
++
++
++def test_repeated_calls_with_equivalent_input_and_deterministic_provider_produce_equivalent_output():
++    context = _context(EvidenceState.HAS_EVIDENCE)
++
++    first = generate_candidate_response(context, FakeLLMAdapter("stable output"))
++    second = generate_candidate_response(context, FakeLLMAdapter("stable output"))
++
++    assert first.outcome == second.outcome == GenerationOutcome.GENERATED
++    assert first.response.content == second.response.content
++    assert first.response.evidence_state == second.response.evidence_state
++    assert first.response.integration_id == second.response.integration_id
++    assert first.response.retrieval_id == second.response.retrieval_id
++    # candidate_response_id/generation_timestamp are legitimately
++    # runtime-generated identity/timestamp fields and may differ.
++    assert isinstance(first.response.candidate_response_id, str)
++    assert isinstance(second.response.candidate_response_id, str)

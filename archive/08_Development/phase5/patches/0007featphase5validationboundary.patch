@@ -1,0 +1,1085 @@
+diff --git a/08_Development/implementation/README.md b/08_Development/implementation/README.md
+index 3d512dc..da668d0 100644
+--- a/08_Development/implementation/README.md
++++ b/08_Development/implementation/README.md
+@@ -4,8 +4,8 @@ Python implementation package for the Safe Medical AI Oncology system,
+ established as Phase 5 Task #002 scaffolding and extended by Task #003
+ (retrieval foundation), Task #004 (filesystem repository source),
+ Task #005 (Runtime Evidence Package boundary), Task #006 (Runtime
+-Integration / GenerationContext boundary), and Task #007 (Generation
+-boundary).
++Integration / GenerationContext boundary), Task #007 (Generation
++boundary), and Task #008 (Validation boundary).
+ 
+ ## Scope of the Task #002 scaffolding
+ 
+@@ -66,6 +66,18 @@ approved/citation verified. No Validation, clinical/safety adjudication,
+ retrieval, embeddings, or vector search. See `generation/README.md` for
+ the full contract, provider boundary, and deferred scope.
+ 
++## Scope of the Task #008 Validation boundary
++
++`validation/` adds the downstream boundary that evaluates a `CandidateResponse`
++(Task #007) against the authoritative RTEP/evidence context: `ValidationInput`
++(`CandidateResponse` + RTEP + validation policy version) →
++`validate_candidate_response` → typed `ValidationResult`. `VALID` means only
++that a `CandidateResponse` satisfies the locked Validation contract — never
++that a diagnosis is correct, a treatment is appropriate, or clinical/final
++approval has occurred. No retrieval, generation, provider invocation, clinical
++reasoning, or final delivery/approval. See `validation/README.md` for the
++full contract, failure semantics, and deferred scope.
++
+ ## Directory layout
+ 
+ ```text
+@@ -104,6 +116,11 @@ the full contract, provider boundary, and deferred scope.
+ │       │   ├── README.md
+ │       │   ├── models.py
+ │       │   └── generation.py
++│       ├── validation/
++│       │   ├── __init__.py
++│       │   ├── README.md
++│       │   ├── models.py
++│       │   └── validation.py
+ │       └── api/
+ │           ├── __init__.py
+ │           └── main.py
+@@ -121,7 +138,9 @@ the full contract, provider boundary, and deferred scope.
+     ├── test_integration_models.py
+     ├── test_integration.py
+     ├── test_generation_models.py
+-    └── test_generation.py
++    ├── test_generation.py
++    ├── test_validation_models.py
++    └── test_validation.py
+ ```
+ 
+ ## Running
+diff --git a/08_Development/implementation/src/safe_medical_ai/validation/__init__.py b/08_Development/implementation/src/safe_medical_ai/validation/__init__.py
+new file mode 100644
+index 0000000..e17a4ec
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/validation/__init__.py
+@@ -0,0 +1,23 @@
++"""Validation boundary — Task #008.
++
++Public interface: `ValidationInput`, `ValidationResult`,
++`CandidateValidationOutcome`, `validate_candidate_response`.
++
++Consumes a `CandidateResponse` (Task #007) plus the authoritative
++RTEP/evidence context and produces a typed `ValidationResult`. `VALID`
++means only that a `CandidateResponse` satisfies the locked Validation
++contract — never that it is clinically safe, diagnostically correct, or
++finally approved. Does not implement retrieval, generation, clinical
++reasoning, or final delivery/approval. See `validation/README.md` for the
++full contract, failure semantics, and deferred scope.
++"""
++
++from .models import CandidateValidationOutcome, ValidationInput, ValidationResult
++from .validation import validate_candidate_response
++
++__all__ = [
++    "CandidateValidationOutcome",
++    "ValidationInput",
++    "ValidationResult",
++    "validate_candidate_response",
++]
+diff --git a/08_Development/implementation/src/safe_medical_ai/validation/models.py b/08_Development/implementation/src/safe_medical_ai/validation/models.py
+new file mode 100644
+index 0000000..8361e2e
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/validation/models.py
+@@ -0,0 +1,114 @@
++"""Typed Validation contracts — Task #008.
++
++Implements the locked B1-B4 decision set: Validation consumes a
++`CandidateResponse` (Task #007) plus the authoritative RTEP/evidence
++context and produces a typed `ValidationResult`. Validation is a
++downstream evaluator, never a second retrieval/generation authority
++(spec section 4).
++
++Dependency direction (locked): `validation -> generation -> integration ->
++evidence -> retrieval`. Nothing in `retrieval/`, `evidence/`,
++`integration/`, or `generation/` is modified by this module.
++"""
++
++from __future__ import annotations
++
++from datetime import datetime
++from enum import Enum
++
++from pydantic import BaseModel, ConfigDict, Field
++
++from ..evidence import RuntimeEvidencePackage
++from ..generation import CandidateResponse
++
++
++class CandidateValidationOutcome(str, Enum):
++    """Controlled Validation-result classification (spec sections 7-8).
++
++    Deliberately named `CandidateValidationOutcome`, not `ValidationOutcome`
++    — `models/output_contract.py` already defines a `ValidationOutcome`
++    class (Task #002's forward-looking OUTPUT_CONTRACT.md placeholder,
++    PASS/FAIL/SAFE_FALLBACK). Reusing that exact class name here for a
++    different, narrower member set (this is CandidateResponse-level
++    validation, not the final OUTPUT_CONTRACT delivery decision) would
++    shadow/confuse two distinct types across the codebase.
++
++    Spec section 7 requires disjointness from `RetrievalOutcome`,
++    `RTEPAssemblyOutcome`, `RuntimeIntegrationOutcome`, and
++    `GenerationOutcome` — but *not* from `ValidationOutcome`. That omission
++    is deliberate: section 7 also requires this vocabulary to include
++    `SAFE_FALLBACK`, which is the same literal value OUTPUT_CONTRACT.md's
++    `ValidationOutcome.SAFE_FALLBACK` already uses. This is the one
++    intentional, spec-mandated exception to the "every layer's vocabulary
++    is fully disjoint from every other" rule established by every prior
++    boundary — see `test_candidate_validation_outcome_shares_only_safe_fallback_with_validation_outcome`.
++
++    `INVALID_VALIDATION_INPUT` is spelled this way, not the spec's
++    illustrative bare `INVALID_INPUT`, because `RuntimeIntegrationOutcome`
++    already has a member literally named `INVALID_INPUT` — reusing it here
++    would be exactly the "upstream enum literal collision" section 7
++    prohibits.
++
++    There is no bare `INVALID` member: section 9's own failure-precedence
++    list never uses it, only the five specific values below plus `VALID`/
++    `SAFE_FALLBACK` — section 7's "VALID / INVALID / SAFE_FALLBACK minimum
++    semantic vocabulary" is satisfied by `VALID` and `SAFE_FALLBACK` as
++    concrete successes and the five specific values below collectively
++    representing every concrete "not valid" reason, exactly mirroring how
++    `GenerationOutcome`/`RTEPAssemblyOutcome` have no generic catch-all
++    failure member either.
++    """
++
++    VALID = "VALID"
++    SAFE_FALLBACK = "SAFE_FALLBACK"
++    INVALID_VALIDATION_INPUT = "INVALID_VALIDATION_INPUT"
++    MISSING_EVIDENCE = "MISSING_EVIDENCE"
++    INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE"
++    INVALID_CANDIDATE = "INVALID_CANDIDATE"
++    VALIDATION_FAILURE = "VALIDATION_FAILURE"
++
++
++class ValidationInput(BaseModel):
++    """Explicit input required to attempt validation of a `CandidateResponse`.
++
++    `rtep` is `None` to represent "no authoritative RTEP/evidence context
++    is available" (spec section 8.2 / `MISSING_EVIDENCE`) — Validation
++    never retrieves one itself. `candidate_response` is required (not
++    `Optional`): a missing candidate is a missing-required-input case
++    (spec section 8.1), not the narrower "candidate present but malformed"
++    case (section 8.4).
++    """
++
++    model_config = ConfigDict(frozen=True)
++
++    candidate_response: CandidateResponse
++    rtep: RuntimeEvidencePackage | None
++    validation_policy_version: str = Field(min_length=1)
++
++
++class ValidationResult(BaseModel):
++    """The atomic result of one validation attempt (spec section 10).
++
++    Every outcome carries whatever traceability identifiers are available
++    from `candidate_response` (spec section 12) — never fabricated when
++    absent (e.g. when the input itself was invalid and no candidate could
++    be inspected at all).
++    """
++
++    model_config = ConfigDict(frozen=True)
++
++    outcome: CandidateValidationOutcome
++    validation_id: str = Field(min_length=1)
++    validation_timestamp: datetime
++    validation_policy_version: str | None = None
++    findings: tuple[str, ...] = Field(default_factory=tuple)
++
++    # Traceability identifiers (spec section 12), sourced from the
++    # CandidateResponse this result evaluates — never fabricated.
++    candidate_response_id: str | None = None
++    integration_id: str | None = None
++    retrieval_id: str | None = None
++    navigation_context_id: str | None = None
++    evidence_package_id: str | None = None
++
++    message: str | None = None
+diff --git a/08_Development/implementation/src/safe_medical_ai/validation/validation.py b/08_Development/implementation/src/safe_medical_ai/validation/validation.py
+new file mode 100644
+index 0000000..7b610b1
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/validation/validation.py
+@@ -0,0 +1,151 @@
++"""Validation boundary — Task #008.
++
++Implements the locked B1-B4 behavioral requirements as one explicit,
++deterministic entry point: `validate_candidate_response`.
++
++This module:
++- accepts a `ValidationInput` (`CandidateResponse` + authoritative
++  RTEP/evidence + validation policy/version) and performs a local,
++  read-only evaluation only;
++- never constructs a `RepositorySource`, calls `RetrievalService`, or
++  otherwise re-retrieves;
++- never touches the filesystem or the network;
++- never reranks, reorders, deduplicates, enriches, or repairs provenance;
++- never calls an `LLMAdapter` provider, retries/regenerates a response, or
++  performs clinical reasoning, diagnosis, treatment recommendation, or
++  patient-specific safety adjudication;
++- never mutates `CandidateResponse`, its upstream RTEP, evidence items,
++  provenance, or generation/integration metadata.
++
++`VALID` means only "this CandidateResponse satisfies the locked Validation
++contract" — never that a diagnosis is correct, a treatment is appropriate,
++or clinical/final approval has occurred (spec section 15).
++"""
++
++from __future__ import annotations
++
++import logging
++import uuid
++from datetime import UTC, datetime
++
++from ..integration import EvidenceState
++from .models import CandidateValidationOutcome, ValidationInput, ValidationResult
++
++logger = logging.getLogger(__name__)
++
++
++def validate_candidate_response(validation_input: ValidationInput | None) -> ValidationResult:
++    """Evaluate a `CandidateResponse` against the locked Validation contract.
++
++    Atomic: each call returns exactly one authoritative `ValidationResult`
++    (spec section 10) — never a partially-approved or hidden-failure state.
++    Deterministic precedence (spec section 9): invalid input, then missing/
++    insufficient evidence, then invalid candidate, then mechanism failure,
++    then the semantic VALID/SAFE_FALLBACK decision.
++    """
++    if validation_input is None or validation_input.candidate_response is None:
++        # A missing ValidationInput, or a defensively-checked missing
++        # candidate_response (not reachable through the typed API, since
++        # ValidationInput.candidate_response is a required field — see
++        # test_validation.py's model_construct-based test), are both
++        # "malformed/missing required validation input" (spec section 8.1).
++        logger.warning("Validation failed: no ValidationInput/candidate_response supplied")
++        return ValidationResult(
++            outcome=CandidateValidationOutcome.INVALID_VALIDATION_INPUT,
++            validation_id=uuid.uuid4().hex,
++            validation_timestamp=datetime.now(UTC),
++            findings=("no ValidationInput or candidate_response was supplied",),
++            message="no validation performed: required validation input was not supplied",
++        )
++
++    try:
++        return _evaluate(validation_input)
++    except Exception:
++        # Controlled unexpected/internal failure (spec section 8.5): the
++        # validation mechanism itself failed technically. Never converted
++        # to VALID.
++        logger.exception("Validation failed: unexpected internal failure")
++        candidate = validation_input.candidate_response
++        return ValidationResult(
++            outcome=CandidateValidationOutcome.VALIDATION_FAILURE,
++            validation_id=uuid.uuid4().hex,
++            validation_timestamp=datetime.now(UTC),
++            validation_policy_version=validation_input.validation_policy_version,
++            findings=("the validation mechanism failed technically",),
++            candidate_response_id=candidate.candidate_response_id,
++            integration_id=candidate.integration_id,
++            retrieval_id=candidate.retrieval_id,
++            navigation_context_id=candidate.navigation_context_id,
++            evidence_package_id=candidate.evidence_package_id,
++            message="no VALID/SAFE_FALLBACK outcome: validation mechanism failure",
++        )
++
++
++def _evaluate(validation_input: ValidationInput) -> ValidationResult:
++    candidate = validation_input.candidate_response
++    trace_ids = {
++        "candidate_response_id": candidate.candidate_response_id,
++        "integration_id": candidate.integration_id,
++        "retrieval_id": candidate.retrieval_id,
++        "navigation_context_id": candidate.navigation_context_id,
++        "evidence_package_id": candidate.evidence_package_id,
++    }
++
++    def _result(outcome: CandidateValidationOutcome, findings: tuple[str, ...], message: str | None) -> ValidationResult:
++        return ValidationResult(
++            outcome=outcome,
++            validation_id=uuid.uuid4().hex,
++            validation_timestamp=datetime.now(UTC),
++            validation_policy_version=validation_input.validation_policy_version,
++            findings=findings,
++            message=message,
++            **trace_ids,
++        )
++
++    rtep = validation_input.rtep
++
++    if rtep is None:
++        logger.info("Validation: MISSING_EVIDENCE candidate_response_id=%s", candidate.candidate_response_id)
++        return _result(
++            CandidateValidationOutcome.MISSING_EVIDENCE,
++            ("no authoritative RTEP/evidence context was supplied",),
++            "no VALID/SAFE_FALLBACK outcome: evidence context is missing",
++        )
++
++    if candidate.evidence_state is EvidenceState.HAS_EVIDENCE and len(rtep.evidence) == 0:
++        # The candidate claims to be evidence-backed, but the authoritative
++        # RTEP it is being validated against carries no evidence items —
++        # a genuine inconsistency, not a graduated sufficiency judgment
++        # (no clinical/content adjudication of *which* evidence is needed).
++        logger.info("Validation: INSUFFICIENT_EVIDENCE candidate_response_id=%s", candidate.candidate_response_id)
++        return _result(
++            CandidateValidationOutcome.INSUFFICIENT_EVIDENCE,
++            ("candidate_response.evidence_state is HAS_EVIDENCE but the supplied RTEP has zero evidence items",),
++            "no VALID/SAFE_FALLBACK outcome: RTEP does not satisfy the evidence prerequisite",
++        )
++
++    if not candidate.content or not candidate.content.strip():
++        # Defensive: CandidateResponse.content already has a non-blank
++        # Pydantic constraint, so this is not reachable through the typed
++        # API — see test_validation.py's model_construct-based test.
++        logger.warning("Validation: INVALID_CANDIDATE candidate_response_id=%s", candidate.candidate_response_id)
++        return _result(
++            CandidateValidationOutcome.INVALID_CANDIDATE,
++            ("candidate_response.content is blank/malformed",),
++            "no VALID/SAFE_FALLBACK outcome: candidate_response failed structural validation",
++        )
++
++    if candidate.evidence_state is EvidenceState.EMPTY:
++        # Recognizes and passes through Generation's own locked
++        # EMPTY_EVIDENCE policy response (spec section 8.6/8.7) as the safe
++        # fallback state it already is — Validation does not re-adjudicate
++        # or generate a clinical alternative for it.
++        logger.info("Validation: SAFE_FALLBACK candidate_response_id=%s", candidate.candidate_response_id)
++        return _result(
++            CandidateValidationOutcome.SAFE_FALLBACK,
++            ("candidate_response.evidence_state is EMPTY: candidate cannot be used as a normal answer",),
++            None,
++        )
++
++    logger.info("Validation: VALID candidate_response_id=%s", candidate.candidate_response_id)
++    return _result(CandidateValidationOutcome.VALID, (), None)
+diff --git a/08_Development/implementation/src/safe_medical_ai/validation/README.md b/08_Development/implementation/src/safe_medical_ai/validation/README.md
+new file mode 100644
+index 0000000..f1d6983
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/validation/README.md
+@@ -0,0 +1,143 @@
++# Validation Boundary (Task #008)
++
++## What this is
++
++The controlled downstream evaluator of a `CandidateResponse` (Task #007),
++per the locked architecture:
++
++```text
++Generation
++  ↓
++CandidateResponse
++  ↓
++Validation                        (this module)
++  ↓
++ValidationResult
++```
++
++Validation is a **downstream evaluator**, never a second retrieval or
++generation authority. It may inspect the `CandidateResponse`, the
++authoritative RTEP, and traceability/policy-version context — it may not
++initiate upstream operations. Dependency direction is strictly one-way:
++`generation → validation`, `integration/evidence → validation` (read-only).
++
++## `VALID` ≠ clinically safe
++
++This is the single most important boundary this module enforces (spec
++section 15):
++
++> `VALID` means only that a `CandidateResponse` satisfies the locked
++> Validation contract.
++
++It does **not** mean a diagnosis is correct, a treatment is appropriate, a
++patient-specific recommendation is safe, or clinical approval has
++occurred. Clinical/safety adjudication and final delivery approval remain
++outside this task entirely.
++
++## Interfaces
++
++- **`ValidationInput`** — `candidate_response` (required — a missing
++  candidate is an *input* problem, section 8.1, not a *malformed
++  candidate* problem, section 8.4), `rtep` (`RuntimeEvidencePackage | None`
++  — `None` means no authoritative evidence context was supplied),
++  `validation_policy_version` (required, non-blank).
++- **`ValidationResult`** — `outcome`, `validation_id`/`validation_timestamp`
++  (generated at validation time, the same "legitimately runtime-generated
++  identity/timestamp" pattern established in every prior boundary),
++  `validation_policy_version` (echoed from the input, for traceability),
++  `findings` (a tuple of short reason strings), plus traceability
++  identifiers (`candidate_response_id`, `integration_id`, `retrieval_id`,
++  `navigation_context_id`, `evidence_package_id`) sourced from
++  `candidate_response` — never fabricated when absent.
++- **`CandidateValidationOutcome`** — `VALID` / `SAFE_FALLBACK` /
++  `INVALID_VALIDATION_INPUT` / `MISSING_EVIDENCE` / `INSUFFICIENT_EVIDENCE`
++  / `INVALID_CANDIDATE` / `VALIDATION_FAILURE`. See "Outcome vocabulary"
++  below for why this is a distinct class from `models/output_contract.py`'s
++  `ValidationOutcome`, and why it deliberately shares `SAFE_FALLBACK` with
++  it while staying disjoint from every upstream pipeline outcome.
++- **`validate_candidate_response(validation_input)`** — the one explicit,
++  deterministic entry point (spec section 16).
++
++## Outcome vocabulary
++
++`CandidateValidationOutcome` is a new class, not a reuse of
++`models/output_contract.py`'s `ValidationOutcome` (Task #002's
++forward-looking OUTPUT_CONTRACT.md placeholder, `PASS`/`FAIL`/`SAFE_FALLBACK`)
++— reusing that class name for this narrower, CandidateResponse-specific
++vocabulary would shadow/confuse two distinct types across the codebase.
++
++Spec section 7 requires disjointness from `RetrievalOutcome`,
++`RTEPAssemblyOutcome`, `RuntimeIntegrationOutcome`, and `GenerationOutcome`
++— but **not** from `ValidationOutcome`. That omission is intentional:
++section 7 also requires the vocabulary to include `SAFE_FALLBACK`, the same
++literal value `ValidationOutcome.SAFE_FALLBACK` already uses. This is the
++one deliberate, spec-mandated exception to the "every layer's vocabulary is
++fully disjoint from every other" convention every prior boundary follows —
++tested explicitly by
++`test_candidate_validation_outcome_shares_only_safe_fallback_with_validation_outcome`.
++
++`INVALID_VALIDATION_INPUT` is spelled this way, not the spec's illustrative
++bare `INVALID_INPUT`, because `RuntimeIntegrationOutcome` already has a
++member literally named `INVALID_INPUT` — reusing it would be exactly the
++"upstream enum literal collision" section 7 prohibits.
++
++There is no bare `INVALID` member. Section 9's own failure-precedence list
++never uses one — only the five specific values plus `VALID`/`SAFE_FALLBACK`.
++Section 7's "VALID / INVALID / SAFE_FALLBACK minimum semantic vocabulary"
++is satisfied by `VALID`/`SAFE_FALLBACK` as concrete successes and the five
++specific failure values collectively representing every concrete "not
++valid" reason — the same no-generic-catch-all pattern
++`GenerationOutcome`/`RTEPAssemblyOutcome` already use.
++
++## Decision logic (deterministic precedence, spec section 9)
++
++1. `validation_input is None`, or (defensive-only, unreachable via the
++   typed API) `validation_input.candidate_response is None` →
++   `INVALID_VALIDATION_INPUT`.
++2. `validation_input.rtep is None` → `MISSING_EVIDENCE`.
++3. `candidate_response.evidence_state is HAS_EVIDENCE` but the RTEP has
++   zero evidence items (a genuine input inconsistency, not a graduated
++   sufficiency judgment) → `INSUFFICIENT_EVIDENCE`.
++4. (defensive-only, unreachable via the typed API) `candidate_response.content`
++   is blank → `INVALID_CANDIDATE`.
++5. An unexpected exception anywhere in evaluation → `VALIDATION_FAILURE`
++   (never silently converted to `VALID`).
++6. `candidate_response.evidence_state is EMPTY` → `SAFE_FALLBACK`: this
++   recognizes and passes through Generation's own locked EMPTY_EVIDENCE
++   policy response (see `generation/README.md`'s "Locked EMPTY_EVIDENCE
++   policy") as the safe fallback it already is. Validation does not
++   re-adjudicate it or generate a clinical alternative (spec section 8.7).
++7. Otherwise → `VALID`.
++
++No step here inspects the *content* of `candidate_response.content` for
++factual/citation correctness, clinical appropriateness, or safety — only
++structural presence and the `evidence_state` signal Generation already
++established. That is a deliberate scope boundary, not an oversight (spec
++sections 3.3/15).
++
++## Evidence-support boundary
++
++When evaluating evidence sufficiency, Validation only ever inspects the
++`RuntimeEvidencePackage` already supplied on `ValidationInput.rtep` — it
++never retrieves additional evidence, reranks, deduplicates, or repairs
++provenance (spec section 14). `rtep.evidence`'s ordering and every
++`EvidenceItem`'s provenance are read, never modified.
++
++## Immutability
++
++Validation never mutates `CandidateResponse`, `RTEP`, `EvidenceItem`,
++provenance, or generation/integration metadata — every one of those is
++already an immutable (frozen) object from Tasks #005-#007; Validation only
++reads them and constructs a brand-new `ValidationResult`.
++
++## Not implemented by this task (deferred / out of scope)
++
++- Clinical reasoning, diagnosis, treatment recommendation, patient-specific
++  clinical safety adjudication, final clinical approval, human approval
++  workflow.
++- Factual/citation verification, hallucination detection, LLM-judge-based
++  evaluation.
++- Response regeneration, provider retry/switching.
++- Deployment, monitoring, UI, production safety infrastructure.
++- A concrete downstream `FinalResponse`/delivery type — `ValidationResult`
++  is not converted into one here (spec section 6).
+diff --git a/08_Development/implementation/tests/test_validation_models.py b/08_Development/implementation/tests/test_validation_models.py
+new file mode 100644
+index 0000000..fbc39ca
+--- /dev/null
++++ b/08_Development/implementation/tests/test_validation_models.py
+@@ -0,0 +1,129 @@
++"""Contract tests for the Task #008 Validation models."""
++
++from datetime import UTC, datetime
++
++import pytest
++from pydantic import ValidationError
++
++from safe_medical_ai.evidence import RTEPAssemblyOutcome, RuntimeEvidenceMetadata, RuntimeEvidencePackage
++from safe_medical_ai.generation import CandidateResponse, GenerationOutcome
++from safe_medical_ai.integration import EvidenceState, RuntimeIntegrationOutcome
++from safe_medical_ai.models.output_contract import ValidationOutcome
++from safe_medical_ai.retrieval import RetrievalOutcome
++from safe_medical_ai.validation import CandidateValidationOutcome, ValidationInput, ValidationResult
++
++
++def _candidate(**overrides) -> CandidateResponse:
++    fields = {
++        "candidate_response_id": "CR-1",
++        "generation_timestamp": datetime.now(UTC),
++        "content": "some generated text",
++        "evidence_state": EvidenceState.HAS_EVIDENCE,
++        "provider_name": "FakeProvider",
++        "integration_id": "INT-1",
++        "retrieval_id": "RID-1",
++        "navigation_context_id": "NAV-1",
++        "evidence_package_id": "EP-1",
++    }
++    fields.update(overrides)
++    return CandidateResponse(**fields)
++
++
++def _rtep(evidence=()) -> RuntimeEvidencePackage:
++    metadata = RuntimeEvidenceMetadata(
++        evidence_package_id="EP-1",
++        retrieval_id="RID-1",
++        navigation_context_id="NAV-1",
++        retrieval_policy_version="1.0",
++        knowledge_base_version="1.0",
++        generation_timestamp=datetime.now(UTC),
++    )
++    return RuntimeEvidencePackage(metadata=metadata, evidence=evidence)
++
++
++def _validation_result(**overrides) -> ValidationResult:
++    fields = {
++        "outcome": CandidateValidationOutcome.VALID,
++        "validation_id": "VAL-1",
++        "validation_timestamp": datetime.now(UTC),
++    }
++    fields.update(overrides)
++    return ValidationResult(**fields)
++
++
++# --- controlled vocabulary --------------------------------------------------
++
++
++def test_candidate_validation_outcome_vocabulary():
++    assert {o.value for o in CandidateValidationOutcome} == {
++        "VALID",
++        "SAFE_FALLBACK",
++        "INVALID_VALIDATION_INPUT",
++        "MISSING_EVIDENCE",
++        "INSUFFICIENT_EVIDENCE",
++        "INVALID_CANDIDATE",
++        "VALIDATION_FAILURE",
++    }
++
++
++def test_candidate_validation_outcome_is_disjoint_from_upstream_pipeline_outcomes():
++    assert set(CandidateValidationOutcome.__members__) & set(RetrievalOutcome.__members__) == set()
++    assert set(CandidateValidationOutcome.__members__) & set(RTEPAssemblyOutcome.__members__) == set()
++    assert set(CandidateValidationOutcome.__members__) & set(RuntimeIntegrationOutcome.__members__) == set()
++    assert set(CandidateValidationOutcome.__members__) & set(GenerationOutcome.__members__) == set()
++
++
++def test_candidate_validation_outcome_shares_only_safe_fallback_with_validation_outcome():
++    # Intentional exception (spec section 7): SAFE_FALLBACK is shared with
++    # OUTPUT_CONTRACT's ValidationOutcome by design; nothing else overlaps.
++    assert set(CandidateValidationOutcome.__members__) & set(ValidationOutcome.__members__) == {"SAFE_FALLBACK"}
++
++
++# --- required fields ---------------------------------------------------------
++
++
++def test_validation_input_requires_candidate_response():
++    with pytest.raises(ValidationError):
++        ValidationInput(rtep=None, validation_policy_version="1.0")
++
++
++def test_validation_input_allows_none_rtep():
++    validation_input = ValidationInput(
++        candidate_response=_candidate(), rtep=None, validation_policy_version="1.0"
++    )
++    assert validation_input.rtep is None
++
++
++def test_validation_input_requires_non_blank_policy_version():
++    with pytest.raises(ValidationError):
++        ValidationInput(candidate_response=_candidate(), rtep=None, validation_policy_version="")
++
++
++def test_validation_result_requires_non_blank_validation_id():
++    with pytest.raises(ValidationError):
++        ValidationResult(
++            outcome=CandidateValidationOutcome.VALID, validation_id="", validation_timestamp=datetime.now(UTC)
++        )
++
++
++def test_validation_result_traceability_fields_are_optional():
++    result = _validation_result()
++    assert result.candidate_response_id is None
++    assert result.integration_id is None
++
++
++# --- immutability ------------------------------------------------------------
++
++
++def test_validation_input_is_frozen():
++    validation_input = ValidationInput(
++        candidate_response=_candidate(), rtep=None, validation_policy_version="1.0"
++    )
++    with pytest.raises(ValidationError):
++        validation_input.validation_policy_version = "MUTATED"
++
++
++def test_validation_result_is_frozen():
++    result = _validation_result()
++    with pytest.raises(ValidationError):
++        result.outcome = CandidateValidationOutcome.SAFE_FALLBACK
+diff --git a/08_Development/implementation/tests/test_validation.py b/08_Development/implementation/tests/test_validation.py
+new file mode 100644
+index 0000000..da00d5b
+--- /dev/null
++++ b/08_Development/implementation/tests/test_validation.py
+@@ -0,0 +1,432 @@
++"""Tests for the Task #008 Validation boundary (`validate_candidate_response`)."""
++
++import inspect
++from datetime import UTC, datetime
++
++import pytest
++from pydantic import ValidationError
++
++from safe_medical_ai.evidence import EvidenceItem, EvidenceItemProvenance, RuntimeEvidenceMetadata, RuntimeEvidencePackage
++from safe_medical_ai.generation import CandidateResponse
++from safe_medical_ai.integration import EvidenceState
++from safe_medical_ai.retrieval import ArtifactType
++from safe_medical_ai.validation import CandidateValidationOutcome, ValidationInput, ValidationResult, validate_candidate_response
++from safe_medical_ai.validation import validation as validation_module
++from safe_medical_ai.validation import models as validation_models_module
++
++
++# --- fixtures ------------------------------------------------------------------
++
++
++def _metadata(retrieval_id: str = "RID-1") -> RuntimeEvidenceMetadata:
++    return RuntimeEvidenceMetadata(
++        evidence_package_id="EP-1",
++        retrieval_id=retrieval_id,
++        navigation_context_id="NAV-1",
++        retrieval_policy_version="1.0",
++        knowledge_base_version="1.0",
++        generation_timestamp=datetime.now(UTC),
++    )
++
++
++def _evidence_item(suffix: str) -> EvidenceItem:
++    return EvidenceItem(
++        population_id="PP-0001",
++        artifact_type=ArtifactType.CKO,
++        source_path=f"03_Clinical_Knowledge/population/population_packages/PP-0001/01_CKO-{suffix}.md",
++        title=f"title-{suffix}",
++        provenance=EvidenceItemProvenance(
++            knowledge_object_id=f"KO-{suffix}",
++            knowledge_passport_id=f"KP-{suffix}",
++            source_id=f"SRC-{suffix}",
++            guideline_version=f"v{suffix}.0",
++        ),
++    )
++
++
++def _rtep(evidence: tuple[EvidenceItem, ...] = ()) -> RuntimeEvidencePackage:
++    return RuntimeEvidencePackage(metadata=_metadata(), evidence=evidence)
++
++
++def _candidate(evidence_state: EvidenceState = EvidenceState.HAS_EVIDENCE, **overrides) -> CandidateResponse:
++    fields = {
++        "candidate_response_id": "CR-1",
++        "generation_timestamp": datetime.now(UTC),
++        "content": "some generated candidate text",
++        "evidence_state": evidence_state,
++        "provider_name": "FakeProvider",
++        "integration_id": "INT-1",
++        "retrieval_id": "RID-1",
++        "navigation_context_id": "NAV-1",
++        "evidence_package_id": "EP-1",
++    }
++    fields.update(overrides)
++    return CandidateResponse(**fields)
++
++
++_UNSET = object()
++
++
++def _input(candidate: CandidateResponse | None = None, rtep=_UNSET, **overrides) -> ValidationInput:
++    if candidate is None:
++        candidate = _candidate()
++    if rtep is _UNSET:
++        rtep = _rtep((_evidence_item("a"), _evidence_item("b")))
++    fields = {
++        "candidate_response": candidate,
++        "rtep": rtep,
++        "validation_policy_version": "1.0",
++    }
++    fields.update(overrides)
++    return ValidationInput(**fields)
++
++
++# --- success: VALID --------------------------------------------------------------
++
++
++def test_valid_candidate_with_evidence_backed_rtep_is_valid():
++    validation_input = _input()
++    result = validate_candidate_response(validation_input)
++
++    assert result.outcome == CandidateValidationOutcome.VALID
++    assert result.findings == ()
++    assert result.message is None
++
++
++def test_valid_result_carries_traceability_from_candidate():
++    candidate = _candidate()
++    validation_input = _input(candidate=candidate)
++
++    result = validate_candidate_response(validation_input)
++
++    assert result.candidate_response_id == candidate.candidate_response_id
++    assert result.integration_id == candidate.integration_id
++    assert result.retrieval_id == candidate.retrieval_id
++    assert result.navigation_context_id == candidate.navigation_context_id
++    assert result.evidence_package_id == candidate.evidence_package_id
++    assert result.validation_policy_version == validation_input.validation_policy_version
++    assert result.validation_id
++    assert isinstance(result.validation_timestamp, datetime)
++
++
++# --- evidence states: MISSING_EVIDENCE / INSUFFICIENT_EVIDENCE -------------------
++
++
++def test_none_rtep_produces_missing_evidence():
++    validation_input = _input(rtep=None)
++
++    result = validate_candidate_response(validation_input)
++
++    assert result.outcome == CandidateValidationOutcome.MISSING_EVIDENCE
++    assert result.findings
++
++
++def test_has_evidence_candidate_with_empty_rtep_produces_insufficient_evidence():
++    candidate = _candidate(evidence_state=EvidenceState.HAS_EVIDENCE)
++    validation_input = _input(candidate=candidate, rtep=_rtep(()))
++
++    result = validate_candidate_response(validation_input)
++
++    assert result.outcome == CandidateValidationOutcome.INSUFFICIENT_EVIDENCE
++    assert result.findings
++
++
++def test_missing_evidence_takes_precedence_over_insufficient_evidence():
++    # rtep is None (missing), never reaches the HAS_EVIDENCE/zero-items check.
++    validation_input = _input(rtep=None)
++
++    result = validate_candidate_response(validation_input)
++
++    assert result.outcome == CandidateValidationOutcome.MISSING_EVIDENCE
++
++
++# --- candidate states: SAFE_FALLBACK / INVALID_CANDIDATE -------------------------
++
++
++def test_empty_evidence_state_candidate_produces_safe_fallback():
++    candidate = _candidate(evidence_state=EvidenceState.EMPTY)
++    validation_input = _input(candidate=candidate, rtep=_rtep(()))
++
++    result = validate_candidate_response(validation_input)
++
++    assert result.outcome == CandidateValidationOutcome.SAFE_FALLBACK
++    assert result.findings
++
++
++def test_safe_fallback_does_not_produce_a_clinical_answer_message():
++    # SAFE_FALLBACK is a semantic pass-through state, not a re-adjudication:
++    # this validate call does not invent/alter clinical content of its own.
++    candidate = _candidate(evidence_state=EvidenceState.EMPTY, content="No governed evidence was retrieved.")
++    validation_input = _input(candidate=candidate, rtep=_rtep(()))
++
++    result = validate_candidate_response(validation_input)
++
++    assert result.outcome == CandidateValidationOutcome.SAFE_FALLBACK
++    # ValidationResult never carries/re-derives clinical content of its own.
++    assert not hasattr(result, "content")
++
++
++def test_blank_candidate_content_produces_invalid_candidate_via_model_construct():
++    # Defensive-only: CandidateResponse.content has a locked min_length=1
++    # constraint, so this state is not reachable through the typed
++    # construction API — model_construct() bypasses validation to exercise
++    # the defensive branch directly.
++    broken_candidate = CandidateResponse.model_construct(
++        candidate_response_id="CR-1",
++        generation_timestamp=datetime.now(UTC),
++        content="   ",
++        evidence_state=EvidenceState.HAS_EVIDENCE,
++        provider_name="FakeProvider",
++        integration_id="INT-1",
++        retrieval_id="RID-1",
++        navigation_context_id="NAV-1",
++        evidence_package_id="EP-1",
++    )
++    validation_input = _input(candidate=broken_candidate)
++
++    result = validate_candidate_response(validation_input)
++
++    assert result.outcome == CandidateValidationOutcome.INVALID_CANDIDATE
++
++
++# --- invalid input: INVALID_VALIDATION_INPUT --------------------------------------
++
++
++def test_none_validation_input_produces_invalid_validation_input():
++    result = validate_candidate_response(None)
++
++    assert result.outcome == CandidateValidationOutcome.INVALID_VALIDATION_INPUT
++    assert result.candidate_response_id is None
++
++
++def test_missing_candidate_response_via_model_construct_produces_invalid_validation_input():
++    # Defensive-only: ValidationInput.candidate_response is required, so
++    # this is not reachable through the typed construction API.
++    broken_input = ValidationInput.model_construct(
++        candidate_response=None, rtep=None, validation_policy_version="1.0"
++    )
++
++    result = validate_candidate_response(broken_input)
++
++    assert result.outcome == CandidateValidationOutcome.INVALID_VALIDATION_INPUT
++
++
++def test_invalid_validation_input_produces_no_traceability_identifiers():
++    result = validate_candidate_response(None)
++
++    assert result.candidate_response_id is None
++    assert result.integration_id is None
++    assert result.retrieval_id is None
++    assert result.navigation_context_id is None
++    assert result.evidence_package_id is None
++
++
++# --- technical failure: VALIDATION_FAILURE ----------------------------------------
++
++
++def test_unexpected_internal_exception_produces_validation_failure_not_a_crash(monkeypatch):
++    def _broken_evaluate(_validation_input):
++        raise RuntimeError("simulated unexpected internal error")
++
++    monkeypatch.setattr(validation_module, "_evaluate", _broken_evaluate)
++
++    validation_input = _input()
++    result = validate_candidate_response(validation_input)
++
++    assert result.outcome == CandidateValidationOutcome.VALIDATION_FAILURE
++    assert result.candidate_response_id == validation_input.candidate_response.candidate_response_id
++    assert result.message is not None
++
++
++def test_validation_failure_is_never_silently_converted_to_valid(monkeypatch):
++    def _broken_evaluate(_validation_input):
++        raise ValueError("boom")
++
++    monkeypatch.setattr(validation_module, "_evaluate", _broken_evaluate)
++
++    result = validate_candidate_response(_input())
++
++    assert result.outcome != CandidateValidationOutcome.VALID
++    assert result.outcome == CandidateValidationOutcome.VALIDATION_FAILURE
++
++
++# --- atomicity ----------------------------------------------------------------------
++
++
++@pytest.mark.parametrize(
++    "validation_input_factory",
++    [
++        lambda: _input(),
++        lambda: _input(rtep=None),
++        lambda: _input(candidate=_candidate(evidence_state=EvidenceState.EMPTY), rtep=_rtep(())),
++        lambda: _input(candidate=_candidate(evidence_state=EvidenceState.HAS_EVIDENCE), rtep=_rtep(())),
++    ],
++)
++def test_every_call_returns_exactly_one_authoritative_outcome(validation_input_factory):
++    result = validate_candidate_response(validation_input_factory())
++
++    assert isinstance(result, ValidationResult)
++    assert isinstance(result.outcome, CandidateValidationOutcome)
++
++
++def test_no_partial_or_hidden_approval_state_exists():
++    # ValidationResult has no field representing a partial/graduated
++    # approval state distinct from `outcome` — every result is exactly one
++    # of the seven controlled CandidateValidationOutcome values.
++    assert set(ValidationResult.model_fields) == {
++        "outcome",
++        "validation_id",
++        "validation_timestamp",
++        "validation_policy_version",
++        "findings",
++        "candidate_response_id",
++        "integration_id",
++        "retrieval_id",
++        "navigation_context_id",
++        "evidence_package_id",
++        "message",
++    }
++
++
++# --- determinism ----------------------------------------------------------------------
++
++
++def test_repeated_calls_with_equivalent_input_produce_equivalent_outcome():
++    validation_input = _input()
++
++    first = validate_candidate_response(validation_input)
++    second = validate_candidate_response(validation_input)
++
++    assert first.outcome == second.outcome == CandidateValidationOutcome.VALID
++    assert first.candidate_response_id == second.candidate_response_id
++    assert first.findings == second.findings
++    # validation_id/validation_timestamp are legitimately runtime-generated
++    # identity/timestamp fields and may differ between calls.
++    assert isinstance(first.validation_id, str)
++    assert isinstance(second.validation_id, str)
++
++
++def test_repeated_calls_for_safe_fallback_produce_equivalent_outcome():
++    candidate = _candidate(evidence_state=EvidenceState.EMPTY)
++    validation_input = _input(candidate=candidate, rtep=_rtep(()))
++
++    first = validate_candidate_response(validation_input)
++    second = validate_candidate_response(validation_input)
++
++    assert first.outcome == second.outcome == CandidateValidationOutcome.SAFE_FALLBACK
++
++
++# --- immutability ----------------------------------------------------------------------
++
++
++def test_validate_candidate_response_does_not_mutate_candidate_or_rtep():
++    candidate = _candidate()
++    rtep = _rtep((_evidence_item("a"),))
++    validation_input = _input(candidate=candidate, rtep=rtep)
++
++    validate_candidate_response(validation_input)
++
++    with pytest.raises(ValidationError):
++        candidate.content = "MUTATED"
++    with pytest.raises(ValidationError):
++        rtep.evidence[0].title = "MUTATED"
++    with pytest.raises(ValidationError):
++        validation_input.validation_policy_version = "MUTATED"
++
++
++# --- boundary protection: no retrieval/repository/filesystem access (static) ------
++
++
++def test_validation_module_does_not_access_repository_or_retrieval():
++    source = inspect.getsource(validation_module)
++    assert "RepositorySource(" not in source
++    assert ".list_artifacts(" not in source
++    assert "RetrievalService(" not in source
++    assert ".retrieve(" not in source
++
++
++def test_validation_module_does_not_touch_filesystem_or_network():
++    source = inspect.getsource(validation_module)
++    assert "open(" not in source
++    assert "Path(" not in source
++    assert "pathlib" not in source
++    assert "requests" not in source
++    assert "urllib" not in source
++
++
++@pytest.mark.parametrize(
++    "forbidden_token",
++    [
++        "openai",
++        "anthropic",
++        "sentence_transformers",
++        "faiss",
++        "chromadb",
++        "pinecone",
++        "import torch",
++    ],
++)
++def test_validation_does_not_reference_llm_vendor_libraries(forbidden_token):
++    source = inspect.getsource(validation_module) + inspect.getsource(validation_models_module)
++    assert forbidden_token.lower() not in source.lower()
++
++
++def test_validation_does_not_import_llm_adapter_or_call_generate():
++    # Check the actual module namespace, not raw source text: the module's
++    # own docstring legitimately *mentions* LLMAdapter/.generate( in prose
++    # (explaining what Validation deliberately does not do), which would
++    # false-positive a plain substring search — same pattern as Task #007's
++    # ValidationOutcome docstring-mention fix.
++    assert "LLMAdapter" not in dir(validation_module)
++    assert "LLMAdapter" not in dir(validation_models_module)
++    source = inspect.getsource(validation_module)
++    assert "import llm" not in source.lower()
++    assert "from ..llm" not in source
++
++
++def test_validation_does_not_reference_clinical_reasoning_functions():
++    source = inspect.getsource(validation_module)
++    for forbidden in ("diagnose", "recommend_treatment", "clinical_reasoning"):
++        assert forbidden not in source.lower()
++
++
++# --- regression: full outcome vocabulary is reachable ------------------------------
++
++
++def test_all_seven_outcomes_are_reachable_through_the_public_entry_point(monkeypatch):
++    reached = set()
++
++    reached.add(validate_candidate_response(None).outcome)
++    reached.add(validate_candidate_response(_input(rtep=None)).outcome)
++    reached.add(
++        validate_candidate_response(
++            _input(candidate=_candidate(evidence_state=EvidenceState.HAS_EVIDENCE), rtep=_rtep(()))
++        ).outcome
++    )
++    reached.add(
++        validate_candidate_response(
++            _input(candidate=_candidate(evidence_state=EvidenceState.EMPTY), rtep=_rtep(()))
++        ).outcome
++    )
++    reached.add(validate_candidate_response(_input()).outcome)
++
++    broken_candidate = CandidateResponse.model_construct(
++        candidate_response_id="CR-1",
++        generation_timestamp=datetime.now(UTC),
++        content="",
++        evidence_state=EvidenceState.HAS_EVIDENCE,
++        provider_name="FakeProvider",
++        integration_id="INT-1",
++        retrieval_id="RID-1",
++        navigation_context_id="NAV-1",
++        evidence_package_id="EP-1",
++    )
++    reached.add(validate_candidate_response(_input(candidate=broken_candidate)).outcome)
++
++    def _broken_evaluate(_validation_input):
++        raise RuntimeError("simulated")
++
++    monkeypatch.setattr(validation_module, "_evaluate", _broken_evaluate)
++    reached.add(validate_candidate_response(_input()).outcome)
++
++    assert reached == set(CandidateValidationOutcome)

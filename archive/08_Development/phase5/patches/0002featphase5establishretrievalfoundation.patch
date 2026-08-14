@@ -1,0 +1,710 @@
+From a7b52465d6fa451faae6830c6f6c4b4fb4f80640 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 13 Aug 2026 06:57:46 +0000
+Subject: [PATCH] feat(phase5): establish retrieval foundation
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01JnvFx7QKd4vTUh27GhZHeQ
+---
+ 08_Development/implementation/README.md       |  26 ++-
+ .../src/safe_medical_ai/retrieval/README.md   | 108 +++++++++++++
+ .../src/safe_medical_ai/retrieval/__init__.py |  29 ++++
+ .../src/safe_medical_ai/retrieval/models.py   |  88 ++++++++++
+ .../src/safe_medical_ai/retrieval/service.py  |  84 ++++++++++
+ .../src/safe_medical_ai/retrieval/source.py   |  47 ++++++
+ .../tests/test_retrieval_models.py            |  72 +++++++++
+ .../tests/test_retrieval_service.py           | 152 ++++++++++++++++++
+ 8 files changed, 601 insertions(+), 5 deletions(-)
+ create mode 100644 08_Development/implementation/src/safe_medical_ai/retrieval/README.md
+ create mode 100644 08_Development/implementation/src/safe_medical_ai/retrieval/__init__.py
+ create mode 100644 08_Development/implementation/src/safe_medical_ai/retrieval/models.py
+ create mode 100644 08_Development/implementation/src/safe_medical_ai/retrieval/service.py
+ create mode 100644 08_Development/implementation/src/safe_medical_ai/retrieval/source.py
+ create mode 100644 08_Development/implementation/tests/test_retrieval_models.py
+ create mode 100644 08_Development/implementation/tests/test_retrieval_service.py
+
+diff --git a/08_Development/implementation/README.md b/08_Development/implementation/README.md
+index c86bac6..ec86549 100644
+--- a/08_Development/implementation/README.md
++++ b/08_Development/implementation/README.md
+@@ -1,12 +1,13 @@
+ # 08_Development/implementation/
+ 
+ Python implementation package for the Safe Medical AI Oncology system,
+-established as Phase 5 Task #002 scaffolding.
++established as Phase 5 Task #002 scaffolding and extended by Task #003 with
++a controlled repository retrieval foundation.
+ 
+-## Scope of this scaffolding
++## Scope of the Task #002 scaffolding
+ 
+-This package currently contains **no retrieval, runtime, or clinical
+-business logic**. It establishes only:
++This package contains **no runtime generation or clinical business logic**.
++It establishes only:
+ 
+ - a reproducible Python 3.12 project (`uv` + `pyproject.toml` at the
+   repository root);
+@@ -26,6 +27,13 @@ business logic**. It establishes only:
+   no concrete provider implementation;
+ - a pytest baseline (`tests/`) proving the scaffold imports and runs.
+ 
++## Scope of the Task #003 retrieval foundation
++
++`retrieval/` adds a deterministic, provider/engine-agnostic navigation-first
++retrieval foundation (no embeddings, vector search, or LLM integration — see
++`retrieval/README.md` for the full interface description, result semantics,
++and deferred scope).
++
+ ## Directory layout
+ 
+ ```text
+@@ -42,6 +50,12 @@ business logic**. It establishes only:
+ │       ├── llm/
+ │       │   ├── __init__.py
+ │       │   └── base.py
++│       ├── retrieval/
++│       │   ├── __init__.py
++│       │   ├── README.md
++│       │   ├── models.py
++│       │   ├── source.py
++│       │   └── service.py
+ │       └── api/
+ │           ├── __init__.py
+ │           └── main.py
+@@ -50,7 +64,9 @@ business logic**. It establishes only:
+     ├── test_imports.py
+     ├── test_config.py
+     ├── test_trace.py
+-    └── test_app.py
++    ├── test_app.py
++    ├── test_retrieval_models.py
++    └── test_retrieval_service.py
+ ```
+ 
+ ## Running
+diff --git a/08_Development/implementation/src/safe_medical_ai/retrieval/README.md b/08_Development/implementation/src/safe_medical_ai/retrieval/README.md
+new file mode 100644
+index 0000000..edee324
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/retrieval/README.md
+@@ -0,0 +1,108 @@
++# Retrieval Foundation (Task #003)
++
++## What this is
++
++A deterministic, provider/engine-agnostic **navigation-first retrieval
++foundation**. It implements the hierarchical resolution step of the approved
++retrieval flow:
++
++```text
++controlled repository
++        ↓
++navigation-first retrieval          (RetrievalRequest.population_id)
++        ↓
++hierarchical resolution             (Population/PP -> Artifact, via RepositorySource)
++        ↓
++provenance / traceability           (RetrievalCandidate.source_path, .title)
++        ↓
++structured retrieval result         (RetrievalResponse)
++```
++
++It is **not** the semantic/vector retrieval implementation. No embeddings,
++vector database, semantic-search engine, or LLM are used or referenced here.
++See `TECH_STACK.md` §4 for the still-deferred technology choices this
++foundation deliberately does not lock.
++
++## Interfaces
++
++- **`RetrievalRequest`** — navigation-first query: required `population_id`
++  (e.g. `"PP-0001"`), optional `artifact_type` filter.
++- **`RetrievalCandidate`** — one located artifact: `population_id`,
++  `artifact_type`, `source_path` (provenance), optional `title`.
++- **`RetrievalResponse`** — `outcome` (`RetrievalOutcome`), the echoed
++  `request`, ordered `results`, `trace_id`, optional `message`.
++- **`RetrievalOutcome`** — `FOUND` / `EMPTY` / `INVALID_REQUEST` /
++  `NOT_FOUND`. This is retrieval-result vocabulary, deliberately **separate**
++  from OUTPUT_CONTRACT's `ValidationOutcome` (`PASS` / `FAIL` /
++  `SAFE_FALLBACK`), which governs a distinct, later concern — whether a
++  *generated response* is eligible for delivery. The two vocabularies are not
++  merged or reused for each other's purpose.
++- **`RepositorySource`** (ABC) — the seam that keeps `RetrievalService`
++  provider/engine agnostic. `list_artifacts(population_id)` returns the known
++  artifacts for a population, or `None` if the population is not registered
++  in the source at all.
++- **`InMemoryRepositorySource`** — the only concrete `RepositorySource`
++  shipped by this task: a deterministic, fixture-backed implementation for
++  tests/local development. It performs no filesystem or network access and
++  does not read the actual controlled repository.
++- **`RetrievalService`** — orchestrator; `retrieve(request) -> RetrievalResponse`.
++  Validates the request, resolves via the injected `RepositorySource`,
++  applies hierarchical filtering, and returns a deterministically ordered
++  result.
++
++## Result semantics
++
++| Condition | Outcome |
++|---|---|
++| `population_id` doesn't match the `PP-####` navigation format | `INVALID_REQUEST` |
++| `population_id` well-formed but unknown to the source | `NOT_FOUND` |
++| `population_id` known, but no artifacts match (after any `artifact_type` filter) | `EMPTY` |
++| `population_id` known and at least one artifact matches | `FOUND` |
++
++Ordering, when multiple artifacts are returned, is always canonical
++`CKO -> KNOWLEDGE_PASSPORT -> PRIMARY_EVIDENCE_PACKAGE -> QA_REPORT`
++(`artifact_type_sort_key`), independent of the order artifacts were
++registered in the source.
++
++## Usage
++
++```python
++from safe_medical_ai.retrieval import (
++    ArtifactType,
++    InMemoryRepositorySource,
++    RetrievalCandidate,
++    RetrievalRequest,
++    RetrievalService,
++)
++
++source = InMemoryRepositorySource({
++    "PP-0001": [
++        RetrievalCandidate(
++            population_id="PP-0001",
++            artifact_type=ArtifactType.CKO,
++            source_path="03_Clinical_Knowledge/population/population_packages/PP-0001/01_CKO.md",
++        ),
++    ],
++})
++
++service = RetrievalService(source)
++response = service.retrieve(RetrievalRequest(population_id="PP-0001"))
++# response.outcome == RetrievalOutcome.FOUND
++```
++
++## Deliberately deferred (not implemented by this task)
++
++- A real filesystem- or database-backed `RepositorySource` that reads the
++  actual controlled `03_Clinical_Knowledge/population/population_packages/`
++  content. Only the fixture-backed `InMemoryRepositorySource` exists so far;
++  autonomous ingestion of the real 239-PP repository is explicitly out of
++  scope for Task #003.
++- Embeddings, vector database/engine, semantic-search provider, hybrid
++  ranking.
++- LLM provider/model integration.
++- Navigation Context / clinical-domain selection (RAG_ARCHITECTURE.md's
++  full navigation-first flow above the Population/PP level).
++- Cross-population listing, pagination, or free-text query support.
++- Assembly into the Runtime Evidence Package (EVIDENCE_PACKAGE_SPECIFICATION.md)
++  — this foundation produces `RetrievalResponse`, not an Evidence Package.
++- Clinical reasoning, safety logic, response generation, output validation.
+diff --git a/08_Development/implementation/src/safe_medical_ai/retrieval/__init__.py b/08_Development/implementation/src/safe_medical_ai/retrieval/__init__.py
+new file mode 100644
+index 0000000..38acacb
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/retrieval/__init__.py
+@@ -0,0 +1,29 @@
++"""Task #003 controlled repository retrieval foundation.
++
++Public interface: `RetrievalRequest`, `RetrievalCandidate`, `RetrievalResponse`,
++`RetrievalOutcome`, `ArtifactType`, `RepositorySource`, `InMemoryRepositorySource`,
++`RetrievalService`. See `retrieval/README.md` for usage and deferred scope.
++"""
++
++from .models import (
++    ArtifactType,
++    RetrievalCandidate,
++    RetrievalOutcome,
++    RetrievalRequest,
++    RetrievalResponse,
++    artifact_type_sort_key,
++)
++from .service import RetrievalService
++from .source import InMemoryRepositorySource, RepositorySource
++
++__all__ = [
++    "ArtifactType",
++    "InMemoryRepositorySource",
++    "RepositorySource",
++    "RetrievalCandidate",
++    "RetrievalOutcome",
++    "RetrievalRequest",
++    "RetrievalResponse",
++    "RetrievalService",
++    "artifact_type_sort_key",
++]
+diff --git a/08_Development/implementation/src/safe_medical_ai/retrieval/models.py b/08_Development/implementation/src/safe_medical_ai/retrieval/models.py
+new file mode 100644
+index 0000000..f3bed3a
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/retrieval/models.py
+@@ -0,0 +1,88 @@
++"""Typed domain models for the Task #003 retrieval foundation.
++
++These models are intentionally separate from `models/output_contract.py`.
++`RetrievalOutcome` is retrieval-result vocabulary (did navigation/hierarchical
++resolution find something), not output-validation vocabulary. OUTPUT_CONTRACT's
++`ValidationOutcome` (PASS / FAIL / SAFE_FALLBACK) governs a later, distinct
++concern — whether a *generated response* is eligible for delivery — and is not
++redefined or overloaded here.
++"""
++
++from __future__ import annotations
++
++from enum import Enum
++
++from pydantic import BaseModel, Field
++
++
++class ArtifactType(str, Enum):
++    """The four canonical Gold Population Package artifacts.
++
++    Mirrors the controlled artifact set defined by the Phase 3 Gold
++    Population Package standard (01_CKO.md .. 04_QA_REPORT.md).
++    """
++
++    CKO = "CKO"
++    KNOWLEDGE_PASSPORT = "KNOWLEDGE_PASSPORT"
++    PRIMARY_EVIDENCE_PACKAGE = "PRIMARY_EVIDENCE_PACKAGE"
++    QA_REPORT = "QA_REPORT"
++
++
++_ARTIFACT_TYPE_ORDER: dict[ArtifactType, int] = {
++    ArtifactType.CKO: 1,
++    ArtifactType.KNOWLEDGE_PASSPORT: 2,
++    ArtifactType.PRIMARY_EVIDENCE_PACKAGE: 3,
++    ArtifactType.QA_REPORT: 4,
++}
++
++
++def artifact_type_sort_key(artifact_type: ArtifactType) -> int:
++    """Canonical 01..04 ordering used for deterministic result ordering."""
++    return _ARTIFACT_TYPE_ORDER[artifact_type]
++
++
++class RetrievalOutcome(str, Enum):
++    """Controlled retrieval-result classification.
++
++    Distinct from and not a substitute for OUTPUT_CONTRACT's
++    ValidationOutcome (PASS / FAIL / SAFE_FALLBACK).
++    """
++
++    FOUND = "FOUND"
++    EMPTY = "EMPTY"
++    INVALID_REQUEST = "INVALID_REQUEST"
++    NOT_FOUND = "NOT_FOUND"
++
++
++class RetrievalRequest(BaseModel):
++    """A navigation-first retrieval request.
++
++    `population_id` is the required top-level navigation key (hierarchical
++    level: Population / PP). `artifact_type` optionally narrows to a single
++    canonical artifact; omitted, all known artifacts for the population are
++    returned.
++    """
++
++    population_id: str
++    artifact_type: ArtifactType | None = None
++
++
++class RetrievalCandidate(BaseModel):
++    """A single located artifact, with provenance sufficient for traceability."""
++
++    population_id: str
++    artifact_type: ArtifactType
++    source_path: str = Field(
++        description="Authoritative controlled-repository path or equivalent controlled identifier."
++    )
++    title: str | None = None
++
++
++class RetrievalResponse(BaseModel):
++    """The structured result of a retrieval request."""
++
++    outcome: RetrievalOutcome
++    request: RetrievalRequest
++    results: list[RetrievalCandidate] = Field(default_factory=list)
++    trace_id: str | None = None
++    message: str | None = None
+diff --git a/08_Development/implementation/src/safe_medical_ai/retrieval/service.py b/08_Development/implementation/src/safe_medical_ai/retrieval/service.py
+new file mode 100644
+index 0000000..734c95c
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/retrieval/service.py
+@@ -0,0 +1,84 @@
++"""Navigation-first retrieval orchestrator for the Task #003 foundation.
++
++`RetrievalService` implements:
++- navigation-first retrieval: `population_id` is a required, explicit
++  navigation key (no free-text/semantic query in this foundation);
++- hierarchical resolution: Repository -> Population/PP -> Artifact, via
++  `RepositorySource.list_artifacts` followed by optional `artifact_type`
++  filtering;
++- deterministic ordering: results are always sorted into canonical
++  01..04 artifact order;
++- explicit, deterministic result semantics (FOUND / EMPTY /
++  INVALID_REQUEST / NOT_FOUND) instead of exceptions for expected
++  domain conditions.
++
++`RetrievalService` depends only on the `RepositorySource` abstraction, so it
++remains provider/engine agnostic: swapping in a different `RepositorySource`
++implementation (e.g. a future filesystem-backed or hybrid/semantic source)
++does not require changing this class or its callers.
++"""
++
++from __future__ import annotations
++
++import re
++
++from ..trace import get_trace_id
++from .models import RetrievalOutcome, RetrievalRequest, RetrievalResponse, artifact_type_sort_key
++from .source import RepositorySource
++
++_POPULATION_ID_PATTERN = re.compile(r"^PP-\d{4}$")
++
++
++class RetrievalService:
++    """Deterministic navigation-first retrieval orchestrator."""
++
++    def __init__(self, source: RepositorySource):
++        self._source = source
++
++    def retrieve(self, request: RetrievalRequest) -> RetrievalResponse:
++        trace_id = get_trace_id()
++
++        if not _POPULATION_ID_PATTERN.match(request.population_id):
++            return RetrievalResponse(
++                outcome=RetrievalOutcome.INVALID_REQUEST,
++                request=request,
++                results=[],
++                trace_id=trace_id,
++                message=(
++                    f"population_id '{request.population_id}' does not match "
++                    "the required 'PP-####' navigation format"
++                ),
++            )
++
++        artifacts = self._source.list_artifacts(request.population_id)
++
++        if artifacts is None:
++            return RetrievalResponse(
++                outcome=RetrievalOutcome.NOT_FOUND,
++                request=request,
++                results=[],
++                trace_id=trace_id,
++                message=f"population_id '{request.population_id}' was not found in the repository source",
++            )
++
++        if request.artifact_type is not None:
++            artifacts = [a for a in artifacts if a.artifact_type == request.artifact_type]
++
++        ordered = sorted(artifacts, key=lambda candidate: artifact_type_sort_key(candidate.artifact_type))
++
++        if not ordered:
++            return RetrievalResponse(
++                outcome=RetrievalOutcome.EMPTY,
++                request=request,
++                results=[],
++                trace_id=trace_id,
++                message="no matching artifacts were found for the given request",
++            )
++
++        return RetrievalResponse(
++            outcome=RetrievalOutcome.FOUND,
++            request=request,
++            results=ordered,
++            trace_id=trace_id,
++            message=None,
++        )
+diff --git a/08_Development/implementation/src/safe_medical_ai/retrieval/source.py b/08_Development/implementation/src/safe_medical_ai/retrieval/source.py
+new file mode 100644
+index 0000000..f96445e
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/retrieval/source.py
+@@ -0,0 +1,47 @@
++"""Repository-source abstraction for the Task #003 retrieval foundation.
++
++`RepositorySource` is the seam that keeps `RetrievalService` provider/engine
++agnostic. Later hybrid/semantic retrieval, or a real filesystem/database-backed
++implementation, can be introduced as additional `RepositorySource`
++implementations without changing the retrieval contract or the service.
++
++Only a deterministic, fixture-backed implementation
++(`InMemoryRepositorySource`) is provided by this task. A real
++repository-reading implementation is explicitly deferred — see
++`retrieval/README.md`.
++"""
++
++from __future__ import annotations
++
++from abc import ABC, abstractmethod
++
++from .models import RetrievalCandidate
++
++
++class RepositorySource(ABC):
++    """Abstraction over where controlled repository artifacts are located."""
++
++    @abstractmethod
++    def list_artifacts(self, population_id: str) -> list[RetrievalCandidate] | None:
++        """Return all known artifacts for `population_id`.
++
++        Returns `None` if `population_id` is not registered in this source
++        at all (distinct from an empty list, which means the population is
++        known but currently has no matching artifacts).
++        """
++        raise NotImplementedError
++
++
++class InMemoryRepositorySource(RepositorySource):
++    """Deterministic, fixture-backed `RepositorySource`.
++
++    Intended for tests and local development only. Populations/artifacts are
++    supplied explicitly by the caller; this class performs no filesystem or
++    network access and does not read the actual controlled repository.
++    """
++
++    def __init__(self, populations: dict[str, list[RetrievalCandidate]]):
++        self._populations = populations
++
++    def list_artifacts(self, population_id: str) -> list[RetrievalCandidate] | None:
++        return self._populations.get(population_id)
+diff --git a/08_Development/implementation/tests/test_retrieval_models.py b/08_Development/implementation/tests/test_retrieval_models.py
+new file mode 100644
+index 0000000..c520a99
+--- /dev/null
++++ b/08_Development/implementation/tests/test_retrieval_models.py
+@@ -0,0 +1,72 @@
++"""Baseline tests for the Task #003 retrieval domain models."""
++
++import pytest
++from pydantic import ValidationError
++
++from safe_medical_ai.models.output_contract import ValidationOutcome
++from safe_medical_ai.retrieval import (
++    ArtifactType,
++    RetrievalCandidate,
++    RetrievalOutcome,
++    RetrievalRequest,
++    artifact_type_sort_key,
++)
++
++
++def test_artifact_type_vocabulary():
++    assert {a.value for a in ArtifactType} == {
++        "CKO",
++        "KNOWLEDGE_PASSPORT",
++        "PRIMARY_EVIDENCE_PACKAGE",
++        "QA_REPORT",
++    }
++
++
++def test_artifact_type_sort_key_is_canonical_order():
++    ordered = sorted(ArtifactType, key=artifact_type_sort_key)
++    assert ordered == [
++        ArtifactType.CKO,
++        ArtifactType.KNOWLEDGE_PASSPORT,
++        ArtifactType.PRIMARY_EVIDENCE_PACKAGE,
++        ArtifactType.QA_REPORT,
++    ]
++
++
++def test_retrieval_outcome_vocabulary():
++    assert {o.value for o in RetrievalOutcome} == {
++        "FOUND",
++        "EMPTY",
++        "INVALID_REQUEST",
++        "NOT_FOUND",
++    }
++
++
++def test_retrieval_outcome_is_distinct_from_validation_outcome():
++    # Retrieval-result vocabulary must not be merged with or substitute for
++    # OUTPUT_CONTRACT's output-validation vocabulary.
++    assert RetrievalOutcome is not ValidationOutcome
++    assert set(RetrievalOutcome.__members__) & set(ValidationOutcome.__members__) == set()
++
++
++def test_retrieval_request_defaults_artifact_type_to_none():
++    request = RetrievalRequest(population_id="PP-0001")
++    assert request.artifact_type is None
++
++
++def test_retrieval_request_accepts_explicit_artifact_type():
++    request = RetrievalRequest(population_id="PP-0001", artifact_type=ArtifactType.QA_REPORT)
++    assert request.artifact_type == ArtifactType.QA_REPORT
++
++
++def test_retrieval_candidate_requires_core_fields():
++    with pytest.raises(ValidationError):
++        RetrievalCandidate()  # missing population_id / artifact_type / source_path
++
++
++def test_retrieval_candidate_title_is_optional():
++    candidate = RetrievalCandidate(
++        population_id="PP-0001",
++        artifact_type=ArtifactType.CKO,
++        source_path="03_Clinical_Knowledge/population/population_packages/PP-0001/01_CKO.md",
++    )
++    assert candidate.title is None
+diff --git a/08_Development/implementation/tests/test_retrieval_service.py b/08_Development/implementation/tests/test_retrieval_service.py
+new file mode 100644
+index 0000000..e01b64a
+--- /dev/null
++++ b/08_Development/implementation/tests/test_retrieval_service.py
+@@ -0,0 +1,152 @@
++"""Baseline tests for the Task #003 RetrievalService.
++
++Uses only deterministic, synthetic fixture data via InMemoryRepositorySource
++— no reading of the actual controlled 239-PP repository.
++"""
++
++import pytest
++
++from safe_medical_ai.retrieval import (
++    ArtifactType,
++    InMemoryRepositorySource,
++    RetrievalCandidate,
++    RetrievalOutcome,
++    RetrievalRequest,
++    RetrievalService,
++)
++from safe_medical_ai.trace import set_trace_id
++
++
++def _candidate(population_id: str, artifact_type: ArtifactType) -> RetrievalCandidate:
++    return RetrievalCandidate(
++        population_id=population_id,
++        artifact_type=artifact_type,
++        source_path=(
++            f"03_Clinical_Knowledge/population/population_packages/"
++            f"{population_id}/{artifact_type.value}.md"
++        ),
++        title=f"{population_id} {artifact_type.value} (fixture)",
++    )
++
++
++def _fixture_service() -> RetrievalService:
++    # Deliberately registered out of canonical order to prove sorting works.
++    source = InMemoryRepositorySource(
++        {
++            "PP-0001": [
++                _candidate("PP-0001", ArtifactType.QA_REPORT),
++                _candidate("PP-0001", ArtifactType.CKO),
++                _candidate("PP-0001", ArtifactType.PRIMARY_EVIDENCE_PACKAGE),
++                _candidate("PP-0001", ArtifactType.KNOWLEDGE_PASSPORT),
++            ],
++            "PP-0002": [
++                _candidate("PP-0002", ArtifactType.CKO),
++            ],
++            "PP-0003": [],
++        }
++    )
++    return RetrievalService(source)
++
++
++def test_valid_navigation_retrieval_returns_all_artifacts_in_canonical_order():
++    service = _fixture_service()
++    response = service.retrieve(RetrievalRequest(population_id="PP-0001"))
++
++    assert response.outcome == RetrievalOutcome.FOUND
++    assert [c.artifact_type for c in response.results] == [
++        ArtifactType.CKO,
++        ArtifactType.KNOWLEDGE_PASSPORT,
++        ArtifactType.PRIMARY_EVIDENCE_PACKAGE,
++        ArtifactType.QA_REPORT,
++    ]
++
++
++def test_hierarchical_filtering_by_artifact_type():
++    service = _fixture_service()
++    response = service.retrieve(
++        RetrievalRequest(population_id="PP-0001", artifact_type=ArtifactType.QA_REPORT)
++    )
++
++    assert response.outcome == RetrievalOutcome.FOUND
++    assert len(response.results) == 1
++    assert response.results[0].artifact_type == ArtifactType.QA_REPORT
++    assert response.results[0].population_id == "PP-0001"
++
++
++def test_provenance_is_preserved_on_every_result():
++    service = _fixture_service()
++    response = service.retrieve(RetrievalRequest(population_id="PP-0001"))
++
++    assert response.outcome == RetrievalOutcome.FOUND
++    for candidate in response.results:
++        assert candidate.population_id == "PP-0001"
++        assert candidate.source_path.startswith(
++            "03_Clinical_Knowledge/population/population_packages/PP-0001/"
++        )
++        assert candidate.artifact_type.value in candidate.source_path
++
++
++def test_result_ordering_is_deterministic_across_repeated_calls():
++    service = _fixture_service()
++    request = RetrievalRequest(population_id="PP-0001")
++
++    first = [c.source_path for c in service.retrieve(request).results]
++    for _ in range(5):
++        again = [c.source_path for c in service.retrieve(request).results]
++        assert again == first
++
++
++def test_empty_result_when_filter_matches_nothing():
++    service = _fixture_service()
++    # PP-0002 only has a CKO artifact registered.
++    response = service.retrieve(
++        RetrievalRequest(population_id="PP-0002", artifact_type=ArtifactType.QA_REPORT)
++    )
++
++    assert response.outcome == RetrievalOutcome.EMPTY
++    assert response.results == []
++    assert response.message is not None
++
++
++def test_empty_result_when_population_has_zero_registered_artifacts():
++    service = _fixture_service()
++    response = service.retrieve(RetrievalRequest(population_id="PP-0003"))
++
++    assert response.outcome == RetrievalOutcome.EMPTY
++    assert response.results == []
++
++
++@pytest.mark.parametrize("bad_population_id", ["PP-1", "pp-0001", "PP-abcd", "", "PP-00001", "0001"])
++def test_invalid_request_rejects_malformed_population_id(bad_population_id):
++    service = _fixture_service()
++    response = service.retrieve(RetrievalRequest(population_id=bad_population_id))
++
++    assert response.outcome == RetrievalOutcome.INVALID_REQUEST
++    assert response.results == []
++    assert response.message is not None
++
++
++def test_not_found_for_well_formed_but_unregistered_population_id():
++    service = _fixture_service()
++    response = service.retrieve(RetrievalRequest(population_id="PP-9999"))
++
++    assert response.outcome == RetrievalOutcome.NOT_FOUND
++    assert response.results == []
++    assert response.message is not None
++
++
++def test_response_echoes_the_original_request():
++    service = _fixture_service()
++    request = RetrievalRequest(population_id="PP-0001", artifact_type=ArtifactType.CKO)
++    response = service.retrieve(request)
++
++    assert response.request == request
++
++
++def test_trace_id_is_propagated_into_the_response():
++    service = _fixture_service()
++    set_trace_id("fixed-trace-for-retrieval-test")
++
++    response = service.retrieve(RetrievalRequest(population_id="PP-0001"))
++
++    assert response.trace_id == "fixed-trace-for-retrieval-test"
+-- 
+2.43.0
+

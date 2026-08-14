@@ -1,0 +1,524 @@
+diff --git a/08_Development/implementation/src/safe_medical_ai/retrieval/README.md b/08_Development/implementation/src/safe_medical_ai/retrieval/README.md
+index edee324..5456af3 100644
+--- a/08_Development/implementation/src/safe_medical_ai/retrieval/README.md
++++ b/08_Development/implementation/src/safe_medical_ai/retrieval/README.md
+@@ -1,4 +1,4 @@
+-# Retrieval Foundation (Task #003)
++# Retrieval Foundation (Task #003 + Task #004)
+ 
+ ## What this is
+ 
+@@ -41,10 +41,11 @@ foundation deliberately does not lock.
+   provider/engine agnostic. `list_artifacts(population_id)` returns the known
+   artifacts for a population, or `None` if the population is not registered
+   in the source at all.
+-- **`InMemoryRepositorySource`** — the only concrete `RepositorySource`
+-  shipped by this task: a deterministic, fixture-backed implementation for
+-  tests/local development. It performs no filesystem or network access and
+-  does not read the actual controlled repository.
++- **`InMemoryRepositorySource`** — deterministic, fixture-backed
++  `RepositorySource` for tests/local development. Performs no filesystem or
++  network access and does not read the actual controlled repository.
++- **`FilesystemRepositorySource`** (Task #004) — the first repository-backed
++  `RepositorySource`. See "Filesystem-backed source" below.
+ - **`RetrievalService`** — orchestrator; `retrieve(request) -> RetrievalResponse`.
+   Validates the request, resolves via the injected `RepositorySource`,
+   applies hierarchical filtering, and returns a deterministically ordered
+@@ -90,13 +91,52 @@ response = service.retrieve(RetrievalRequest(population_id="PP-0001"))
+ # response.outcome == RetrievalOutcome.FOUND
+ ```
+ 
++## Filesystem-backed source (Task #004)
++
++`FilesystemRepositorySource(source_root, *, provenance_prefix)` resolves
++population/PP artifact locations under an explicit, configured `source_root`
++directory boundary — e.g. it could be pointed at
++`03_Clinical_Knowledge/population/population_packages/` in a real
++deployment, or at a bounded temporary fixture tree in tests.
++
++It performs **no proactive, whole-repository ingestion or indexing**: each
++`list_artifacts(population_id)` call does one bounded, non-recursive lookup
++scoped to `source_root` and, at most, one resolved PP directory beneath it.
++
++Directory-name resolution (both conventions observed directly in the
++controlled repository or used by this task's own fixtures, not invented):
++1. **exact match** — a directory named exactly `population_id`;
++2. **prefix match** — a directory named `"{population_id} — {title}"`,
++   matching the real repository's `"PP-0001 — What_is_Cancer"` convention.
++   Zero or ambiguous (>1) prefix matches resolve to "not found" rather than
++   guessing.
++
++Within a resolved PP directory, only the four canonical Gold artifact
++filenames (`01_CKO.md` .. `04_QA_REPORT.md`, per
++`FREEZE GOLD POPULATION PACKAGE SPECIFICATION v1.1.md`) are recognized. A
++missing or malformed entry (e.g. a directory in place of a file) is skipped
++deterministically — never fabricated.
++
++`source_path` provenance is always `f"{provenance_prefix}/{pp_dir_name}/{filename}"`
++— repository-relative, never an absolute local filesystem path.
++
++A missing or unavailable `source_root` raises `RepositorySourceUnavailableError`
++(checked at construction and again on every `list_artifacts` call) rather
++than silently returning "not found" — a broken/missing source is a
++configuration failure, distinct from a population genuinely being absent.
++
++`list_artifacts` also independently re-validates `population_id` against the
++same navigation-format pattern `RetrievalService` uses, so a caller invoking
++`FilesystemRepositorySource` directly (bypassing `RetrievalService`) still
++cannot path-traverse outside `source_root`.
++
++Not wired into `api/main.py` or any default configuration by this task —
++using it in a running service remains a later, explicitly authorized step.
++
+ ## Deliberately deferred (not implemented by this task)
+ 
+-- A real filesystem- or database-backed `RepositorySource` that reads the
+-  actual controlled `03_Clinical_Knowledge/population/population_packages/`
+-  content. Only the fixture-backed `InMemoryRepositorySource` exists so far;
+-  autonomous ingestion of the real 239-PP repository is explicitly out of
+-  scope for Task #003.
++- Wiring `FilesystemRepositorySource` into the API layer or a default
++  production configuration.
+ - Embeddings, vector database/engine, semantic-search provider, hybrid
+   ranking.
+ - LLM provider/model integration.
+diff --git a/08_Development/implementation/src/safe_medical_ai/retrieval/__init__.py b/08_Development/implementation/src/safe_medical_ai/retrieval/__init__.py
+index 38acacb..cb8e92d 100644
+--- a/08_Development/implementation/src/safe_medical_ai/retrieval/__init__.py
++++ b/08_Development/implementation/src/safe_medical_ai/retrieval/__init__.py
+@@ -1,10 +1,17 @@
+-"""Task #003 controlled repository retrieval foundation.
++"""Controlled repository retrieval foundation (Task #003 + Task #004).
+ 
+ Public interface: `RetrievalRequest`, `RetrievalCandidate`, `RetrievalResponse`,
+ `RetrievalOutcome`, `ArtifactType`, `RepositorySource`, `InMemoryRepositorySource`,
+-`RetrievalService`. See `retrieval/README.md` for usage and deferred scope.
++`FilesystemRepositorySource`, `RepositorySourceError`,
++`RepositorySourceUnavailableError`, `RetrievalService`. See `retrieval/README.md`
++for usage and deferred scope.
+ """
+ 
++from .filesystem_source import (
++    FilesystemRepositorySource,
++    RepositorySourceError,
++    RepositorySourceUnavailableError,
++)
+ from .models import (
+     ArtifactType,
+     RetrievalCandidate,
+@@ -18,8 +25,11 @@ from .source import InMemoryRepositorySource, RepositorySource
+ 
+ __all__ = [
+     "ArtifactType",
++    "FilesystemRepositorySource",
+     "InMemoryRepositorySource",
+     "RepositorySource",
++    "RepositorySourceError",
++    "RepositorySourceUnavailableError",
+     "RetrievalCandidate",
+     "RetrievalOutcome",
+     "RetrievalRequest",
+diff --git a/08_Development/implementation/src/safe_medical_ai/retrieval/models.py b/08_Development/implementation/src/safe_medical_ai/retrieval/models.py
+index f3bed3a..1f5040e 100644
+--- a/08_Development/implementation/src/safe_medical_ai/retrieval/models.py
++++ b/08_Development/implementation/src/safe_medical_ai/retrieval/models.py
+@@ -10,10 +10,16 @@ redefined or overloaded here.
+ 
+ from __future__ import annotations
+ 
++import re
+ from enum import Enum
+ 
+ from pydantic import BaseModel, Field
+ 
++#: Navigation-key format shared by every navigation-first entry point
++#: (RetrievalService and any RepositorySource implementation) so validation
++#: stays identical wherever a population_id is accepted.
++POPULATION_ID_PATTERN = re.compile(r"^PP-\d{4}$")
++
+ 
+ class ArtifactType(str, Enum):
+     """The four canonical Gold Population Package artifacts.
+diff --git a/08_Development/implementation/src/safe_medical_ai/retrieval/service.py b/08_Development/implementation/src/safe_medical_ai/retrieval/service.py
+index 734c95c..1adc56d 100644
+--- a/08_Development/implementation/src/safe_medical_ai/retrieval/service.py
++++ b/08_Development/implementation/src/safe_medical_ai/retrieval/service.py
+@@ -20,14 +20,16 @@ does not require changing this class or its callers.
+ 
+ from __future__ import annotations
+ 
+-import re
+-
+ from ..trace import get_trace_id
+-from .models import RetrievalOutcome, RetrievalRequest, RetrievalResponse, artifact_type_sort_key
++from .models import (
++    POPULATION_ID_PATTERN,
++    RetrievalOutcome,
++    RetrievalRequest,
++    RetrievalResponse,
++    artifact_type_sort_key,
++)
+ from .source import RepositorySource
+ 
+-_POPULATION_ID_PATTERN = re.compile(r"^PP-\d{4}$")
+-
+ 
+ class RetrievalService:
+     """Deterministic navigation-first retrieval orchestrator."""
+@@ -38,7 +40,7 @@ class RetrievalService:
+     def retrieve(self, request: RetrievalRequest) -> RetrievalResponse:
+         trace_id = get_trace_id()
+ 
+-        if not _POPULATION_ID_PATTERN.match(request.population_id):
++        if not POPULATION_ID_PATTERN.match(request.population_id):
+             return RetrievalResponse(
+                 outcome=RetrievalOutcome.INVALID_REQUEST,
+                 request=request,
+diff --git a/08_Development/implementation/src/safe_medical_ai/retrieval/filesystem_source.py b/08_Development/implementation/src/safe_medical_ai/retrieval/filesystem_source.py
+new file mode 100644
+index 0000000..1f84561
+--- /dev/null
++++ b/08_Development/implementation/src/safe_medical_ai/retrieval/filesystem_source.py
+@@ -0,0 +1,126 @@
++"""Filesystem-backed `RepositorySource` (Task #004).
++
++Resolves population/PP artifact locations under an explicit, configured
++`source_root` boundary. This class performs no proactive, whole-repository
++ingestion or indexing: each `list_artifacts` call does a single, bounded,
++non-recursive lookup scoped to `source_root` and (at most) one resolved PP
++directory beneath it.
++
++Directory-naming compatibility (both observed in the controlled repository
++and used directly by this implementation, not invented):
++- exact match: a directory named exactly `population_id` (used by this
++  task's test fixtures for simplicity and determinism);
++- prefix match: a directory named `"{population_id} — {title}"`, matching
++  the naming convention actually used under
++  `03_Clinical_Knowledge/population/population_packages/` (e.g.
++  `"PP-0001 — What_is_Cancer"`).
++
++Canonical artifact filenames (`01_CKO.md` .. `04_QA_REPORT.md`) are the
++controlled Gold Population Package filenames defined by
++`FREEZE GOLD POPULATION PACKAGE SPECIFICATION v1.1.md` and observed
++directly in the repository; they are not invented by this module.
++"""
++
++from __future__ import annotations
++
++from pathlib import Path
++
++from .models import POPULATION_ID_PATTERN, ArtifactType, RetrievalCandidate
++from .source import RepositorySource
++
++_ARTIFACT_FILENAMES: dict[str, ArtifactType] = {
++    "01_CKO.md": ArtifactType.CKO,
++    "02_KNOWLEDGE_PASSPORT.md": ArtifactType.KNOWLEDGE_PASSPORT,
++    "03_PRIMARY_EVIDENCE_PACKAGE.md": ArtifactType.PRIMARY_EVIDENCE_PACKAGE,
++    "04_QA_REPORT.md": ArtifactType.QA_REPORT,
++}
++
++_TITLE_SEPARATOR = " — "
++
++
++class RepositorySourceError(Exception):
++    """Base class for RepositorySource configuration/availability failures."""
++
++
++class RepositorySourceUnavailableError(RepositorySourceError):
++    """Raised when the configured source root does not exist or is not a directory.
++
++    This is a configuration/availability failure, distinct from a retrieval
++    outcome (NOT_FOUND / EMPTY apply to a *population*, not to the source
++    itself being unusable) — it is raised rather than silently returning
++    `None`, so a missing source root is never mistaken for "population not
++    registered".
++    """
++
++
++class FilesystemRepositorySource(RepositorySource):
++    """`RepositorySource` backed by an explicit, configured directory boundary."""
++
++    def __init__(self, source_root: Path, *, provenance_prefix: str):
++        self._source_root = Path(source_root)
++        self._provenance_prefix = provenance_prefix.rstrip("/")
++        self._require_available()
++
++    def _require_available(self) -> None:
++        if not self._source_root.is_dir():
++            raise RepositorySourceUnavailableError(
++                f"repository source root '{self._source_root}' does not exist or is not a directory"
++            )
++
++    def list_artifacts(self, population_id: str) -> list[RetrievalCandidate] | None:
++        self._require_available()
++
++        # Defense in depth: never join an unsafe/malformed identifier onto a
++        # filesystem path, even if a caller bypasses RetrievalService's own
++        # navigation-format validation.
++        if not POPULATION_ID_PATTERN.match(population_id):
++            return None
++
++        population_dir = self._resolve_population_dir(population_id)
++        if population_dir is None:
++            return None
++
++        candidates: list[RetrievalCandidate] = []
++        title = self._extract_title(population_dir, population_id)
++
++        for filename, artifact_type in _ARTIFACT_FILENAMES.items():
++            artifact_path = population_dir / filename
++            if not artifact_path.is_file():
++                # Missing or malformed (e.g. a directory in its place)
++                # artifact: skip deterministically rather than fabricate it.
++                continue
++            candidates.append(
++                RetrievalCandidate(
++                    population_id=population_id,
++                    artifact_type=artifact_type,
++                    source_path=f"{self._provenance_prefix}/{population_dir.name}/{filename}",
++                    title=title,
++                )
++            )
++
++        return candidates
++
++    def _resolve_population_dir(self, population_id: str) -> Path | None:
++        exact = self._source_root / population_id
++        if exact.is_dir():
++            return exact
++
++        prefix = f"{population_id}{_TITLE_SEPARATOR}"
++        matches = [
++            entry
++            for entry in self._source_root.iterdir()
++            if entry.is_dir() and entry.name.startswith(prefix)
++        ]
++
++        # Zero or ambiguous (>1) matches are treated as unresolved rather
++        # than guessing which directory was intended.
++        if len(matches) == 1:
++            return matches[0]
++        return None
++
++    @staticmethod
++    def _extract_title(population_dir: Path, population_id: str) -> str | None:
++        if population_dir.name == population_id:
++            return None
++        _, _, remainder = population_dir.name.partition(_TITLE_SEPARATOR)
++        return remainder or None
+diff --git a/08_Development/implementation/tests/test_retrieval_filesystem_source.py b/08_Development/implementation/tests/test_retrieval_filesystem_source.py
+new file mode 100644
+index 0000000..ac54add
+--- /dev/null
++++ b/08_Development/implementation/tests/test_retrieval_filesystem_source.py
+@@ -0,0 +1,210 @@
++"""Tests for the Task #004 filesystem-backed RepositorySource.
++
++Uses only bounded pytest `tmp_path` fixture trees — never the real
++controlled repository — per the Task #004 testing boundary.
++"""
++
++import pytest
++
++from safe_medical_ai.retrieval import (
++    ArtifactType,
++    FilesystemRepositorySource,
++    RepositorySourceUnavailableError,
++    RetrievalOutcome,
++    RetrievalRequest,
++    RetrievalService,
++)
++
++_CANONICAL_FILES = (
++    "01_CKO.md",
++    "02_KNOWLEDGE_PASSPORT.md",
++    "03_PRIMARY_EVIDENCE_PACKAGE.md",
++    "04_QA_REPORT.md",
++)
++
++
++def _make_pp_dir(root, dirname: str, filenames=_CANONICAL_FILES) -> None:
++    pp_dir = root / dirname
++    pp_dir.mkdir(parents=True)
++    for filename in filenames:
++        (pp_dir / filename).write_text(f"fixture content for {dirname}/{filename}\n")
++    return pp_dir
++
++
++@pytest.fixture
++def population_packages_root(tmp_path):
++    root = tmp_path / "population_packages"
++    root.mkdir()
++
++    # Real-repository naming convention: "PP-#### — Title", all 4 artifacts.
++    _make_pp_dir(root, "PP-0001 — Sample_Title")
++
++    # Fixture-style exact-name directory, only a partial artifact set.
++    _make_pp_dir(root, "PP-0002", filenames=("01_CKO.md",))
++
++    # Registered population with zero artifacts inside.
++    (root / "PP-0003").mkdir()
++
++    # Malformed metadata: 01_CKO.md exists as a directory, not a file.
++    pp4 = _make_pp_dir(root, "PP-0004", filenames=("02_KNOWLEDGE_PASSPORT.md",))
++    (pp4 / "01_CKO.md").mkdir()
++
++    # Ambiguous: two directories both match the "PP-0005 — " prefix.
++    _make_pp_dir(root, "PP-0005 — TitleA", filenames=("01_CKO.md",))
++    _make_pp_dir(root, "PP-0005 — TitleB", filenames=("01_CKO.md",))
++
++    return root
++
++
++def _source(root):
++    return FilesystemRepositorySource(
++        root, provenance_prefix="03_Clinical_Knowledge/population/population_packages"
++    )
++
++
++# --- A. configured valid source root -> successful retrieval -------------
++
++
++def test_successful_retrieval_via_prefix_matched_directory(population_packages_root):
++    source = _source(population_packages_root)
++    service = RetrievalService(source)
++
++    response = service.retrieve(RetrievalRequest(population_id="PP-0001"))
++
++    assert response.outcome == RetrievalOutcome.FOUND
++    assert len(response.results) == 4
++    assert [c.artifact_type for c in response.results] == [
++        ArtifactType.CKO,
++        ArtifactType.KNOWLEDGE_PASSPORT,
++        ArtifactType.PRIMARY_EVIDENCE_PACKAGE,
++        ArtifactType.QA_REPORT,
++    ]
++
++
++def test_successful_retrieval_via_exact_name_directory(population_packages_root):
++    source = _source(population_packages_root)
++    response = source.list_artifacts("PP-0002")
++
++    assert response is not None
++    assert len(response) == 1
++    assert response[0].artifact_type == ArtifactType.CKO
++
++
++# --- F. provenance ---------------------------------------------------------
++
++
++def test_provenance_is_repository_relative_and_authoritative(population_packages_root):
++    source = _source(population_packages_root)
++    candidates = source.list_artifacts("PP-0001")
++
++    for candidate in candidates:
++        assert candidate.source_path.startswith(
++            "03_Clinical_Knowledge/population/population_packages/PP-0001 — Sample_Title/"
++        )
++        assert not candidate.source_path.startswith(str(population_packages_root))
++
++
++def test_title_is_extracted_from_prefix_matched_directory_name(population_packages_root):
++    source = _source(population_packages_root)
++    candidates = source.list_artifacts("PP-0001")
++
++    assert all(c.title == "Sample_Title" for c in candidates)
++
++
++def test_title_is_none_for_exact_name_directory_not_fabricated(population_packages_root):
++    source = _source(population_packages_root)
++    candidates = source.list_artifacts("PP-0002")
++
++    assert candidates[0].title is None
++
++
++# --- B. valid population, no matching artifacts -> EMPTY -------------------
++
++
++def test_empty_outcome_for_population_with_zero_artifacts(population_packages_root):
++    service = RetrievalService(_source(population_packages_root))
++    response = service.retrieve(RetrievalRequest(population_id="PP-0003"))
++
++    assert response.outcome == RetrievalOutcome.EMPTY
++    assert response.results == []
++
++
++def test_empty_outcome_when_artifact_type_filter_matches_nothing(population_packages_root):
++    service = RetrievalService(_source(population_packages_root))
++    response = service.retrieve(
++        RetrievalRequest(population_id="PP-0002", artifact_type=ArtifactType.QA_REPORT)
++    )
++
++    assert response.outcome == RetrievalOutcome.EMPTY
++
++
++# --- C. well-formed but unregistered/missing population -> NOT_FOUND -------
++
++
++def test_not_found_for_well_formed_unregistered_population(population_packages_root):
++    service = RetrievalService(_source(population_packages_root))
++    response = service.retrieve(RetrievalRequest(population_id="PP-9999"))
++
++    assert response.outcome == RetrievalOutcome.NOT_FOUND
++
++
++def test_not_found_for_ambiguous_prefix_match(population_packages_root):
++    # Two directories match "PP-0005 — " -> must not guess.
++    source = _source(population_packages_root)
++    assert source.list_artifacts("PP-0005") is None
++
++
++# --- D. missing/unavailable source root -> safe deterministic failure ------
++
++
++def test_missing_source_root_raises_at_construction(tmp_path):
++    missing_root = tmp_path / "does-not-exist"
++
++    with pytest.raises(RepositorySourceUnavailableError):
++        FilesystemRepositorySource(missing_root, provenance_prefix="irrelevant")
++
++
++def test_source_root_removed_after_construction_raises_deterministically(tmp_path):
++    root = tmp_path / "root"
++    root.mkdir()
++    source = FilesystemRepositorySource(root, provenance_prefix="irrelevant")
++
++    root.rmdir()
++
++    with pytest.raises(RepositorySourceUnavailableError):
++        source.list_artifacts("PP-0001")
++
++
++# --- E. malformed/missing artifact metadata: safe handling, no fabrication -
++
++
++def test_malformed_artifact_entry_is_skipped_not_fabricated(population_packages_root):
++    source = _source(population_packages_root)
++    candidates = source.list_artifacts("PP-0004")
++
++    # 01_CKO.md exists only as a directory (malformed); must be skipped.
++    assert [c.artifact_type for c in candidates] == [ArtifactType.KNOWLEDGE_PASSPORT]
++
++
++# --- G. deterministic ordering ---------------------------------------------
++
++
++def test_result_ordering_is_deterministic_across_repeated_calls(population_packages_root):
++    service = RetrievalService(_source(population_packages_root))
++    request = RetrievalRequest(population_id="PP-0001")
++
++    first = [c.source_path for c in service.retrieve(request).results]
++    for _ in range(5):
++        again = [c.source_path for c in service.retrieve(request).results]
++        assert again == first
++
++
++# --- H. path-traversal defense-in-depth (bypassing RetrievalService) -------
++
++
++@pytest.mark.parametrize("unsafe_id", ["../../etc", "PP-0001/../../etc", "PP-0001/subdir", ""])
++def test_unsafe_population_id_is_rejected_even_when_calling_source_directly(
++    population_packages_root, unsafe_id
++):
++    source = _source(population_packages_root)
++    assert source.list_artifacts(unsafe_id) is None
