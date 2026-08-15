@@ -36,7 +36,7 @@ PROJECT_STATUS.md
 All Architecture Documents
 
 Last Updated:
-2026-08-14
+2026-08-15
 
 ---
 
@@ -379,13 +379,25 @@ as one monolithic implementation.
 ### Objective
 
 Validate the implemented system.
+Phase 6 validation shall distinguish operational runnability from
+validation status.
+
+The implemented system may be operated for controlled research,
+development, and controlled evaluation purposes while formal validation
+is ongoing.
+
+Operational runnability does not constitute clinical validation or
+authorization for clinical decision-making.
 
 ### Expected Activities
 
-- Clinical expert review.
 - Technical validation.
 - Safety validation.
-- User testing.
+- Human-oversight / user evaluation.
+- Clinical validation where sufficient governed clinical source and
+  case basis exists.
+- Controlled exploratory system use for research/development feedback
+  and iterative improvement.
 
 ### Entry Gate
 
@@ -428,9 +440,18 @@ Phase 6 shall be completed when:
   refinement / re-validation;
 - Phase 6 acceptance and closure are approved by the Project Coordinator.
 
-A deferred validation domain shall not be represented as validated,
+- A deferred validation domain shall not be represented as validated,
 and incomplete clinical validation shall not be used to overclaim
 clinical deployment readiness.
+
+- Operational runnability may be established before Phase 6 closure.
+However, operational runnability shall not be treated as evidence of
+clinical validation or authorization for clinical decision-making.
+
+- Exploratory human use may support development feedback and iterative
+improvement, but formal VC-HUMAN validation requires the approved
+evaluator package, approved case set, controlled evaluation criteria,
+and evidence capture.
 
 ### Validation Coverage Principle
 
@@ -601,17 +622,6 @@ Post-integration Archive Correction
 
 d4c2994e390d746c37276b7d29d0ba57ebae0d53
 
-Current Strategic Priority
-
-Prepare Phase 5 implementation under the approved architecture and
-preserve the completed Phase 3 and Phase 4 baselines.
-
-Current Phase
-
-Phase 5 — Implementation
-
-Current Status
-
 Phase 3 — CLOSED
 Phase 4 — CLOSED
 Phase 5 — CLOSED / PASS
@@ -630,9 +640,10 @@ Canonical governance state synchronized at v12.0.
 
 Current Strategic Priority
 
-Execute Phase 6 — Validation under the approved Architecture / Scope
-Gate while preserving explicit limitations for validation domains that
-lack sufficient governed source material.
+Advance Phase 6 from the remotely verified execution checkpoint through
+the PR / Review Gate under the locked Architecture / Scope Gate while
+preserving explicit limitations for validation domains that lack
+sufficient governed source material.
 
 Current Phase
 
@@ -643,32 +654,50 @@ Current Status
 Phase 3 — CLOSED
 Phase 4 — CLOSED / PASS
 Phase 5 — CLOSED / PASS
-Phase 6 — VALIDATION / EXECUTION PREPARATION
+Phase 6 — VALIDATION / PR / REVIEW GATE
 
 Phase 6 Execution State
 
 Architecture / Scope Gate — LOCKED
-Decision Batches B01 → B19 — LOCKED
-Execution Preparation Step 2A — PASS / LOCKED
-Execution Preparation Step 2B — PASS WITH CONTROLLED SOURCE HOLD / LOCKED
+Decision Batches B01 → B21 — LOCKED
+Execution Campaign — COMPLETED / REMOTE VERIFIED — PASS
+Remote-Verified Commit — 261d3b22a18ebe293fffcf6f8c464fb988c4f652
+Current Gate — PR / REVIEW GATE
 
-Clinical Validation Limitation
+Validation Domains
 
-MISSING — REQUIRES SOURCE / CLINICAL INPUT
+VC-TECH — Pending Formal Validation
+VC-SAFE — Pending Formal Validation
+VC-HUMAN — Pending evaluator package + approved case set
+VC-SYS — Pending Formal Validation
+VC-CLIN — DEFERRED — MISSING — REQUIRES SOURCE / CLINICAL INPUT
 
-This limitation applies specifically to the incomplete gastric
-case-level clinical decision and safety validation coverage.
+Operational System State
 
-Other validatable Phase 6 domains may proceed under the approved
-validation scope.
+Operationally Runnable — Controlled Research / Development /
+Controlled Evaluation Use
+
+No-Overclaim Boundary
+
+Research / Development / Controlled Evaluation Only —
+Not Clinically Validated or Authorized for Clinical Decision-Making.
 
 Actual Validation Execution
 
-NOT YET STARTED
+NOT STARTED
+
+Execution Authorization
+
+NOT GRANTED
 
 Next Controlled Milestone
 
-Phase 6 — Validation Execution Readiness
+Phase 6 — PR / Review Gate
+
+Scope Review
+→ CI Review
+→ Governance Merge Decision
+→ MERGE GO / NO-GO
 
 ---
 
@@ -676,29 +705,18 @@ Phase 6 — Validation Execution Readiness
 
 ## Version 1.9
 
-Updated following Phase 6 Execution Preparation and governance
-clarification of the relationship between Phase 6 Validation and
-Phase 7 Continuous Evolution.
+Updated following Phase 6 B20/B21 execution-readiness clarification.
 
 Amendments include:
 
-- Clarified Phase 6 completion criteria to distinguish validated,
-  partially validated, and deferred validation domains.
-- Established explicit handling of validation gaps recorded as
-  MISSING — REQUIRES SOURCE / CLINICAL INPUT.
-- Clarified that incomplete clinical validation shall not be
-  represented as validated or used to overclaim clinical deployment
-  readiness.
-- Clarified that validatable technical, safety, human-oversight, and
-  system-level domains may proceed despite an explicitly documented
-  clinical-source limitation.
-- Renamed Phase 7 from Portfolio Packaging to Continuous Evolution.
-- Expanded Phase 7 objectives to include validation refinement,
-  knowledge expansion, governance evolution, regulatory adaptation,
-  organizational learning, and portfolio packaging.
-- Updated the Current Project Position to reflect Phase 6 execution
-  preparation.
-- Recorded the deferred gastric clinical validation limitation.
+- Distinguished operational runnability from formal validation status.
+- Explicitly established controlled research/development/controlled
+  evaluation use during ongoing Phase 6 validation.
+- Distinguished exploratory human testing from formal VC-HUMAN validation.
+- Clarified that operational runnability does not constitute clinical
+  validation or authorization for clinical decision-making.
+- Preserved the existing explicit clinical-source limitation and
+  deferred-validation model.
 
 No major architectural restructuring introduced.
 

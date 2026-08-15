@@ -1,16 +1,19 @@
-# PROJECT REPOSITORY MAP — END OF PHASE 4
+# PROJECT REPOSITORY MAP — PHASE 6 EXECUTION PREPARATION
 
 Version:
 1.5
 
 Repository State:
+Phase 3 CLOSED
+Phase 4 CLOSED / PASS
 Phase 5 CLOSED / PASS
+Phase 6 — VALIDATION / EXECUTION PREPARATION
 
-Next Phase:
-Phase 6 — Validation
+Next Controlled Step:
+Pre-Execution QA / Execution Readiness Artifact Assembly
 
 Last Updated:
-2026-08-14
+2026-08-15
 
 ---
 
@@ -465,57 +468,28 @@ Integration Verification.
 ---
 
 Phase 5 implementation state
-
-Task #002:
-Implementation Scaffolding — CLOSED / PASS
-
-Task #003:
-Retrieval Foundation — CLOSED / PASS
-
-Task #004:
-Filesystem Repository Source — CLOSED / PASS / REMOTE VERIFIED
-
-Task #005:
-Runtime Evidence Package — CLOSED / PASS
-
-Task #006:
-Runtime Integration / GenerationContext — CLOSED / PASS
-
-Task #007:
-Generation Boundary — CLOSED / PASS
-
-Task #008:
-Validation Boundary — CLOSED / PASS
-
-Task #009:
-Safety Enforcement Boundary — CLOSED / PASS
-
-Phase 5 Technical Verification:
-
-- Dedicated Task #009 tests — 47 PASS
-- Full regression — 287 PASS
-- Independent isolated verification — PASS
-- Scope verification — PASS
-- Technical Acceptance — PASS
-- Remote verification — PASS
-
-Phase 5 final commit:
-
-0f413c94ce3848c586fc3fd500706017c82d7533
-
-Phase 5 status:
+Phase 5 implementation state
 
 CLOSED / PASS
 
-Next phase:
+Completed:
+Task #002 → #009
 
-Phase 6 — Validation
+Final implementation baseline:
+0f413c94ce3848c586fc3fd500706017c82d7533
+
+Phase 5 is no longer the active execution phase.
+
+Phase 6 uses the Phase 5 implementation baseline as inherited
+implementation evidence, but the actual Phase 6 system-under-validation
+baseline must be independently frozen and verified before controlled
+validation execution.
 
 ---
 
 # 09_Evaluation/
 
-Đây là nơi tôi muốn đặc biệt nhấn mạnh khi bạn bước từ **Phase 3 → Phase 4**.
+
 
 ```text
 09_Evaluation/
@@ -580,6 +554,21 @@ PP vẫn nằm:
 ```
 
 `09_Evaluation/` chỉ lưu **evidence/results/records của verification**.
+
+Phase 6 Validation
+
+09_Evaluation/validation/
+├── phase6/
+│   ├── cases/
+│   ├── baselines/
+│   ├── evaluators/
+│   ├── evidence/
+│   ├── manifests/
+│   ├── coverage/
+│   ├── qa/
+│   └── clinical/
+│       └── PHASE_6_CLINICAL_DEFERRED_REGISTER_v1.0.md
+
 
 ---
 
@@ -919,18 +908,42 @@ d4c2994e390d746c37276b7d29d0ba57ebae0d53
 Current Repository State
 
 Phase 3 — CLOSED
-Phase 4 — CLOSED
-Phase 5 — ACTIVE
+Phase 4 — CLOSED / PASS
+Phase 5 — CLOSED / PASS
+Phase 6 — VALIDATION / PR / REVIEW GATE
 
-Phase 5 implementation is currently proceeding through controlled tasks.
+Phase 6 Governance State
 
-Completed:
-Task #002
-Task #003
-Task #004
+Architecture / Scope Gate — LOCKED
+Decision Batches B01 → B21 — LOCKED
 
-Next:
-Task #005 Architecture/Scope Gate
+Current Phase 6 State
+
+Execution Campaign — COMPLETED / REMOTE VERIFIED — PASS
+Remote-Verified Commit — 261d3b22a18ebe293fffcf6f8c464fb988c4f652
+Current Gate — PR / REVIEW GATE
+
+Current Validation Domains
+
+VC-TECH — Prepare for Pre-Execution QA
+VC-SAFE — Prepare for Pre-Execution QA
+VC-HUMAN — Pending evaluator package + approved case set
+VC-SYS — Prepare for Pre-Execution QA
+VC-CLIN — DEFERRED — MISSING — REQUIRES SOURCE / CLINICAL INPUT
+
+Operational Boundary
+
+Operationally Runnable — Controlled Research / Development /
+Controlled Evaluation Use
+
+No-Overclaim Boundary
+
+Research / Development / Controlled Evaluation Only —
+Not Clinically Validated or Authorized for Clinical Decision-Making.
+
+Next Controlled Step
+
+Pre-Execution QA / Execution Readiness Artifact Assembly
 
 ---
 ## Một nguyên tắc cuối cùng để dùng cho các thread sau
@@ -948,6 +961,30 @@ rồi mới quyết định nơi lưu.
 ---
 
 Amendment History
+
+## Version 1.5
+
+Updated following Phase 5 formal closure and Phase 6 B20/B21
+execution-readiness locking.
+
+Major updates include:
+
+- Repository state advanced to Phase 6 — Validation / Execution
+  Preparation.
+- Phase 5 implementation state corrected to CLOSED / PASS.
+- Stale Phase 5 active-task references removed from the current-state
+  representation.
+- Phase 6 validation/evaluation workspace structure introduced.
+- Phase 6 operational runnability boundary recorded.
+- Controlled Research / Development / Controlled Evaluation boundary
+  recorded.
+- Explicit distinction between exploratory human testing and formal
+  VC-HUMAN validation recorded.
+- VC-CLIN deferred clinical limitation recorded.
+- Next controlled step updated to Pre-Execution QA / Execution
+  Readiness Artifact Assembly.
+
+No change to the fundamental repository architecture.
 
 ## Version 1.4
 

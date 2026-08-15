@@ -347,17 +347,34 @@ Phase 6 — System Validation
 
 Current Execution Priority:
 
-Define and approve the Phase 6 Architecture / Scope Gate.
+Advance Phase 6 through the PR / Review Gate following the remotely
+verified completion of the Phase 6 execution campaign under the locked
+Architecture / Scope Gate and Decision Batches B01 → B21.
+
+Current gate:
+
+PR / Review Gate
+→ Scope Review
+→ CI Review
+→ Governance Merge Decision
+→ MERGE GO / NO-GO
 
 Immediate Validation Focus:
 
-- technical validation;
-- clinical validation;
-- safety validation;
-- human-oversight / user evaluation;
-- validation evidence;
-- acceptance criteria;
-- risk and defect disposition.
+- PR / Review Gate;
+- scope review of the remotely verified Phase 6 execution state;
+- CI review and regression verification;
+- governance merge decision;
+- preservation of the frozen execution baseline;
+- post-merge verification after governed merge;
+- controlled evaluation following successful merge;
+- formal validation of approved validation domains;
+- human-oversight / user evaluation under the approved evaluator package
+  and approved case set;
+- clinical validation only where sufficient governed clinical source and
+  case basis exists;
+- explicit disposition and deferred re-validation path for incomplete
+  clinical validation domains.
 
 Completed Strategic Milestones:
 
