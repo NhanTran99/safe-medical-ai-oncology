@@ -1,0 +1,1682 @@
+{
+  "source_manifest": "PHASE6_STAGE2_EVALUATION_CASE_MANIFEST_v1.0_FROZEN.xlsx",
+  "source_manifest_version": "1.0-FROZEN",
+  "source_manifest_sha256": "29463ad268f2b9718201758a14b1c464d8d47e2691a83fd3e6cf6dd93714c167",
+  "generated_by": "08_Development/implementation/scripts/generate_evaluation_case_manifest_projection.py",
+  "case_count": 239,
+  "cases": [
+    {
+      "case_id": "EC-0001",
+      "population_id": "PP-0001",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "What is Cancer?",
+      "controlled_question": "What is Cancer?"
+    },
+    {
+      "case_id": "EC-0002",
+      "population_id": "PP-0002",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "What is Gastric Cancer?",
+      "controlled_question": "What is Gastric Cancer?"
+    },
+    {
+      "case_id": "EC-0003",
+      "population_id": "PP-0003",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "What is Gastric Adenocarcinoma?",
+      "controlled_question": "What is Gastric Adenocarcinoma?"
+    },
+    {
+      "case_id": "EC-0004",
+      "population_id": "PP-0004",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "What Causes Gastric Adenocarcinoma (Causes & Risk Factors)",
+      "controlled_question": "What Causes Gastric Adenocarcinoma (Causes & Risk Factors)?"
+    },
+    {
+      "case_id": "EC-0005",
+      "population_id": "PP-0005",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "What Are the Symptoms of Gastric Adenocarcinoma",
+      "controlled_question": "What Are the Symptoms of Gastric Adenocarcinoma?"
+    },
+    {
+      "case_id": "EC-0006",
+      "population_id": "PP-0006",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "How Is Gastric Adenocarcinoma Diagnosed",
+      "controlled_question": "How Is Gastric Adenocarcinoma Diagnosed?"
+    },
+    {
+      "case_id": "EC-0007",
+      "population_id": "PP-0007",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Understanding Your Pathology Report",
+      "controlled_question": "Please explain Understanding Your Pathology Report."
+    },
+    {
+      "case_id": "EC-0008",
+      "population_id": "PP-0008",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Understanding Cancer Staging (TNM Staging)",
+      "controlled_question": "Please explain Understanding Cancer Staging (TNM Staging)."
+    },
+    {
+      "case_id": "EC-0009",
+      "population_id": "PP-0009",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Treatment Options for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Treatment Options for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0010",
+      "population_id": "PP-0010",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Surgery for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Surgery for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0011",
+      "population_id": "PP-0011",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Chemotherapy for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Chemotherapy for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0012",
+      "population_id": "PP-0012",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Radiotherapy for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Radiotherapy for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0013",
+      "population_id": "PP-0013",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Targeted Therapy for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Targeted Therapy for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0014",
+      "population_id": "PP-0014",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Immunotherapy for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Immunotherapy for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0015",
+      "population_id": "PP-0015",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Biomarker Testing for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Biomarker Testing for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0016",
+      "population_id": "PP-0016",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "HER2 Testing for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain HER2 Testing for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0017",
+      "population_id": "PP-0017",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PD-L1 Testing for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain PD-L1 Testing for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0018",
+      "population_id": "PP-0018",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "MSI-H / dMMR Testing for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain MSI-H / dMMR Testing for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0019",
+      "population_id": "PP-0019",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "CLDN18.2 Testing for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain CLDN18.2 Testing for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0020",
+      "population_id": "PP-0020",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "HER2-targeted Therapy for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain HER2-targeted Therapy for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0021",
+      "population_id": "PP-0021",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Trastuzumab for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Trastuzumab for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0022",
+      "population_id": "PP-0022",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Trastuzumab Deruxtecan (T-DXd) for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Trastuzumab Deruxtecan (T-DXd) for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0023",
+      "population_id": "PP-0023",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Antibody-Drug Conjugates (ADC) for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Antibody-Drug Conjugates (ADC) for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0024",
+      "population_id": "PP-0024",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "ADC Mechanism of Action for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain ADC Mechanism of Action for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0025",
+      "population_id": "PP-0025",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Payload Mechanism in Antibody-Drug Conjugates (ADC) for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Payload Mechanism in Antibody-Drug Conjugates (ADC) for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0026",
+      "population_id": "PP-0026",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Linker Technology in Antibody-Drug Conjugates (ADC) for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Linker Technology in Antibody-Drug Conjugates (ADC) for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0027",
+      "population_id": "PP-0027",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Bystander Effect in Antibody-Drug Conjugates (ADC) for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain Bystander Effect in Antibody-Drug Conjugates (ADC) for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0028",
+      "population_id": "PP-0028",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "ADC Toxicities for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain ADC Toxicities for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0029",
+      "population_id": "PP-0029",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Interstitial Lung Disease (ILD) Associated with ADC Therapy",
+      "controlled_question": "Please explain Interstitial Lung Disease (ILD) Associated with ADC Therapy."
+    },
+    {
+      "case_id": "EC-0030",
+      "population_id": "PP-0030",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Stomach Cancer Screening",
+      "controlled_question": "Please explain Stomach Cancer Screening."
+    },
+    {
+      "case_id": "EC-0031",
+      "population_id": "PP-0031",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Upper Endoscopy",
+      "controlled_question": "Please explain Upper Endoscopy."
+    },
+    {
+      "case_id": "EC-0032",
+      "population_id": "PP-0032",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Biopsy During Upper Endoscopy",
+      "controlled_question": "Please explain Biopsy During Upper Endoscopy."
+    },
+    {
+      "case_id": "EC-0033",
+      "population_id": "PP-0033",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Understanding Your Pathology Report",
+      "controlled_question": "Please explain Understanding Your Pathology Report."
+    },
+    {
+      "case_id": "EC-0034",
+      "population_id": "PP-0034",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "How to Read Your Pathology Report",
+      "controlled_question": "How to Read Your Pathology Report?"
+    },
+    {
+      "case_id": "EC-0035",
+      "population_id": "PP-0035",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Histologic Types of Gastric Cancer",
+      "controlled_question": "Please explain Histologic Types of Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0036",
+      "population_id": "PP-0036",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Lauren Classification",
+      "controlled_question": "Please explain Lauren Classification."
+    },
+    {
+      "case_id": "EC-0037",
+      "population_id": "PP-0037",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "WHO Classification of Gastric Cancer",
+      "controlled_question": "Please explain WHO Classification of Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0038",
+      "population_id": "PP-0038",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Tumor Grade",
+      "controlled_question": "Please explain Tumor Grade."
+    },
+    {
+      "case_id": "EC-0039",
+      "population_id": "PP-0039",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Histologic Differentiation",
+      "controlled_question": "Please explain Histologic Differentiation."
+    },
+    {
+      "case_id": "EC-0040",
+      "population_id": "PP-0040",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Prognostic Factors in Gastric Cancer",
+      "controlled_question": "Please explain Prognostic Factors in Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0041",
+      "population_id": "PP-0041",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Cancer Staging as a Prognostic Factor",
+      "controlled_question": "Please explain Cancer Staging as a Prognostic Factor."
+    },
+    {
+      "case_id": "EC-0042",
+      "population_id": "PP-0042",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "TNM Staging System",
+      "controlled_question": "Please explain TNM Staging System."
+    },
+    {
+      "case_id": "EC-0043",
+      "population_id": "PP-0043",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "T Category (Primary Tumor)",
+      "controlled_question": "Please explain T Category (Primary Tumor)."
+    },
+    {
+      "case_id": "EC-0044",
+      "population_id": "PP-0044",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "N Category (Regional Lymph Nodes)",
+      "controlled_question": "Please explain N Category (Regional Lymph Nodes)."
+    },
+    {
+      "case_id": "EC-0045",
+      "population_id": "PP-0045",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "M Category (Distant Metastasis)",
+      "controlled_question": "Please explain M Category (Distant Metastasis)."
+    },
+    {
+      "case_id": "EC-0046",
+      "population_id": "PP-0046",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "What Is Metastasis?",
+      "controlled_question": "What Is Metastasis?"
+    },
+    {
+      "case_id": "EC-0047",
+      "population_id": "PP-0047",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "How Does Gastric Cancer Spread?",
+      "controlled_question": "How Does Gastric Cancer Spread?"
+    },
+    {
+      "case_id": "EC-0048",
+      "population_id": "PP-0048",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Peritoneal Metastasis",
+      "controlled_question": "Please explain Peritoneal Metastasis."
+    },
+    {
+      "case_id": "EC-0049",
+      "population_id": "PP-0049",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Liver Metastasis",
+      "controlled_question": "Please explain Liver Metastasis."
+    },
+    {
+      "case_id": "EC-0050",
+      "population_id": "PP-0050",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Lung Metastasis",
+      "controlled_question": "Please explain Lung Metastasis."
+    },
+    {
+      "case_id": "EC-0051",
+      "population_id": "PP-0051",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Bone Metastasis",
+      "controlled_question": "Please explain Bone Metastasis."
+    },
+    {
+      "case_id": "EC-0052",
+      "population_id": "PP-0052",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Brain Metastasis",
+      "controlled_question": "Please explain Brain Metastasis."
+    },
+    {
+      "case_id": "EC-0053",
+      "population_id": "PP-0053",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Ovarian Metastasis (Krukenberg Tumor)",
+      "controlled_question": "Please explain Ovarian Metastasis (Krukenberg Tumor)."
+    },
+    {
+      "case_id": "EC-0054",
+      "population_id": "PP-0054",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Distant Lymph Node Metastasis",
+      "controlled_question": "Please explain Distant Lymph Node Metastasis."
+    },
+    {
+      "case_id": "EC-0055",
+      "population_id": "PP-0055",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Multiple Organ Metastases",
+      "controlled_question": "Please explain Multiple Organ Metastases."
+    },
+    {
+      "case_id": "EC-0056",
+      "population_id": "PP-0056",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Oligometastatic Disease",
+      "controlled_question": "Please explain Oligometastatic Disease."
+    },
+    {
+      "case_id": "EC-0057",
+      "population_id": "PP-0057",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Tumor Burden",
+      "controlled_question": "Please explain Tumor Burden."
+    },
+    {
+      "case_id": "EC-0058",
+      "population_id": "PP-0058",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "RECIST",
+      "controlled_question": "Please explain RECIST."
+    },
+    {
+      "case_id": "EC-0059",
+      "population_id": "PP-0059",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "RECIST 1.1",
+      "controlled_question": "Please explain RECIST 1.1."
+    },
+    {
+      "case_id": "EC-0060",
+      "population_id": "PP-0060",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Target Lesions",
+      "controlled_question": "Please explain Target Lesions."
+    },
+    {
+      "case_id": "EC-0061",
+      "population_id": "PP-0061",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Measurable Disease",
+      "controlled_question": "Please explain Measurable Disease."
+    },
+    {
+      "case_id": "EC-0062",
+      "population_id": "PP-0062",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Non-target Lesions",
+      "controlled_question": "Please explain Non-target Lesions."
+    },
+    {
+      "case_id": "EC-0063",
+      "population_id": "PP-0063",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Complete Response (CR)",
+      "controlled_question": "Please explain Complete Response (CR)."
+    },
+    {
+      "case_id": "EC-0064",
+      "population_id": "PP-0064",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Partial Response (PR)",
+      "controlled_question": "Please explain Partial Response (PR)."
+    },
+    {
+      "case_id": "EC-0065",
+      "population_id": "PP-0065",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Stable Disease (SD)",
+      "controlled_question": "Please explain Stable Disease (SD)."
+    },
+    {
+      "case_id": "EC-0066",
+      "population_id": "PP-0066",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Progressive Disease (PD)",
+      "controlled_question": "Please explain Progressive Disease (PD)."
+    },
+    {
+      "case_id": "EC-0067",
+      "population_id": "PP-0067",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Response Assessment Algorithm",
+      "controlled_question": "Please explain Response Assessment Algorithm."
+    },
+    {
+      "case_id": "EC-0068",
+      "population_id": "PP-0068",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Follow-up Imaging",
+      "controlled_question": "Please explain Follow-up Imaging."
+    },
+    {
+      "case_id": "EC-0069",
+      "population_id": "PP-0069",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "CT Scan",
+      "controlled_question": "Please explain CT Scan."
+    },
+    {
+      "case_id": "EC-0070",
+      "population_id": "PP-0070",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "MRI",
+      "controlled_question": "Please explain MRI."
+    },
+    {
+      "case_id": "EC-0071",
+      "population_id": "PP-0071",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PETCT",
+      "controlled_question": "Please explain PETCT."
+    },
+    {
+      "case_id": "EC-0072",
+      "population_id": "PP-0072",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Contrast Agent",
+      "controlled_question": "Please explain Contrast Agent."
+    },
+    {
+      "case_id": "EC-0073",
+      "population_id": "PP-0073",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Preparing for a CT Scan",
+      "controlled_question": "Please explain Preparing for a CT Scan."
+    },
+    {
+      "case_id": "EC-0074",
+      "population_id": "PP-0074",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "What Happens During a CT Scan",
+      "controlled_question": "What Happens During a CT Scan?"
+    },
+    {
+      "case_id": "EC-0075",
+      "population_id": "PP-0075",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "After a CT Scan",
+      "controlled_question": "Please explain After a CT Scan."
+    },
+    {
+      "case_id": "EC-0076",
+      "population_id": "PP-0076",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Understanding Your CT Report",
+      "controlled_question": "Please explain Understanding Your CT Report."
+    },
+    {
+      "case_id": "EC-0077",
+      "population_id": "PP-0077",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Common Terms in a CT Report",
+      "controlled_question": "Please explain Common Terms in a CT Report."
+    },
+    {
+      "case_id": "EC-0078",
+      "population_id": "PP-0078",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "What Does Lesion Mean",
+      "controlled_question": "What Does Lesion Mean?"
+    },
+    {
+      "case_id": "EC-0079",
+      "population_id": "PP-0079",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "What Does Mass Mean",
+      "controlled_question": "What Does Mass Mean?"
+    },
+    {
+      "case_id": "EC-0080",
+      "population_id": "PP-0080",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "What Does Nodule Mean",
+      "controlled_question": "What Does Nodule Mean?"
+    },
+    {
+      "case_id": "EC-0081",
+      "population_id": "PP-0081",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Difference Between Lesion, Mass and Nodule",
+      "controlled_question": "Please explain Difference Between Lesion, Mass and Nodule."
+    },
+    {
+      "case_id": "EC-0082",
+      "population_id": "PP-0082",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Benign Tumors",
+      "controlled_question": "Please explain Benign Tumors."
+    },
+    {
+      "case_id": "EC-0083",
+      "population_id": "PP-0083",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Malignant Tumors",
+      "controlled_question": "Please explain Malignant Tumors."
+    },
+    {
+      "case_id": "EC-0084",
+      "population_id": "PP-0084",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Benign vs Malignant Tumors",
+      "controlled_question": "Please explain Benign vs Malignant Tumors."
+    },
+    {
+      "case_id": "EC-0085",
+      "population_id": "PP-0085",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Biopsy",
+      "controlled_question": "Please explain Biopsy."
+    },
+    {
+      "case_id": "EC-0086",
+      "population_id": "PP-0086",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Pathology Report",
+      "controlled_question": "Please explain Pathology Report."
+    },
+    {
+      "case_id": "EC-0087",
+      "population_id": "PP-0087",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "How to Read a Pathology Report",
+      "controlled_question": "How to Read a Pathology Report?"
+    },
+    {
+      "case_id": "EC-0088",
+      "population_id": "PP-0088",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Understanding the Final Diagnosis Section",
+      "controlled_question": "Please explain Understanding the Final Diagnosis Section."
+    },
+    {
+      "case_id": "EC-0089",
+      "population_id": "PP-0089",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Tumor Grade",
+      "controlled_question": "Please explain Tumor Grade."
+    },
+    {
+      "case_id": "EC-0090",
+      "population_id": "PP-0090",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "TNM Staging",
+      "controlled_question": "Please explain TNM Staging."
+    },
+    {
+      "case_id": "EC-0091",
+      "population_id": "PP-0091",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Understanding Stage I\u2013IV",
+      "controlled_question": "Please explain Understanding Stage I\u2013IV."
+    },
+    {
+      "case_id": "EC-0092",
+      "population_id": "PP-0092",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Clinical Stage vs Pathological Stage",
+      "controlled_question": "Please explain Clinical Stage vs Pathological Stage."
+    },
+    {
+      "case_id": "EC-0093",
+      "population_id": "PP-0093",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Restaging",
+      "controlled_question": "Please explain Restaging."
+    },
+    {
+      "case_id": "EC-0094",
+      "population_id": "PP-0094",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Prognostic Stage",
+      "controlled_question": "Please explain Prognostic Stage."
+    },
+    {
+      "case_id": "EC-0095",
+      "population_id": "PP-0095",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Prognostic Factors",
+      "controlled_question": "Please explain Prognostic Factors."
+    },
+    {
+      "case_id": "EC-0096",
+      "population_id": "PP-0096",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Predictive Factors",
+      "controlled_question": "Please explain Predictive Factors."
+    },
+    {
+      "case_id": "EC-0097",
+      "population_id": "PP-0097",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Biomarker Testing",
+      "controlled_question": "Please explain Biomarker Testing."
+    },
+    {
+      "case_id": "EC-0098",
+      "population_id": "PP-0098",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Precision Medicine",
+      "controlled_question": "Please explain Precision Medicine."
+    },
+    {
+      "case_id": "EC-0099",
+      "population_id": "PP-0099",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Molecular Testing",
+      "controlled_question": "Please explain Molecular Testing."
+    },
+    {
+      "case_id": "EC-0100",
+      "population_id": "PP-0100",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Companion Diagnostics",
+      "controlled_question": "Please explain Companion Diagnostics."
+    },
+    {
+      "case_id": "EC-0101",
+      "population_id": "PP-0101",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Next-Generation Sequencing (NGS)",
+      "controlled_question": "Please explain Next-Generation Sequencing (NGS)."
+    },
+    {
+      "case_id": "EC-0102",
+      "population_id": "PP-0102",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Gene Panel Testing",
+      "controlled_question": "Please explain Gene Panel Testing."
+    },
+    {
+      "case_id": "EC-0103",
+      "population_id": "PP-0103",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Whole Genome Sequencing (WGS)",
+      "controlled_question": "Please explain Whole Genome Sequencing (WGS)."
+    },
+    {
+      "case_id": "EC-0104",
+      "population_id": "PP-0104",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Whole Exome Sequencing (WES)",
+      "controlled_question": "Please explain Whole Exome Sequencing (WES)."
+    },
+    {
+      "case_id": "EC-0105",
+      "population_id": "PP-0105",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "RNA Sequencing (RNA-seq)",
+      "controlled_question": "Please explain RNA Sequencing (RNA-seq)."
+    },
+    {
+      "case_id": "EC-0106",
+      "population_id": "PP-0106",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Fusion Gene Testing",
+      "controlled_question": "Please explain Fusion Gene Testing."
+    },
+    {
+      "case_id": "EC-0107",
+      "population_id": "PP-0107",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Variant Interpretation",
+      "controlled_question": "Please explain Variant Interpretation."
+    },
+    {
+      "case_id": "EC-0108",
+      "population_id": "PP-0108",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Variant Classification",
+      "controlled_question": "Please explain Variant Classification."
+    },
+    {
+      "case_id": "EC-0109",
+      "population_id": "PP-0109",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Pathogenic Variant",
+      "controlled_question": "Please explain Pathogenic Variant."
+    },
+    {
+      "case_id": "EC-0110",
+      "population_id": "PP-0110",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Likely Pathogenic Variant",
+      "controlled_question": "Please explain Likely Pathogenic Variant."
+    },
+    {
+      "case_id": "EC-0111",
+      "population_id": "PP-0111",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Variant of Uncertain Significance (VUS)",
+      "controlled_question": "Please explain Variant of Uncertain Significance (VUS)."
+    },
+    {
+      "case_id": "EC-0112",
+      "population_id": "PP-0112",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Likely Benign Variant",
+      "controlled_question": "Please explain Likely Benign Variant."
+    },
+    {
+      "case_id": "EC-0113",
+      "population_id": "PP-0113",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Benign Variant",
+      "controlled_question": "Please explain Benign Variant."
+    },
+    {
+      "case_id": "EC-0114",
+      "population_id": "PP-0114",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Variant Reclassification",
+      "controlled_question": "Please explain Variant Reclassification."
+    },
+    {
+      "case_id": "EC-0115",
+      "population_id": "PP-0115",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "ACMG Variant Classification Framework",
+      "controlled_question": "Please explain ACMG Variant Classification Framework."
+    },
+    {
+      "case_id": "EC-0116",
+      "population_id": "PP-0116",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "ACMG Evidence Codes",
+      "controlled_question": "Please explain ACMG Evidence Codes."
+    },
+    {
+      "case_id": "EC-0117",
+      "population_id": "PP-0117",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PVS1 (Very Strong Pathogenic Evidence)",
+      "controlled_question": "Please explain PVS1 (Very Strong Pathogenic Evidence)."
+    },
+    {
+      "case_id": "EC-0118",
+      "population_id": "PP-0118",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PS Evidence Codes (Strong Pathogenic Evidence)",
+      "controlled_question": "Please explain PS Evidence Codes (Strong Pathogenic Evidence)."
+    },
+    {
+      "case_id": "EC-0119",
+      "population_id": "PP-0119",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PS1 (Same Amino Acid Change as an Established Pathogenic Variant)",
+      "controlled_question": "Please explain PS1 (Same Amino Acid Change as an Established Pathogenic Variant)."
+    },
+    {
+      "case_id": "EC-0120",
+      "population_id": "PP-0120",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PS2 (De Novo Variant Evidence)",
+      "controlled_question": "Please explain PS2 (De Novo Variant Evidence)."
+    },
+    {
+      "case_id": "EC-0121",
+      "population_id": "PP-0121",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PS3 (Functional Studies Supporting a Damaging Effect)",
+      "controlled_question": "Please explain PS3 (Functional Studies Supporting a Damaging Effect)."
+    },
+    {
+      "case_id": "EC-0122",
+      "population_id": "PP-0122",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PS4 (Increased Prevalence in Affected Individuals)",
+      "controlled_question": "Please explain PS4 (Increased Prevalence in Affected Individuals)."
+    },
+    {
+      "case_id": "EC-0123",
+      "population_id": "PP-0123",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PM Evidence Codes (Moderate Pathogenic Evidence)",
+      "controlled_question": "Please explain PM Evidence Codes (Moderate Pathogenic Evidence)."
+    },
+    {
+      "case_id": "EC-0124",
+      "population_id": "PP-0124",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PM1 (Located in a Mutational Hotspot or Critical Functional Domain)",
+      "controlled_question": "Please explain PM1 (Located in a Mutational Hotspot or Critical Functional Domain)."
+    },
+    {
+      "case_id": "EC-0125",
+      "population_id": "PP-0125",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PM2 (Absent or Rare in Population Databases)",
+      "controlled_question": "Please explain PM2 (Absent or Rare in Population Databases)."
+    },
+    {
+      "case_id": "EC-0126",
+      "population_id": "PP-0126",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PM3 (Detected in Trans with a Pathogenic Variant for Recessive Disorders)",
+      "controlled_question": "Please explain PM3 (Detected in Trans with a Pathogenic Variant for Recessive Disorders)."
+    },
+    {
+      "case_id": "EC-0127",
+      "population_id": "PP-0127",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PM4 (Protein Length Changes Due to In-Frame Deletions/Insertions or Stop-Loss Variants)",
+      "controlled_question": "Please explain PM4 (Protein Length Changes Due to In-Frame Deletions/Insertions or Stop-Loss Variants)."
+    },
+    {
+      "case_id": "EC-0128",
+      "population_id": "PP-0128",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PM5 (Novel Missense Change at an Amino Acid Residue Where a Different Missense Change Is Pathogenic)",
+      "controlled_question": "Please explain PM5 (Novel Missense Change at an Amino Acid Residue Where a Different Missense Change Is Pathogenic)."
+    },
+    {
+      "case_id": "EC-0129",
+      "population_id": "PP-0129",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PM6 (Assumed De Novo, Without Confirmation of Parentage)",
+      "controlled_question": "Please explain PM6 (Assumed De Novo, Without Confirmation of Parentage)."
+    },
+    {
+      "case_id": "EC-0130",
+      "population_id": "PP-0130",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PP Evidence Codes (Supporting Pathogenic Evidence)",
+      "controlled_question": "Please explain PP Evidence Codes (Supporting Pathogenic Evidence)."
+    },
+    {
+      "case_id": "EC-0131",
+      "population_id": "PP-0131",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PP1 (Cosegregation with Disease in Multiple Affected Family Members)",
+      "controlled_question": "Please explain PP1 (Cosegregation with Disease in Multiple Affected Family Members)."
+    },
+    {
+      "case_id": "EC-0132",
+      "population_id": "PP-0132",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PP2 (Missense Variant in a Gene with Low Rate of Benign Missense Variation)",
+      "controlled_question": "Please explain PP2 (Missense Variant in a Gene with Low Rate of Benign Missense Variation)."
+    },
+    {
+      "case_id": "EC-0133",
+      "population_id": "PP-0133",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PP3 (Multiple Lines of Computational Evidence Support a Deleterious Effect)",
+      "controlled_question": "Please explain PP3 (Multiple Lines of Computational Evidence Support a Deleterious Effect)."
+    },
+    {
+      "case_id": "EC-0134",
+      "population_id": "PP-0134",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PP4 (Patient's Phenotype or Family History Highly Specific for a Disease with a Single Genetic Etiology)",
+      "controlled_question": "Please explain PP4 (Patient's Phenotype or Family History Highly Specific for a Disease with a Single Genetic Etiology)."
+    },
+    {
+      "case_id": "EC-0135",
+      "population_id": "PP-0135",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PP5 (Reputable Source Recently Reports Variant as Pathogenic)",
+      "controlled_question": "Please explain PP5 (Reputable Source Recently Reports Variant as Pathogenic)."
+    },
+    {
+      "case_id": "EC-0136",
+      "population_id": "PP-0136",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BP Evidence Codes (Supporting Benign Evidence)",
+      "controlled_question": "Please explain BP Evidence Codes (Supporting Benign Evidence)."
+    },
+    {
+      "case_id": "EC-0137",
+      "population_id": "PP-0137",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BP1 (Missense Variant in a Gene for Which Primarily Truncating Variants Are Known to Cause Disease)",
+      "controlled_question": "Please explain BP1 (Missense Variant in a Gene for Which Primarily Truncating Variants Are Known to Cause Disease)."
+    },
+    {
+      "case_id": "EC-0138",
+      "population_id": "PP-0138",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BP2 (Observed in Trans with a Pathogenic Variant for a Fully Penetrant Dominant Gene / Observed in Cis with a Pathogenic Variant)",
+      "controlled_question": "Please explain BP2 (Observed in Trans with a Pathogenic Variant for a Fully Penetrant Dominant Gene / Observed in Cis with a Pathogenic Variant)."
+    },
+    {
+      "case_id": "EC-0139",
+      "population_id": "PP-0139",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BP3 (In-frame Deletions/Insertions in a Repetitive Region Without a Known Function)",
+      "controlled_question": "Please explain BP3 (In-frame Deletions/Insertions in a Repetitive Region Without a Known Function)."
+    },
+    {
+      "case_id": "EC-0140",
+      "population_id": "PP-0140",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BP4 (Multiple Lines of Computational Evidence Suggest No Impact on Gene or Gene Product)",
+      "controlled_question": "Please explain BP4 (Multiple Lines of Computational Evidence Suggest No Impact on Gene or Gene Product)."
+    },
+    {
+      "case_id": "EC-0141",
+      "population_id": "PP-0141",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BP5 (Variant Found in a Case with an Alternate Molecular Basis for Disease)",
+      "controlled_question": "Please explain BP5 (Variant Found in a Case with an Alternate Molecular Basis for Disease)."
+    },
+    {
+      "case_id": "EC-0142",
+      "population_id": "PP-0142",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BP6 (Reputable Source Recently Reports Variant as Benign, but the Evidence Is Not Available for Independent Evaluation)",
+      "controlled_question": "Please explain BP6 (Reputable Source Recently Reports Variant as Benign, but the Evidence Is Not Available for Independent Evaluation)."
+    },
+    {
+      "case_id": "EC-0143",
+      "population_id": "PP-0143",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BP7 (Synonymous Variant with No Impact on Splicing or Gene Function)",
+      "controlled_question": "Please explain BP7 (Synonymous Variant with No Impact on Splicing or Gene Function)."
+    },
+    {
+      "case_id": "EC-0144",
+      "population_id": "PP-0144",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BS Evidence Codes (Strong Benign Evidence)",
+      "controlled_question": "Please explain BS Evidence Codes (Strong Benign Evidence)."
+    },
+    {
+      "case_id": "EC-0145",
+      "population_id": "PP-0145",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BS1 (Allele Frequency Is Greater Than Expected for a Disorder)",
+      "controlled_question": "Please explain BS1 (Allele Frequency Is Greater Than Expected for a Disorder)."
+    },
+    {
+      "case_id": "EC-0146",
+      "population_id": "PP-0146",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BS2 (Observed in Healthy Adults Without the Disease)",
+      "controlled_question": "Please explain BS2 (Observed in Healthy Adults Without the Disease)."
+    },
+    {
+      "case_id": "EC-0147",
+      "population_id": "PP-0147",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BS3 (Well-Established Functional Studies Show No Deleterious Effect on Gene or Gene Product)",
+      "controlled_question": "Please explain BS3 (Well-Established Functional Studies Show No Deleterious Effect on Gene or Gene Product)."
+    },
+    {
+      "case_id": "EC-0148",
+      "population_id": "PP-0148",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "BS4 (Lack of Co-segregation in Affected Members of a Family)",
+      "controlled_question": "Please explain BS4 (Lack of Co-segregation in Affected Members of a Family)."
+    },
+    {
+      "case_id": "EC-0149",
+      "population_id": "PP-0149",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Hereditary Diffuse Gastric Cancer (HDGC)",
+      "controlled_question": "Please explain Hereditary Diffuse Gastric Cancer (HDGC)."
+    },
+    {
+      "case_id": "EC-0150",
+      "population_id": "PP-0150",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "CDH1 Germline Pathogenic Variants",
+      "controlled_question": "Please explain CDH1 Germline Pathogenic Variants."
+    },
+    {
+      "case_id": "EC-0151",
+      "population_id": "PP-0151",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "CTNNA1 Germline Variants",
+      "controlled_question": "Please explain CTNNA1 Germline Variants."
+    },
+    {
+      "case_id": "EC-0152",
+      "population_id": "PP-0152",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "HDGC Genetic Testing Criteria",
+      "controlled_question": "Please explain HDGC Genetic Testing Criteria."
+    },
+    {
+      "case_id": "EC-0153",
+      "population_id": "PP-0153",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "HDGC-like Families",
+      "controlled_question": "Please explain HDGC-like Families."
+    },
+    {
+      "case_id": "EC-0154",
+      "population_id": "PP-0154",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Hereditary Gastric Cancer Risk Assessment",
+      "controlled_question": "Please explain Hereditary Gastric Cancer Risk Assessment."
+    },
+    {
+      "case_id": "EC-0155",
+      "population_id": "PP-0155",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Family history as a risk factor and Risk-information tool",
+      "controlled_question": "Please explain Family history as a risk factor and Risk-information tool."
+    },
+    {
+      "case_id": "EC-0156",
+      "population_id": "PP-0156",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Genetic Counseling for Hereditary Gastric Cancer",
+      "controlled_question": "Please explain Genetic Counseling for Hereditary Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0157",
+      "population_id": "PP-0157",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Cascade Testing in Hereditary Gastric Cancer",
+      "controlled_question": "Please explain Cascade Testing in Hereditary Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0158",
+      "population_id": "PP-0158",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Risk-Reducing Total Gastrectomy",
+      "controlled_question": "Please explain Risk-Reducing Total Gastrectomy."
+    },
+    {
+      "case_id": "EC-0159",
+      "population_id": "PP-0159",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Endoscopic Surveillance in HDGC",
+      "controlled_question": "Please explain Endoscopic Surveillance in HDGC."
+    },
+    {
+      "case_id": "EC-0160",
+      "population_id": "PP-0160",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "H. pylori and Gastric Cancer Prevention",
+      "controlled_question": "Please explain H. pylori and Gastric Cancer Prevention."
+    },
+    {
+      "case_id": "EC-0161",
+      "population_id": "PP-0161",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "H. pylori Eradication for Gastric Cancer Prevention",
+      "controlled_question": "Please explain H. pylori Eradication for Gastric Cancer Prevention."
+    },
+    {
+      "case_id": "EC-0162",
+      "population_id": "PP-0162",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Smoking and Gastric Cancer Risk",
+      "controlled_question": "Please explain Smoking and Gastric Cancer Risk."
+    },
+    {
+      "case_id": "EC-0163",
+      "population_id": "PP-0163",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Diet and Gastric Cancer Risk",
+      "controlled_question": "Please explain Diet and Gastric Cancer Risk."
+    },
+    {
+      "case_id": "EC-0164",
+      "population_id": "PP-0164",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Obesity and Gastric Cancer Risk",
+      "controlled_question": "Please explain Obesity and Gastric Cancer Risk."
+    },
+    {
+      "case_id": "EC-0165",
+      "population_id": "PP-0165",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Atrophic Gastritis and Gastric Cancer",
+      "controlled_question": "Please explain Atrophic Gastritis and Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0166",
+      "population_id": "PP-0166",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Intestinal Metaplasia and Gastric Cancer",
+      "controlled_question": "Please explain Intestinal Metaplasia and Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0167",
+      "population_id": "PP-0167",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Pernicious Anemia and Gastric Cancer",
+      "controlled_question": "Please explain Pernicious Anemia and Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0168",
+      "population_id": "PP-0168",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "EBV-associated Gastric Cancer + EBV Testing in Gastric Cancer",
+      "controlled_question": "Please explain EBV-associated Gastric Cancer + EBV Testing in Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0169",
+      "population_id": "PP-0169",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Gastric Adenomas and Cancer Risk",
+      "controlled_question": "Please explain Gastric Adenomas and Cancer Risk."
+    },
+    {
+      "case_id": "EC-0170",
+      "population_id": "PP-0170",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Gastric Cancer Screening in High-Risk Individuals",
+      "controlled_question": "Please explain Gastric Cancer Screening in High-Risk Individuals."
+    },
+    {
+      "case_id": "EC-0171",
+      "population_id": "PP-0171",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Endoscopic Screening for Gastric Cancer",
+      "controlled_question": "Please explain Endoscopic Screening for Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0172",
+      "population_id": "PP-0172",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Serum Pepsinogen Screening",
+      "controlled_question": "Please explain Serum Pepsinogen Screening."
+    },
+    {
+      "case_id": "EC-0173",
+      "population_id": "PP-0173",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Screening in High-Incidence Populations",
+      "controlled_question": "Please explain Screening in High-Incidence Populations."
+    },
+    {
+      "case_id": "EC-0174",
+      "population_id": "PP-0174",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Screening_Harms_and_False_Results",
+      "controlled_question": "Please explain Screening_Harms_and_False_Results."
+    },
+    {
+      "case_id": "EC-0175",
+      "population_id": "PP-0175",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Gastric Cancer Diagnostic Work-up",
+      "controlled_question": "Please explain Gastric Cancer Diagnostic Work-up."
+    },
+    {
+      "case_id": "EC-0176",
+      "population_id": "PP-0176",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Endoscopic Diagnosis of Gastric Cancer",
+      "controlled_question": "Please explain Endoscopic Diagnosis of Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0177",
+      "population_id": "PP-0177",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Endoscopic Biopsy Strategy",
+      "controlled_question": "Please explain Endoscopic Biopsy Strategy."
+    },
+    {
+      "case_id": "EC-0178",
+      "population_id": "PP-0178",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Histopathologic Classification",
+      "controlled_question": "Please explain Histopathologic Classification."
+    },
+    {
+      "case_id": "EC-0179",
+      "population_id": "PP-0179",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Lauren Classification",
+      "controlled_question": "Please explain Lauren Classification."
+    },
+    {
+      "case_id": "EC-0180",
+      "population_id": "PP-0180",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Gastric Cancer Molecular Classification",
+      "controlled_question": "Please explain Gastric Cancer Molecular Classification."
+    },
+    {
+      "case_id": "EC-0181",
+      "population_id": "PP-0181",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "HER2 Testing",
+      "controlled_question": "Please explain HER2 Testing."
+    },
+    {
+      "case_id": "EC-0182",
+      "population_id": "PP-0182",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "MSI/MMR Testing",
+      "controlled_question": "Please explain MSI/MMR Testing."
+    },
+    {
+      "case_id": "EC-0183",
+      "population_id": "PP-0183",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PD-L1 Testing",
+      "controlled_question": "Please explain PD-L1 Testing."
+    },
+    {
+      "case_id": "EC-0184",
+      "population_id": "PP-0184",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "CLDN18.2 Testing",
+      "controlled_question": "Please explain CLDN18.2 Testing."
+    },
+    {
+      "case_id": "EC-0185",
+      "population_id": "PP-0185",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Tumor Mutational Burden (TMB)",
+      "controlled_question": "Please explain Tumor Mutational Burden (TMB)."
+    },
+    {
+      "case_id": "EC-0186",
+      "population_id": "PP-0186",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "FGFR2 Testing",
+      "controlled_question": "Please explain FGFR2 Testing."
+    },
+    {
+      "case_id": "EC-0187",
+      "population_id": "PP-0187",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "NGS Biomarker Testing",
+      "controlled_question": "Please explain NGS Biomarker Testing."
+    },
+    {
+      "case_id": "EC-0188",
+      "population_id": "PP-0188",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Molecular Subtypes of Gastric Cancer",
+      "controlled_question": "Please explain Molecular Subtypes of Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0189",
+      "population_id": "PP-0189",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Genomic Test Results: How to Read a Molecular Report",
+      "controlled_question": "Please explain Genomic Test Results: How to Read a Molecular Report."
+    },
+    {
+      "case_id": "EC-0190",
+      "population_id": "PP-0190",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Biomarker-Directed Treatment Selection",
+      "controlled_question": "Please explain Biomarker-Directed Treatment Selection."
+    },
+    {
+      "case_id": "EC-0191",
+      "population_id": "PP-0191",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Biomarker Testing for Targeted Therapy",
+      "controlled_question": "Please explain Biomarker Testing for Targeted Therapy."
+    },
+    {
+      "case_id": "EC-0192",
+      "population_id": "PP-0192",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Biomarker Testing for Immunotherapy",
+      "controlled_question": "Please explain Biomarker Testing for Immunotherapy."
+    },
+    {
+      "case_id": "EC-0193",
+      "population_id": "PP-0193",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Endoscopic Resection for Early Gastric Cancer",
+      "controlled_question": "Please explain Endoscopic Resection for Early Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0194",
+      "population_id": "PP-0194",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "EMR",
+      "controlled_question": "Please explain EMR."
+    },
+    {
+      "case_id": "EC-0195",
+      "population_id": "PP-0195",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "ESD",
+      "controlled_question": "Please explain ESD."
+    },
+    {
+      "case_id": "EC-0196",
+      "population_id": "PP-0196",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Gastrectomy Principles",
+      "controlled_question": "Please explain Gastrectomy Principles."
+    },
+    {
+      "case_id": "EC-0197",
+      "population_id": "PP-0197",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Subtotal Gastrectomy",
+      "controlled_question": "Please explain Subtotal Gastrectomy."
+    },
+    {
+      "case_id": "EC-0198",
+      "population_id": "PP-0198",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Total Gastrectomy",
+      "controlled_question": "Please explain Total Gastrectomy."
+    },
+    {
+      "case_id": "EC-0199",
+      "population_id": "PP-0199",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Lymphadenectomy",
+      "controlled_question": "Please explain Lymphadenectomy."
+    },
+    {
+      "case_id": "EC-0200",
+      "population_id": "PP-0200",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "D1 Lymphadenectomy",
+      "controlled_question": "Please explain D1 Lymphadenectomy."
+    },
+    {
+      "case_id": "EC-0201",
+      "population_id": "PP-0201",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "D2 Lymphadenectomy",
+      "controlled_question": "Please explain D2 Lymphadenectomy."
+    },
+    {
+      "case_id": "EC-0202",
+      "population_id": "PP-0202",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Sentinel Lymph Node",
+      "controlled_question": "Please explain Sentinel Lymph Node."
+    },
+    {
+      "case_id": "EC-0203",
+      "population_id": "PP-0203",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Perioperative Chemotherapy",
+      "controlled_question": "Please explain Perioperative Chemotherapy."
+    },
+    {
+      "case_id": "EC-0204",
+      "population_id": "PP-0204",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "FLOT",
+      "controlled_question": "Please explain FLOT."
+    },
+    {
+      "case_id": "EC-0205",
+      "population_id": "PP-0205",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Adjuvant Therapy",
+      "controlled_question": "Please explain Adjuvant Therapy."
+    },
+    {
+      "case_id": "EC-0206",
+      "population_id": "PP-0206",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Neoadjuvant Therapy",
+      "controlled_question": "Please explain Neoadjuvant Therapy."
+    },
+    {
+      "case_id": "EC-0207",
+      "population_id": "PP-0207",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Chemoradiation",
+      "controlled_question": "Please explain Chemoradiation."
+    },
+    {
+      "case_id": "EC-0208",
+      "population_id": "PP-0208",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Palliative Systemic Therapy",
+      "controlled_question": "Please explain Palliative Systemic Therapy."
+    },
+    {
+      "case_id": "EC-0209",
+      "population_id": "PP-0209",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Targeted Therapy in Gastric Cancer",
+      "controlled_question": "Please explain Targeted Therapy in Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0210",
+      "population_id": "PP-0210",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "HER2-targeted Therapy for Gastric Adenocarcinoma",
+      "controlled_question": "Please explain HER2-targeted Therapy for Gastric Adenocarcinoma."
+    },
+    {
+      "case_id": "EC-0211",
+      "population_id": "PP-0211",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "CLDN18.2-targeted Therapy",
+      "controlled_question": "Please explain CLDN18.2-targeted Therapy."
+    },
+    {
+      "case_id": "EC-0212",
+      "population_id": "PP-0212",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Anti-angiogenic Therapy",
+      "controlled_question": "Please explain Anti-angiogenic Therapy."
+    },
+    {
+      "case_id": "EC-0213",
+      "population_id": "PP-0213",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Immunotherapy in Gastric Cancer",
+      "controlled_question": "Please explain Immunotherapy in Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0214",
+      "population_id": "PP-0214",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Immune Checkpoint Inhibitors",
+      "controlled_question": "Please explain Immune Checkpoint Inhibitors."
+    },
+    {
+      "case_id": "EC-0215",
+      "population_id": "PP-0215",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "MSI-H/dMMR Gastric Cancer and Immunotherapy",
+      "controlled_question": "Please explain MSI-H/dMMR Gastric Cancer and Immunotherapy."
+    },
+    {
+      "case_id": "EC-0216",
+      "population_id": "PP-0216",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "PD-L1-guided Immunotherapy",
+      "controlled_question": "Please explain PD-L1-guided Immunotherapy."
+    },
+    {
+      "case_id": "EC-0217",
+      "population_id": "PP-0217",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Response Assessment",
+      "controlled_question": "Please explain Response Assessment."
+    },
+    {
+      "case_id": "EC-0218",
+      "population_id": "PP-0218",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "RECIST-based Assessment",
+      "controlled_question": "Please explain RECIST-based Assessment."
+    },
+    {
+      "case_id": "EC-0219",
+      "population_id": "PP-0219",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Post-treatment Imaging",
+      "controlled_question": "Please explain Post-treatment Imaging."
+    },
+    {
+      "case_id": "EC-0220",
+      "population_id": "PP-0220",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Surveillance After Gastric Cancer Treatment",
+      "controlled_question": "Please explain Surveillance After Gastric Cancer Treatment."
+    },
+    {
+      "case_id": "EC-0221",
+      "population_id": "PP-0221",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Recurrence Detection",
+      "controlled_question": "Please explain Recurrence Detection."
+    },
+    {
+      "case_id": "EC-0222",
+      "population_id": "PP-0222",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Management of Recurrent Gastric Cancer",
+      "controlled_question": "Please explain Management of Recurrent Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0223",
+      "population_id": "PP-0223",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Metastatic Gastric Cancer",
+      "controlled_question": "Please explain Metastatic Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0224",
+      "population_id": "PP-0224",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Peritoneal Carcinomatosis",
+      "controlled_question": "Please explain Peritoneal Carcinomatosis."
+    },
+    {
+      "case_id": "EC-0225",
+      "population_id": "PP-0225",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Peritoneal Carcinoma as Only Disease",
+      "controlled_question": "Please explain Peritoneal Carcinoma as Only Disease."
+    },
+    {
+      "case_id": "EC-0226",
+      "population_id": "PP-0226",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "HIPEC",
+      "controlled_question": "Please explain HIPEC."
+    },
+    {
+      "case_id": "EC-0227",
+      "population_id": "PP-0227",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Palliative Care",
+      "controlled_question": "Please explain Palliative Care."
+    },
+    {
+      "case_id": "EC-0228",
+      "population_id": "PP-0228",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Best Supportive Care",
+      "controlled_question": "Please explain Best Supportive Care."
+    },
+    {
+      "case_id": "EC-0229",
+      "population_id": "PP-0229",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Gastric Cancer Survivorship",
+      "controlled_question": "Please explain Gastric Cancer Survivorship."
+    },
+    {
+      "case_id": "EC-0230",
+      "population_id": "PP-0230",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Long-term Follow-up",
+      "controlled_question": "Please explain Long-term Follow-up."
+    },
+    {
+      "case_id": "EC-0231",
+      "population_id": "PP-0231",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Treatment-related Toxicity and Supportive Care",
+      "controlled_question": "Please explain Treatment-related Toxicity and Supportive Care."
+    },
+    {
+      "case_id": "EC-0232",
+      "population_id": "PP-0232",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Multidisciplinary Management of Gastric Cancer",
+      "controlled_question": "Please explain Multidisciplinary Management of Gastric Cancer."
+    },
+    {
+      "case_id": "EC-0233",
+      "population_id": "PP-0233",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Clinical Genomics",
+      "controlled_question": "Please explain Clinical Genomics."
+    },
+    {
+      "case_id": "EC-0234",
+      "population_id": "PP-0234",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Germline Genetic Testing",
+      "controlled_question": "Please explain Germline Genetic Testing."
+    },
+    {
+      "case_id": "EC-0235",
+      "population_id": "PP-0235",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Somatic Genetic Testing",
+      "controlled_question": "Please explain Somatic Genetic Testing."
+    },
+    {
+      "case_id": "EC-0236",
+      "population_id": "PP-0236",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Liquid Biopsy",
+      "controlled_question": "Please explain Liquid Biopsy."
+    },
+    {
+      "case_id": "EC-0237",
+      "population_id": "PP-0237",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Circulating Tumor DNA (ctDNA)",
+      "controlled_question": "Please explain Circulating Tumor DNA (ctDNA)."
+    },
+    {
+      "case_id": "EC-0238",
+      "population_id": "PP-0238",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Molecular Tumor Profiling",
+      "controlled_question": "Please explain Molecular Tumor Profiling."
+    },
+    {
+      "case_id": "EC-0239",
+      "population_id": "PP-0239",
+      "expected_primary_artifact_type": "CKO",
+      "pp_title": "Genomic Biomarkers",
+      "controlled_question": "Please explain Genomic Biomarkers."
+    }
+  ]
+}

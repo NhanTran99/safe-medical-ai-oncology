@@ -14,6 +14,10 @@ dependencies = [
 dev = [
     "pytest>=8.0,<9.0",
     "httpx>=0.27,<1.0",
+    # Dev-time only: regenerating the Evaluation Case Manifest runtime
+    # projection (scripts/generate_evaluation_case_manifest_projection.py).
+    # Never imported by the FastAPI runtime.
+    "openpyxl>=3.1,<4.0",
 ]
 
 [build-system]

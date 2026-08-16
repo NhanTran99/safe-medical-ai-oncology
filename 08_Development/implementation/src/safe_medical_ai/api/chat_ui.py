@@ -1,4 +1,4 @@
-"""Controlled Chat UI shell — Phase 6 Stage 2 Track 1A/1B/1C.
+"""Controlled Chat UI shell — Phase 6 Stage 2 Track 1A/1B/1C/2.
 
 Browser-facing presentation boundary only: a static page (inline HTML/CSS/
 vanilla JS, no new frontend framework/dependency) that lets a user type and
@@ -6,27 +6,50 @@ submit a question, and issues a request toward the backend chat boundary.
 
 This module contains no clinical reasoning, no PP-selection/navigation
 logic, no retrieval, no CER invocation, and no safety/validation logic —
-those remain governed backend concerns. As of Track 1B, `main.py`'s
-`POST /chat/query` submits the question through the existing governed CER
-execution path (PP-0002 + CKO); this presentation module is unchanged by
-that integration and still only renders whatever `answer`/`status` it
-receives back.
+those remain governed backend concerns.
 
-Track 1C adds a client-only "Situation -> Topic -> Question starter"
-navigation aid (visual/UX presentation pattern selectively adapted from a
-legacy reference UI, per governance instructions — no calculation/model/
-clinical logic or React/Tailwind architecture was imported, only visual
-design language reimplemented in plain CSS). Selecting a question starter
-only populates `#question-input`; it never submits the form or calls
-`/chat/query` on its own. The existing `#chat-form`/`#question-input`/
-`#send-button`/`#chat-history`/`#chat-status` elements and their submit
-JS are unchanged from Track 1B, so the existing Track 1A/1B tests remain
-valid against this page unmodified.
+Track 2 change: the page is no longer a single static string. `/chat`
+(see `api/main.py`) renders it via `render_chat_page(catalog)`, embedding
+a controlled navigation catalog derived from the same manifest projection
+`EvaluationCaseResolver` uses (`case_id`, `pp_title`, `controlled_question`
+only — never used for resolution/execution here, only for non-clinical
+display labels and pre-approved question-starter text). The catalog is
+read fresh by `main.py` on every `/chat` request; this module never reads
+the projection file itself and never hardcodes any specific case.
+
+`selectedCaseId` starts `null` — no implicit default case (Track 2 RC-5):
+it becomes non-null only once the user explicitly selects a Topic, which
+sets it from real, approved manifest data, never a fixed literal. Editing
+the question text never changes it. Sending without a selected Topic is
+blocked client-side (and would also fail closed server-side via the
+required `case_id` field). Selecting a question starter only populates
+`#question-input`; it never submits the form or calls `/chat/query` on
+its own.
+
+Situation cards (Tier 1) are unchanged, generic orientation labels — the
+frozen manifest has no situation/category taxonomy, so a situation click
+reveals the same full, searchable Topic list (Tier 2) rather than a
+per-situation filtered subset; inventing such a filter would itself be a
+content-curation/categorization decision outside this task's scope (see
+`README.md` "Known simplification").
 """
 
 from __future__ import annotations
 
-CHAT_PAGE_HTML = """<!doctype html>
+import json
+
+
+def render_chat_page(catalog: list[dict[str, str]]) -> str:
+    """Render the Chat UI page, embedding `catalog` as the controlled
+    navigation data (Situation -> Topic -> Question Starter, Track 2)."""
+    # `</` inside title/question text (e.g. from manifest content) must not
+    # be able to terminate the embedding <script> tag early.
+    catalog_json = json.dumps(catalog).replace("</", "<\\/")
+
+    return _PAGE_TEMPLATE.replace("__CATALOG_JSON__", catalog_json)
+
+
+_PAGE_TEMPLATE = """<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -153,6 +176,7 @@ CHAT_PAGE_HTML = """<!doctype html>
     flex-direction: column;
     gap: 0.4rem;
   }
+  .topic-list { max-height: 220px; overflow-y: auto; }
 
   button.situation-card, button.topic-chip {
     text-align: left;
@@ -187,6 +211,23 @@ CHAT_PAGE_HTML = """<!doctype html>
     cursor: pointer;
   }
   button.starter-chip:hover { border-color: var(--blue-500); color: var(--blue-700); }
+
+  #topic-search {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.8rem;
+    border: 1px solid var(--slate-200);
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  #topic-search:focus { outline: 2px solid var(--blue-500); outline-offset: 1px; }
+
+  .selected-topic-note {
+    font-size: 0.72rem;
+    color: var(--slate-400);
+    margin: 0 0 0.6rem;
+  }
+  .selected-topic-note strong { color: var(--slate-600); }
 
   [hidden] { display: none !important; }
 
@@ -294,12 +335,14 @@ CHAT_PAGE_HTML = """<!doctype html>
       </div>
 
       <div id="topic-panel" class="panel-card" hidden>
-        <p class="panel-label">Topic</p>
+        <p class="panel-label">Approved Topic</p>
+        <input type="search" id="topic-search" placeholder="Search approved topics..." aria-label="Search approved topics">
         <div id="topic-list" class="topic-list"></div>
       </div>
 
       <div id="starter-panel" class="panel-card" hidden>
-        <p class="panel-label">Question Starters</p>
+        <p class="panel-label">Question Starter</p>
+        <p id="selected-topic-note" class="selected-topic-note"></p>
         <div id="starter-list" class="starter-list"></div>
       </div>
 
@@ -328,147 +371,40 @@ CHAT_PAGE_HTML = """<!doctype html>
 
   <script>
     (function () {
-      // --- Track 1C: client-only Situation -> Topic -> Question starter
-      // navigation content. Presentation/orientation data only: no
-      // clinical logic, no PP/navigation identifiers, no backend calls.
+      // --- Track 2: controlled navigation catalog, embedded server-side
+      // from the SAME manifest projection EvaluationCaseResolver uses
+      // (case_id/pp_title/controlled_question only). No PP/EC identifiers
+      // are ever displayed to the user -- only pp_title and
+      // controlled_question. Never hard-coded, never a second manifest.
+      var CATALOG = __CATALOG_JSON__;
+
+      // Deliberately generic orientation labels only -- the frozen manifest
+      // has no situation/category taxonomy, so every situation reveals the
+      // same full, searchable Topic list rather than an invented subset.
       var SITUATIONS = [
-        {
-          id: "diagnosed",
-          label: "I was recently diagnosed",
-          topics: [
-            {
-              id: "understanding-diagnosis",
-              label: "Understanding my diagnosis",
-              starters: [
-                "What does my diagnosis mean?",
-                "What are the different stages of gastric cancer?",
-                "What questions should I ask my doctor?"
-              ]
-            },
-            {
-              id: "next-steps",
-              label: "Next steps",
-              starters: [
-                "What typically happens after a diagnosis?",
-                "What kinds of tests might come next?"
-              ]
-            }
-          ]
-        },
-        {
-          id: "treatment",
-          label: "I'm receiving treatment",
-          topics: [
-            {
-              id: "side-effects",
-              label: "Side effects",
-              starters: [
-                "What side effects can this treatment cause?",
-                "What symptoms should I discuss with my care team?"
-              ]
-            },
-            {
-              id: "treatment-overview",
-              label: "Treatment overview",
-              starters: [
-                "What are common treatment approaches for gastric cancer?",
-                "How is treatment progress typically monitored?"
-              ]
-            }
-          ]
-        },
-        {
-          id: "surgery",
-          label: "I'm preparing for surgery",
-          topics: [
-            {
-              id: "before-surgery",
-              label: "Before surgery",
-              starters: [
-                "What kind of preparation is typically involved before surgery?",
-                "What questions should I ask before surgery?"
-              ]
-            },
-            {
-              id: "recovery",
-              label: "Recovery",
-              starters: [
-                "What does the recovery process typically look like?"
-              ]
-            }
-          ]
-        },
-        {
-          id: "recurrence",
-          label: "I'm concerned about recurrence",
-          topics: [
-            {
-              id: "understanding-recurrence",
-              label: "Understanding recurrence",
-              starters: [
-                "What does cancer recurrence mean?",
-                "What factors are associated with recurrence risk?"
-              ]
-            },
-            {
-              id: "monitoring",
-              label: "Monitoring",
-              starters: [
-                "What kind of follow-up monitoring is typically used?"
-              ]
-            }
-          ]
-        },
-        {
-          id: "follow-up",
-          label: "I'm in follow-up",
-          topics: [
-            {
-              id: "follow-up-care",
-              label: "Follow-up care",
-              starters: [
-                "What does typical follow-up care involve?",
-                "How often are follow-up visits usually scheduled?"
-              ]
-            },
-            {
-              id: "what-to-watch-for",
-              label: "What to watch for",
-              starters: [
-                "What symptoms should prompt me to contact my care team?"
-              ]
-            }
-          ]
-        },
-        {
-          id: "understand",
-          label: "I want to understand my cancer",
-          topics: [
-            {
-              id: "basics",
-              label: "Gastric cancer basics",
-              starters: [
-                "What is gastric cancer?",
-                "How does gastric cancer typically develop?"
-              ]
-            },
-            {
-              id: "risk-factors",
-              label: "Risk factors",
-              starters: [
-                "What are known risk factors for gastric cancer?"
-              ]
-            }
-          ]
-        }
+        "I was recently diagnosed",
+        "I'm receiving treatment",
+        "I'm preparing for surgery",
+        "I'm concerned about recurrence",
+        "I'm in follow-up",
+        "I want to understand my cancer"
       ];
 
       var situationList = document.getElementById("situation-list");
       var topicPanel = document.getElementById("topic-panel");
+      var topicSearch = document.getElementById("topic-search");
       var topicList = document.getElementById("topic-list");
       var starterPanel = document.getElementById("starter-panel");
       var starterList = document.getElementById("starter-list");
+      var selectedTopicNote = document.getElementById("selected-topic-note");
       var input = document.getElementById("question-input");
+
+      // The approved Evaluation Case identity currently associated with the
+      // question box. No implicit default: null until the user explicitly
+      // selects a Topic from the manifest-backed catalog (selectTopic()
+      // below is the only place that ever sets it). Editing the question
+      // text never changes it.
+      var selectedCaseId = null;
 
       function clearChildren(el) {
         while (el.firstChild) {
@@ -477,81 +413,79 @@ CHAT_PAGE_HTML = """<!doctype html>
       }
 
       function renderSituations() {
-        SITUATIONS.forEach(function (situation) {
+        SITUATIONS.forEach(function (label) {
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "situation-card";
-          btn.textContent = situation.label;
+          btn.textContent = label;
           btn.setAttribute("aria-pressed", "false");
           btn.addEventListener("click", function () {
-            selectSituation(situation);
+            Array.prototype.forEach.call(
+              situationList.querySelectorAll(".situation-card"),
+              function (el) { el.setAttribute("aria-pressed", el === btn ? "true" : "false"); }
+            );
+            topicPanel.hidden = false;
+            topicSearch.focus();
+            renderTopics("");
           });
           situationList.appendChild(btn);
         });
       }
 
-      function selectSituation(situation) {
-        Array.prototype.forEach.call(
-          situationList.querySelectorAll(".situation-card"),
-          function (el) {
-            el.setAttribute("aria-pressed", el.textContent === situation.label ? "true" : "false");
-          }
-        );
-
+      function renderTopics(filterText) {
         clearChildren(topicList);
-        starterPanel.hidden = true;
-        clearChildren(starterList);
-
-        situation.topics.forEach(function (topic) {
+        var needle = filterText.trim().toLowerCase();
+        CATALOG.filter(function (item) {
+          return !needle || item.pp_title.toLowerCase().indexOf(needle) !== -1;
+        }).forEach(function (item) {
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "topic-chip";
-          btn.textContent = topic.label;
-          btn.setAttribute("aria-pressed", "false");
+          btn.textContent = item.pp_title;
+          btn.setAttribute("aria-pressed", item.case_id === selectedCaseId ? "true" : "false");
           btn.addEventListener("click", function () {
-            selectTopic(topic, btn);
+            selectTopic(item, btn);
           });
           topicList.appendChild(btn);
         });
-
-        topicPanel.hidden = false;
       }
 
-      function selectTopic(topic, activeButton) {
+      function selectTopic(item, activeButton) {
+        selectedCaseId = item.case_id;
+
         Array.prototype.forEach.call(
           topicList.querySelectorAll(".topic-chip"),
-          function (el) {
-            el.setAttribute("aria-pressed", el === activeButton ? "true" : "false");
-          }
+          function (el) { el.setAttribute("aria-pressed", el === activeButton ? "true" : "false"); }
         );
 
-        clearChildren(starterList);
+        selectedTopicNote.textContent = "Selected topic: " + item.pp_title;
 
-        topic.starters.forEach(function (starterText) {
-          var btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "starter-chip";
-          btn.textContent = starterText;
-          // Populate the existing input only. Never submits the form and
-          // never calls /chat/query on its own -- the user must still
-          // press Send.
-          btn.addEventListener("click", function () {
-            input.value = starterText;
-            input.focus();
-          });
-          starterList.appendChild(btn);
+        clearChildren(starterList);
+        var starterBtn = document.createElement("button");
+        starterBtn.type = "button";
+        starterBtn.className = "starter-chip";
+        starterBtn.textContent = item.controlled_question;
+        // Populate the existing input only. Never submits the form and
+        // never calls /chat/query on its own -- the user must still press
+        // Send. Selecting a starter never changes selectedCaseId (it was
+        // already set by selectTopic above).
+        starterBtn.addEventListener("click", function () {
+          input.value = item.controlled_question;
+          input.focus();
         });
+        starterList.appendChild(starterBtn);
 
         starterPanel.hidden = false;
       }
 
-      renderSituations();
-    })();
+      topicSearch.addEventListener("input", function () {
+        renderTopics(topicSearch.value);
+      });
 
-    (function () {
-      // --- Track 1B chat submission wiring (unchanged) -------------------
+      renderSituations();
+
+      // --- chat submission wiring (shares selectedCaseId above) ---------
       var form = document.getElementById("chat-form");
-      var input = document.getElementById("question-input");
       var button = document.getElementById("send-button");
       var history = document.getElementById("chat-history");
       var status = document.getElementById("chat-status");
@@ -582,6 +516,10 @@ CHAT_PAGE_HTML = """<!doctype html>
         if (!question) {
           return;
         }
+        if (!selectedCaseId) {
+          setError("Please select an approved topic before sending.");
+          return;
+        }
 
         appendMessage("user", question);
         input.value = "";
@@ -590,7 +528,7 @@ CHAT_PAGE_HTML = """<!doctype html>
         fetch("/chat/query", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: question }),
+          body: JSON.stringify({ message: question, case_id: selectedCaseId }),
         })
           .then(function (response) {
             if (!response.ok) {

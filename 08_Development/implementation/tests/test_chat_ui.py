@@ -25,6 +25,15 @@ def test_chat_route_returns_an_html_page():
     assert "text/html" in response.headers["content-type"]
 
 
+def test_chat_route_disables_browser_caching():
+    # Defensive: a stale cached /chat response (with stale embedded catalog
+    # data or stale navigation JS) must never be served from browser cache
+    # across reloads/deploys.
+    response = client.get("/chat")
+
+    assert response.headers.get("cache-control") == "no-store"
+
+
 def test_chat_page_contains_the_question_input_and_submit_control():
     html = client.get("/chat").text
 
@@ -87,22 +96,67 @@ def test_chat_page_contains_two_tier_topic_and_question_starter_structure():
     html = client.get("/chat").text
 
     assert 'id="situation-list"' in html
+    assert 'id="topic-panel"' in html
     assert 'id="topic-list"' in html
+    assert 'id="topic-search"' in html
+    assert 'id="starter-panel"' in html
     assert 'id="starter-list"' in html
-    # At least one concrete topic and one concrete question starter from
-    # the navigation data.
-    assert "Side effects" in html
-    assert "What side effects can this treatment cause?" in html
+
+
+def test_chat_page_navigation_catalog_is_derived_from_the_real_manifest_projection():
+    # Track 2: the catalog embedded in the page is NOT a small hand-written
+    # list -- it is the real 239-case manifest projection (case_id,
+    # pp_title, controlled_question), the same one EvaluationCaseResolver
+    # consumes for execution.
+    html = client.get("/chat").text
+
+    assert '"case_id": "EC-0001"' in html or '"case_id":"EC-0001"' in html
+    assert '"case_id": "EC-0239"' in html or '"case_id":"EC-0239"' in html
+    assert html.count('"case_id"') >= 239
 
 
 def test_chat_page_question_starter_populates_input_without_auto_submitting():
     html = client.get("/chat").text
 
-    # The starter-chip click handler sets the existing input's value...
-    assert "input.value = starterText" in html
+    # The starter-chip click handler sets the existing input's value from
+    # the selected topic's real controlled_question...
+    assert "input.value = item.controlled_question" in html
     # ...and nothing on the page ever programmatically submits the form or
     # calls /chat/query outside the existing Send-button submit handler.
     assert ".submit(" not in html
+
+
+def test_chat_page_selecting_a_topic_sets_case_identity_independent_of_editing():
+    html = client.get("/chat").text
+
+    # selectedCaseId is set only by selectTopic(); editing the textarea
+    # never touches it.
+    assert "selectedCaseId = item.case_id" in html
+
+
+def test_chat_page_has_no_implicit_default_evaluation_case():
+    # RC-5: no implicit default case on page load -- selectedCaseId starts
+    # null and only becomes non-null via explicit Topic selection. Send is
+    # blocked (and never reaches /chat/query) until a Topic is chosen.
+    html = client.get("/chat").text
+
+    assert "var selectedCaseId = null;" in html
+    assert "CATALOG[0].case_id" not in html
+    assert "CATALOG.length > 0 ? CATALOG[0]" not in html
+    assert "if (!selectedCaseId)" in html
+    assert "Please select an approved topic before sending." in html
+
+
+def test_chat_ui_module_source_never_hard_codes_a_specific_case_literal():
+    # RC-1 static check: no EC-XXXX literal anywhere in the UI module's
+    # own source (as opposed to data flowing through it at runtime).
+    import inspect
+
+    from safe_medical_ai.api import chat_ui as chat_ui_module
+
+    source = inspect.getsource(chat_ui_module)
+    assert "EC-0002" not in source
+    assert "EC-0001" not in source
 
 
 def test_chat_page_preserves_existing_form_input_and_send_ids():
@@ -120,33 +174,40 @@ def test_chat_page_shows_research_controlled_evaluation_identity_and_disclaimer(
     assert "Not clinically validated. Not for clinical decision-making." in html
 
 
-# --- /chat/query: input contract (unchanged by Track 1B) -------------------
+# --- /chat/query: input contract (Track 2: case_id is now required) -------
 
 
 def test_chat_query_rejects_a_blank_message():
-    response = client.post("/chat/query", json={"message": ""})
+    response = client.post("/chat/query", json={"message": "", "case_id": "EC-0002"})
 
     assert response.status_code == 422
 
 
 def test_chat_query_rejects_a_missing_message_field():
-    response = client.post("/chat/query", json={})
+    response = client.post("/chat/query", json={"case_id": "EC-0002"})
 
     assert response.status_code == 422
 
 
-# --- /chat/query: Track 1B reaches the real governed CER execution path ----
+def test_chat_query_rejects_a_missing_case_id_field():
+    # RC-1: there is no default case_id -- omitting it is a client error,
+    # never a silent fallback to any specific case.
+    response = client.post("/chat/query", json={"message": "What is gastric cancer?"})
+
+    assert response.status_code == 422
+
+
+# --- /chat/query: reaches the real governed CER execution path -------------
 
 
 def test_chat_query_reaches_the_real_governed_cer_execution_path():
-    response = client.post("/chat/query", json={"message": "What is gastric cancer?"})
+    response = client.post("/chat/query", json={"message": "What is gastric cancer?", "case_id": "EC-0002"})
 
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == "COMPLETED"
     assert isinstance(body["answer"], str) and body["answer"]
     assert "placeholder" not in body["answer"].lower()
-    assert "Track 1B" not in body["answer"]
 
 
 def test_chat_query_answer_is_the_governed_generated_content():
@@ -154,7 +215,7 @@ def test_chat_query_answer_is_the_governed_generated_content():
     # returns this fixed, non-clinical text -- proving the real generation
     # stage of the existing CER path produced the answer, not new logic
     # invented in the chat endpoint.
-    response = client.post("/chat/query", json={"message": "What is gastric cancer?"})
+    response = client.post("/chat/query", json={"message": "What is gastric cancer?", "case_id": "EC-0002"})
 
     body = response.json()
     assert body["answer"] == "Controlled Evaluation deterministic response. Not for clinical decision-making."
@@ -163,9 +224,9 @@ def test_chat_query_answer_is_the_governed_generated_content():
 def test_chat_query_status_matches_the_same_outcome_as_cer_evaluate_for_the_same_question():
     question = "What is gastric cancer?"
 
-    chat_response = client.post("/chat/query", json={"message": question}).json()
+    chat_response = client.post("/chat/query", json={"message": question, "case_id": "EC-0002"}).json()
     cer_response = client.post(
-        "/cer/evaluate", json={"request_text": question, "population_id": "PP-0002"}
+        "/cer/evaluate", json={"request_text": question, "case_id": "EC-0002"}
     ).json()
 
     assert chat_response["status"] == cer_response["outcome"] == "COMPLETED"
@@ -173,13 +234,32 @@ def test_chat_query_status_matches_the_same_outcome_as_cer_evaluate_for_the_same
     assert cer_response["validation"] == "VALID"
 
 
-def test_chat_query_ignores_a_population_id_field_and_still_executes_pp_0002():
-    # ChatQueryRequest has no population/PP field; an extra field from a
-    # client is silently dropped by Pydantic and never reaches the CER
+def test_chat_query_executes_a_non_pp_0002_case():
+    # RC-1: chat_query is no longer fixed to EC-0002/PP-0002 -- proves the
+    # exact user-facing endpoint the browser calls can reach a different
+    # approved case end-to-end.
+    response = client.post("/chat/query", json={"message": "test question", "case_id": "EC-0003"})
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "COMPLETED"
+
+
+def test_chat_query_unknown_case_fails_closed_via_the_chat_endpoint():
+    response = client.post("/chat/query", json={"message": "test question", "case_id": "EC-9999"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "UNKNOWN_CASE"
+
+
+def test_chat_query_ignores_an_extraneous_population_id_field():
+    # ChatQueryRequest has no population field at all; an extra field from
+    # a client is silently dropped by Pydantic and never reaches the CER
     # request. An invalid population_id here would break retrieval if it
-    # were honored -- COMPLETED proves it was not.
+    # were somehow honored -- COMPLETED proves it was not.
     response = client.post(
-        "/chat/query", json={"message": "What is gastric cancer?", "population_id": "PP-9999"}
+        "/chat/query",
+        json={"message": "What is gastric cancer?", "case_id": "EC-0002", "population_id": "PP-9999"},
     )
 
     assert response.status_code == 200
@@ -187,11 +267,13 @@ def test_chat_query_ignores_a_population_id_field_and_still_executes_pp_0002():
 
 
 def test_chat_query_response_is_deterministic_and_independent_of_input_content():
-    # The existing CER path (retrieval keyed only on the fixed PP-0002/CKO
-    # target, and the deterministic provider) does not branch on question
-    # content, so this Track 1A invariant still holds under real execution.
-    first = client.post("/chat/query", json={"message": "question A"}).json()
-    second = client.post("/chat/query", json={"message": "a completely different question B"}).json()
+    # The existing CER path (retrieval keyed only on the selected case's
+    # fixed CKO target, and the deterministic provider) does not branch on
+    # question content, so this invariant still holds under real execution.
+    first = client.post("/chat/query", json={"message": "question A", "case_id": "EC-0002"}).json()
+    second = client.post(
+        "/chat/query", json={"message": "a completely different question B", "case_id": "EC-0002"}
+    ).json()
 
     assert first == second
 
@@ -208,7 +290,7 @@ def test_existing_cer_evaluate_route_remains_registered_and_unchanged():
 
 def test_existing_cer_evaluate_endpoint_behavior_is_unaffected_by_chat_integration():
     response = client.post(
-        "/cer/evaluate", json={"request_text": "What is gastric cancer?", "population_id": "PP-0002"}
+        "/cer/evaluate", json={"request_text": "What is gastric cancer?", "case_id": "EC-0002"}
     )
 
     assert response.status_code == 200

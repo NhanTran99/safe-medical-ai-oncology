@@ -7,11 +7,13 @@ client = TestClient(app)
 
 
 def test_controlled_cer_endpoint_completes():
+    # Track 2: the endpoint now takes an approved case_id (EC-0002 ->
+    # PP-0002), not a client-supplied population_id.
     response = client.post(
         "/cer/evaluate",
         json={
             "request_text": "What is gastric cancer?",
-            "population_id": "PP-0002",
+            "case_id": "EC-0002",
         },
     )
 
