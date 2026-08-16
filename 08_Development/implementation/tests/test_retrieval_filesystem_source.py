@@ -27,7 +27,7 @@ def _make_pp_dir(root, dirname: str, filenames=_CANONICAL_FILES) -> None:
     pp_dir = root / dirname
     pp_dir.mkdir(parents=True)
     for filename in filenames:
-        (pp_dir / filename).write_text(f"fixture content for {dirname}/{filename}\n")
+        (pp_dir / filename).write_text(f"fixture content for {dirname}/{filename}\n", encoding="utf-8",)
     return pp_dir
 
 
@@ -116,6 +116,18 @@ def test_title_is_none_for_exact_name_directory_not_fabricated(population_packag
     candidates = source.list_artifacts("PP-0002")
 
     assert candidates[0].title is None
+
+
+# --- content (Track 3 BATCH 01) ---------------------------------------------
+
+
+def test_content_is_loaded_from_the_actual_artifact_file(population_packages_root):
+    source = _source(population_packages_root)
+    candidates = source.list_artifacts("PP-0001")
+
+    for candidate in candidates:
+        filename = candidate.source_path.rsplit("/", 1)[-1]
+        assert candidate.content == f"fixture content for PP-0001 — Sample_Title/{filename}\n"
 
 
 # --- B. valid population, no matching artifacts -> EMPTY -------------------

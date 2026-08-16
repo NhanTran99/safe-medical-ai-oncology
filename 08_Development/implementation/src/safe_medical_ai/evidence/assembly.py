@@ -151,6 +151,7 @@ def assemble_runtime_evidence_package(
                 source_path=candidate.source_path,
                 title=candidate.title,
                 provenance=item_provenance,
+                content=candidate.content,
             )
         )
 

@@ -19,6 +19,7 @@ from ..cer import CERRequest, CERRuntime
 from ..evidence import EvidenceItemProvenance, RTEPAssemblyContext
 from ..integration import RuntimeConstraints
 from ..llm.base import LLMAdapter
+from ..llm.openai_provider import OpenAIProvider
 from ..models.output_contract import NavigationContextPlaceholder
 from ..retrieval import FilesystemRepositorySource, RetrievalRequest
 from ..safety import RiskClass, SafetyInput
@@ -196,6 +197,20 @@ class DeterministicLocalProvider(LLMAdapter):
         )
 
 
+def _select_provider() -> LLMAdapter:
+    """Minimal provider selection (Track 3 BATCH 02).
+
+    The OpenAI provider is used only when `settings.openai_api_key` is
+    explicitly configured; otherwise `DeterministicLocalProvider` is used
+    unchanged, so offline/no-key development and the existing test suite
+    remain unaffected by default. This is a single explicit choice, not a
+    plugin/provider registry.
+    """
+    if settings.openai_api_key:
+        return OpenAIProvider(api_key=settings.openai_api_key, model=settings.openai_model)
+    return DeterministicLocalProvider()
+
+
 def _run_controlled_evaluation(request: ControlledEvaluationRequest):
     """Resolve `request.case_id` and, only on success, run the existing
     governed CER path for the resolved PP. Returns a `CaseResolutionResult`
@@ -258,7 +273,7 @@ def _run_controlled_evaluation(request: ControlledEvaluationRequest):
             source_root,
             provenance_prefix="03_Clinical_Knowledge/population/population_packages",
         ),
-        provider=DeterministicLocalProvider(),
+        provider=_select_provider(),
     ).run(cer_request)
 
 

@@ -6,6 +6,7 @@ is shipped inside `generation/`.
 """
 
 import inspect
+import uuid
 from datetime import UTC, datetime
 from typing import Any
 
@@ -31,6 +32,7 @@ from safe_medical_ai.integration import EvidenceState, GenerationContext, Runtim
 from safe_medical_ai.llm.base import LLMAdapter
 from safe_medical_ai.models.output_contract import NavigationContextPlaceholder
 from safe_medical_ai.retrieval import ArtifactType
+from safe_medical_ai.safety import RiskClass, SafetyAction, SafetyDecision
 
 
 # --- fake providers (test boundary only) --------------------------------------
@@ -98,7 +100,7 @@ def _metadata(retrieval_id: str = "RID-1") -> RuntimeEvidenceMetadata:
     )
 
 
-def _evidence_item(suffix: str) -> EvidenceItem:
+def _evidence_item(suffix: str, content: str | None = None) -> EvidenceItem:
     return EvidenceItem(
         population_id="PP-0001",
         artifact_type=ArtifactType.CKO,
@@ -110,13 +112,35 @@ def _evidence_item(suffix: str) -> EvidenceItem:
             source_id=f"SRC-{suffix}",
             guideline_version=f"v{suffix}.0",
         ),
+        content=content,
     )
 
 
-def _context(evidence_state: EvidenceState, rtep: RuntimeEvidencePackage | None = None) -> GenerationContext:
+def _safety_decision() -> SafetyDecision:
+    # Track 3 BATCH 03: a valid ALLOW decision -- generation tests are not
+    # about safety adjudication, so this is a fixed, deterministic ALLOW
+    # fixture, not a re-implementation of safety policy.
+    return SafetyDecision(
+        request_id="REQ-1",
+        decision_id=uuid.uuid4().hex,
+        policy_version="1.0",
+        risk_class=RiskClass.LOW,
+        reason_code="AUTHORIZED_REQUEST",
+        action=SafetyAction.ALLOW,
+        timestamp=datetime.now(UTC),
+    )
+
+
+def _context(
+    evidence_state: EvidenceState,
+    rtep: RuntimeEvidencePackage | None = None,
+    safety_decision: SafetyDecision | None | str = "default",
+) -> GenerationContext:
     if rtep is None:
         evidence = (_evidence_item("a"), _evidence_item("b")) if evidence_state is EvidenceState.HAS_EVIDENCE else ()
         rtep = RuntimeEvidencePackage(metadata=_metadata(), evidence=evidence)
+    if safety_decision == "default":
+        safety_decision = _safety_decision()
     return GenerationContext(
         integration_id="INT-1",
         integration_timestamp=datetime.now(UTC),
@@ -125,6 +149,7 @@ def _context(evidence_state: EvidenceState, rtep: RuntimeEvidencePackage | None 
         rtep=rtep,
         runtime_constraints=RuntimeConstraints(),
         evidence_state=evidence_state,
+        safety_decision=safety_decision,
     )
 
 
@@ -168,6 +193,22 @@ def test_provider_receives_authoritative_rtep_evidence():
     ]
 
 
+def test_provider_receives_the_governed_prompt_specification():
+    # Track 3 BATCH 03: the provider request must also carry the governed
+    # PromptSpecification the Prompt Builder produced -- not just the raw
+    # evidence/context fields the pre-BATCH-03 contract already carried.
+    context = _context(EvidenceState.HAS_EVIDENCE)
+    provider = CapturingProvider()
+
+    generate_candidate_response(context, provider)
+
+    request = provider.received_kwargs.get("request")
+    assert request.prompt_specification is not None
+    assert request.prompt_specification.communication.request_text == context.request_text
+    assert request.prompt_specification.governance.decision_id == context.safety_decision.decision_id
+    assert len(request.prompt_specification.evidence.items) == len(context.rtep.evidence)
+
+
 def test_provider_receives_evidence_in_original_order_without_reranking():
     # Deliberately not in any "natural"/alphabetical/canonical order.
     items = (_evidence_item("z"), _evidence_item("a"), _evidence_item("m"))
@@ -179,6 +220,25 @@ def test_provider_receives_evidence_in_original_order_without_reranking():
 
     request = provider.received_kwargs.get("request")
     assert [item.source_path for item in request.evidence] == [item.source_path for item in items]
+
+
+def test_provider_receives_the_evidence_items_actual_content():
+    # Track 3 BATCH 01: the provider must receive EvidenceItem.content
+    # unchanged (present, non-empty for a content-bearing item), not only
+    # identity/provenance -- generation itself requires no redesign to carry
+    # it, since ProviderGenerationRequest.evidence already references the
+    # exact EvidenceItem tuple unchanged.
+    rtep = RuntimeEvidencePackage(
+        metadata=_metadata(),
+        evidence=(_evidence_item("a", content="real clinical prose for evidence item a"),),
+    )
+    context = _context(EvidenceState.HAS_EVIDENCE, rtep=rtep)
+    provider = CapturingProvider()
+
+    generate_candidate_response(context, provider)
+
+    request = provider.received_kwargs.get("request")
+    assert request.evidence[0].content == "real clinical prose for evidence item a"
 
 
 def test_provider_request_evidence_items_are_the_same_objects_not_reconstructed():
@@ -272,6 +332,28 @@ def test_context_with_missing_rtep_produces_context_missing_rtep():
 
     assert result.outcome == GenerationOutcome.CONTEXT_MISSING_RTEP
     assert result.response is None
+
+
+# --- 5b. Prompt Contract blocked (Track 3 BATCH 03) -----------------------------
+
+
+def test_missing_safety_decision_produces_prompt_blocked_not_generated():
+    context = _context(EvidenceState.HAS_EVIDENCE, safety_decision=None)
+    provider = CapturingProvider()
+
+    result = generate_candidate_response(context, provider)
+
+    assert result.outcome == GenerationOutcome.PROMPT_BLOCKED
+    assert result.response is None
+
+
+def test_prompt_blocked_never_calls_the_provider():
+    context = _context(EvidenceState.HAS_EVIDENCE, safety_decision=None)
+    provider = CapturingProvider()
+
+    generate_candidate_response(context, provider)
+
+    assert provider.received_kwargs == {}
 
 
 # --- 6/7/8/9. provider failure modes --------------------------------------------

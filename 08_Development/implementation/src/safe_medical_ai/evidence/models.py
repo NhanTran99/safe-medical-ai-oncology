@@ -77,13 +77,13 @@ class EvidenceItemProvenance(BaseModel):
 class EvidenceItem(BaseModel):
     """One retrieved Clinical Knowledge Object reference plus its provenance.
 
-    Evidence Content per spec section 5.4 / EVIDENCE_PACKAGE_SPECIFICATION.md
-    section 6: identity/pointer fields carried forward unchanged from the
-    originating `RetrievalCandidate` (this retrieval layer does not load
-    artifact text content — see `retrieval/README.md`'s deferred-items list
-    — so there is nothing to embed here beyond the reference itself).
-    Deliberately excludes prompt instructions, prompt templates, model
-    directives, generated responses, or model-generated interpretation.
+    Identity/pointer fields carried forward unchanged from the originating
+    `RetrievalCandidate`. `content` (Track 3 BATCH 01) is likewise carried
+    forward unchanged from `RetrievalCandidate.content` when the source
+    `RepositorySource` loaded it — never independently (re-)loaded, derived,
+    or fabricated by assembly itself (see `assembly.py`). Deliberately still
+    excludes prompt instructions, prompt templates, model directives,
+    generated responses, or model-generated interpretation.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -93,6 +93,7 @@ class EvidenceItem(BaseModel):
     source_path: str
     title: str | None
     provenance: EvidenceItemProvenance
+    content: str | None = None
 
 
 class RTEPAssemblyContext(BaseModel):

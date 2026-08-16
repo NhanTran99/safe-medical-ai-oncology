@@ -7,8 +7,11 @@ upstream object, never a claim of finality/clinical validation/safety
 approval/citation verification (spec section 5).
 
 Dependency direction (locked): `generation -> integration -> evidence ->
-retrieval`. Nothing in `retrieval/`, `evidence/`, or `integration/` is
-modified by this module.
+retrieval`, extended by Track 3 BATCH 03 with `generation -> prompting`
+(the governed Prompt Builder — model-independent, itself depending only on
+`evidence`/`retrieval`/`safety`/`models.output_contract`). Nothing in
+`retrieval/`, `evidence/`, `integration/`, or `prompting/` is modified by
+this module.
 """
 
 from __future__ import annotations
@@ -22,6 +25,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from ..evidence import EvidenceItem, RuntimeEvidenceMetadata
 from ..integration import EvidenceState, RuntimeConstraints
 from ..models.output_contract import NavigationContextPlaceholder
+from ..prompting import PromptSpecification
 
 #: The single, locked, non-provider-generated response for the
 #: EMPTY_EVIDENCE policy branch (spec section 6). This is a governed
@@ -62,6 +66,7 @@ class GenerationOutcome(str, Enum):
     EMPTY_EVIDENCE_RESPONSE = "EMPTY_EVIDENCE_RESPONSE"
     INVALID_CONTEXT = "INVALID_CONTEXT"
     CONTEXT_MISSING_RTEP = "CONTEXT_MISSING_RTEP"
+    PROMPT_BLOCKED = "PROMPT_BLOCKED"
     PROVIDER_FAILURE = "PROVIDER_FAILURE"
     PROVIDER_TIMEOUT = "PROVIDER_TIMEOUT"
     MALFORMED_PROVIDER_OUTPUT = "MALFORMED_PROVIDER_OUTPUT"
@@ -80,6 +85,10 @@ class ProviderGenerationRequest(BaseModel):
     here, never copied, reordered, reranked, deduplicated, or repaired.
     Constructing this object is pure data assembly with no retrieval calls
     and no new retrieval/ranking layer.
+
+    Track 3 BATCH 03 adds `prompt_specification` (see below) — the governed
+    Prompt Builder output the provider must actually use to build its API
+    request, per the LOCKED `PROMPTING_STRATEGY.md`.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -89,6 +98,14 @@ class ProviderGenerationRequest(BaseModel):
     evidence: tuple[EvidenceItem, ...]
     evidence_metadata: RuntimeEvidenceMetadata
     runtime_constraints: RuntimeConstraints
+    #: Track 3 BATCH 03: the governed PromptSpecification the Prompt
+    #: Builder produced from this same request's Navigation Context,
+    #: Safety Decision, and Evidence Package. A concrete provider consumes
+    #: this to render its own API request -- it must not reconstruct or
+    #: bypass it by reading `evidence`/`navigation_context` above directly
+    #: for that purpose (those fields remain for backward-compatible
+    #: traceability/testing, not as an alternate prompt-construction path).
+    prompt_specification: PromptSpecification
 
 
 class CandidateResponse(BaseModel):

@@ -85,6 +85,7 @@ class CERRuntime:
                 navigation_context=request.navigation_context,
                 rtep=assembly_result.package,
                 runtime_constraints=request.runtime_constraints,
+                safety_decision=safety_decision,
             )
         )
         if integration_result.context is None:

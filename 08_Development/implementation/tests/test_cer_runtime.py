@@ -122,3 +122,43 @@ def test_cer_preserves_positional_provenance():
 def test_cer_never_selects_a_provider():
     assert "OpenAI" not in CERRuntime.__module__
     assert "Anthropic" not in CERRuntime.__module__
+
+
+# --- Track 3 BATCH 03: SafetyDecision pass-through --------------------------
+
+
+def test_safety_decision_reaches_generation_context_unchanged():
+    result = CERRuntime(
+        repository_source=_FixtureSource(),
+        provider=_DeterministicProvider(),
+    ).run(_request())
+
+    assert result.safety_decision is not None
+    assert result.integration_result is not None
+    assert result.integration_result.context is not None
+    # Same object, not re-adjudicated or reconstructed.
+    assert result.integration_result.context.safety_decision is result.safety_decision
+
+
+def test_safety_decision_reaches_the_prompt_specification_governance_layer():
+    # End-to-end proof: the same SafetyDecision computed at the CER safety
+    # gate is what the governed Prompt Builder's Governance Layer reflects,
+    # all the way through real retrieval/evidence/integration/generation.
+    class _CapturingProvider(LLMAdapter):
+        def __init__(self):
+            self.received_request = None
+
+        def generate(self, *, request):
+            self.received_request = request
+            return "Controlled Evaluation test response."
+
+    provider = _CapturingProvider()
+    result = CERRuntime(repository_source=_FixtureSource(), provider=provider).run(_request())
+
+    assert result.outcome is CEROutcome.COMPLETED
+    assert provider.received_request is not None
+    governance = provider.received_request.prompt_specification.governance
+    assert governance.decision_id == result.safety_decision.decision_id
+    assert governance.risk_class == result.safety_decision.risk_class
+    assert governance.action == result.safety_decision.action
+    assert governance.reason_code == result.safety_decision.reason_code

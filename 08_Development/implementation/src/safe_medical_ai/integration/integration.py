@@ -75,6 +75,7 @@ def integrate_runtime_context(
             rtep=rtep,
             runtime_constraints=integration_input.runtime_constraints,
             evidence_state=evidence_state,
+            safety_decision=integration_input.safety_decision,
         )
     except ValidationError:
         # Defensive: under the current typed contracts every field here is

@@ -42,6 +42,7 @@ def test_generation_outcome_vocabulary():
         "MALFORMED_PROVIDER_OUTPUT",
         "PARTIAL_GENERATION",
         "INTERNAL_FAILURE",
+        "PROMPT_BLOCKED",
     }
 
 

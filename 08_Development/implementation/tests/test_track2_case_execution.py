@@ -235,3 +235,36 @@ def test_traceability_ids_reflect_the_resolved_pp():
         ControlledEvaluationRequest(request_text="test question", case_id="EC-0147")
     )
     assert result.retrieval_response.request.population_id == "PP-0147"
+
+
+# --- Track 3 BATCH 01: actual governed clinical content reaches evidence ---
+
+
+def test_real_pp_0003_cko_content_reaches_the_assembled_evidence_package():
+    # Proves the real repository artifact's actual text -- not merely its
+    # identity/provenance -- flows through the real, unmocked retrieval and
+    # assembly boundary for a real approved case (EC-0003 -> PP-0003).
+    from pathlib import Path
+
+    from safe_medical_ai.api.main import ControlledEvaluationRequest, _run_controlled_evaluation
+
+    repo_root = Path(__file__).resolve().parents[3]
+    cko_path = (
+        repo_root
+        / "03_Clinical_Knowledge"
+        / "population"
+        / "population_packages"
+        / "PP-0003 — What is Gastric Adenocarcinoma"
+        / "01_CKO.md"
+    )
+    expected_content = cko_path.read_text(encoding="utf-8")
+    assert expected_content  # sanity: the real fixture artifact is non-empty
+
+    result = _run_controlled_evaluation(
+        ControlledEvaluationRequest(request_text="test question", case_id="EC-0003")
+    )
+
+    assert result.assembly_result is not None
+    assert result.assembly_result.package is not None
+    item = result.assembly_result.package.evidence[0]
+    assert item.content == expected_content

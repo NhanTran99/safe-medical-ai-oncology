@@ -7,6 +7,11 @@ This module:
 - accepts an authoritative `GenerationContext` (Task #006) and an explicit
   `LLMAdapter` provider (Task #002's provider-agnostic interface — reused,
   not reinvented) and performs a local orchestration only;
+- calls the governed Prompt Builder (`prompting.build_prompt`, Track 3
+  BATCH 03) to produce a `PromptSpecification` before ever constructing a
+  provider request — this module does not itself construct a prompt or
+  adjudicate the locked Prompt Contract, it only invokes that boundary and
+  returns `PROMPT_BLOCKED` if it declines;
 - passes the authoritative governed evidence from `context.rtep` to the
   provider through a typed `ProviderGenerationRequest` (Change Request
   review fix — see `models.py`), not merely the raw request text;
@@ -30,6 +35,7 @@ from datetime import UTC, datetime
 
 from ..integration import EvidenceState, GenerationContext
 from ..llm.base import LLMAdapter
+from ..prompting import PromptBuilderOutcome, build_prompt
 from .models import (
     EMPTY_EVIDENCE_POLICY_RESPONSE_TEXT,
     CandidateResponse,
@@ -120,6 +126,30 @@ def generate_candidate_response(
             message="CandidateResponse is the fixed no-evidence policy response, not a provider generation",
         )
 
+    # Track 3 BATCH 03: build the governed PromptSpecification via the
+    # Prompt Builder before ever constructing a provider request. The
+    # Prompt Builder enforces the locked Prompt Contract (Navigation
+    # Context / Safety Decision / Evidence Package all mandatory) and
+    # blocks deterministically rather than falling back to any ad-hoc
+    # construction.
+    prompt_result = build_prompt(
+        navigation_context=context.navigation_context,
+        safety_decision=context.safety_decision,
+        evidence_package=context.rtep,
+        request_text=context.request_text,
+    )
+    if prompt_result.outcome is not PromptBuilderOutcome.BUILT:
+        logger.warning(
+            "Generation failed: prompt construction blocked (%s) integration_id=%s",
+            prompt_result.outcome.value,
+            context.integration_id,
+        )
+        return GenerationResult(
+            outcome=GenerationOutcome.PROMPT_BLOCKED,
+            response=None,
+            message=prompt_result.message,
+        )
+
     # Pass the authoritative governed evidence through to the provider as
     # part of the typed request — not just the raw request text. `evidence`
     # and `evidence_metadata` are the same immutable objects already on
@@ -131,6 +161,7 @@ def generate_candidate_response(
         evidence=context.rtep.evidence,
         evidence_metadata=context.rtep.metadata,
         runtime_constraints=context.runtime_constraints,
+        prompt_specification=prompt_result.specification,
     )
 
     try:

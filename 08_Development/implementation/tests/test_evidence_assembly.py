@@ -30,12 +30,15 @@ from safe_medical_ai.retrieval import (
 )
 
 
-def _candidate(population_id: str, artifact_type: ArtifactType, suffix: str = "1") -> RetrievalCandidate:
+def _candidate(
+    population_id: str, artifact_type: ArtifactType, suffix: str = "1", content: str | None = None
+) -> RetrievalCandidate:
     return RetrievalCandidate(
         population_id=population_id,
         artifact_type=artifact_type,
         source_path=f"03_Clinical_Knowledge/population/population_packages/{population_id}/{artifact_type.value}-{suffix}.md",
         title=f"{population_id} {artifact_type.value} title",
+        content=content,
     )
 
 
@@ -113,6 +116,24 @@ def test_evidence_content_and_metadata_are_preserved():
         assert item.artifact_type == candidate.artifact_type
         assert item.source_path == candidate.source_path
         assert item.title == candidate.title
+
+
+def test_candidate_content_is_carried_through_to_the_evidence_item_unchanged():
+    # Track 3 BATCH 01: assembly must pass RetrievalCandidate.content through
+    # to EvidenceItem.content verbatim -- never re-derive, transform, or
+    # (per the module docstring) independently load it.
+    candidate = _candidate(
+        "PP-0001", ArtifactType.CKO, content="actual governed clinical prose for PP-0001's CKO"
+    )
+    source = InMemoryRepositorySource({"PP-0001": [candidate]})
+    response = RetrievalService(source).retrieve(RetrievalRequest(population_id="PP-0001"))
+
+    result = assemble_runtime_evidence_package(
+        response, context=_context(), provenance=_provenance_for(response.results)
+    )
+
+    assert result.outcome == RTEPAssemblyOutcome.ASSEMBLED
+    assert result.package.evidence[0].content == candidate.content
 
 
 def test_provenance_values_are_preserved_exactly():

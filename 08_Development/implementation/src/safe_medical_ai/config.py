@@ -38,6 +38,15 @@ class Settings(BaseSettings):
     # configuration surface is ready to accept a connection string later.
     database_url: str | None = None
 
+    # Track 3 BATCH 02: OpenAI API provider configuration. `openai_api_key`
+    # is `None` by default so the application, offline/no-key development,
+    # and the existing test suite are all unaffected when it is not set —
+    # api/main.py falls back to DeterministicLocalProvider in that case.
+    # `openai_model` defaults to the Project-Coordinator-locked model
+    # (GPT-5.4 mini); overriding it does not change that locked default.
+    openai_api_key: str | None = None
+    openai_model: str = "gpt-5.4-mini"
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -8,6 +8,11 @@ dependencies = [
     "pydantic>=2.7,<3.0",
     "pydantic-settings>=2.4,<3.0",
     "uvicorn[standard]>=0.30,<1.0",
+    # Track 3 BATCH 02: official OpenAI API SDK, behind the existing
+    # LLMAdapter boundary (llm/openai_provider.py). Only used when
+    # SMA_OPENAI_API_KEY is configured; DeterministicLocalProvider remains
+    # the default for offline/unconfigured runs and the test suite.
+    "openai>=1.0,<4.0",
 ]
 
 [project.optional-dependencies]

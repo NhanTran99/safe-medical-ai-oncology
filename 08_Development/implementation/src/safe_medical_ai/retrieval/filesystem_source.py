@@ -89,12 +89,21 @@ class FilesystemRepositorySource(RepositorySource):
                 # Missing or malformed (e.g. a directory in its place)
                 # artifact: skip deterministically rather than fabricate it.
                 continue
+            try:
+                content = artifact_path.read_text(encoding="utf-8")
+            except OSError:
+                # Unreadable despite passing is_file() (e.g. a permissions
+                # error or a removal race): the same "skip deterministically
+                # rather than fabricate it" principle applies as above —
+                # never substitute fabricated/partial content.
+                continue
             candidates.append(
                 RetrievalCandidate(
                     population_id=population_id,
                     artifact_type=artifact_type,
                     source_path=f"{self._provenance_prefix}/{population_dir.name}/{filename}",
                     title=title,
+                    content=content,
                 )
             )
 

@@ -82,6 +82,11 @@ class RetrievalCandidate(BaseModel):
         description="Authoritative controlled-repository path or equivalent controlled identifier."
     )
     title: str | None = None
+    content: str | None = Field(
+        default=None,
+        description="The artifact's actual governed text content, when loaded by the RepositorySource. "
+        "None when a source does not load content (e.g. a fixture-backed source).",
+    )
 
 
 class RetrievalResponse(BaseModel):

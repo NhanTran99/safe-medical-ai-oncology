@@ -20,6 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from ..evidence import RuntimeEvidencePackage
 from ..models.output_contract import NavigationContextPlaceholder
+from ..safety import SafetyDecision
 
 
 class RuntimeConstraints(BaseModel):
@@ -81,6 +82,12 @@ class RuntimeIntegrationInput(BaseModel):
     navigation_context: NavigationContextPlaceholder
     rtep: RuntimeEvidencePackage | None
     runtime_constraints: RuntimeConstraints
+    #: Track 3 BATCH 03: the existing, already-computed SafetyDecision,
+    #: passed through unchanged (never re-adjudicated here) so it can reach
+    #: GenerationContext and, downstream, the governed Prompt Builder.
+    #: Optional/defaulted so existing callers/tests that predate this field
+    #: are unaffected.
+    safety_decision: SafetyDecision | None = None
 
 
 class GenerationContext(BaseModel):
@@ -101,6 +108,9 @@ class GenerationContext(BaseModel):
     rtep: RuntimeEvidencePackage
     runtime_constraints: RuntimeConstraints
     evidence_state: EvidenceState
+    #: Track 3 BATCH 03: carried through unchanged from
+    #: RuntimeIntegrationInput.safety_decision -- never re-adjudicated.
+    safety_decision: SafetyDecision | None = None
 
 
 class RuntimeIntegrationResult(BaseModel):
