@@ -614,6 +614,152 @@ project-level document, with historical versions retained only where
 required for traceability.
 
 ---
+WR-022 — Approved Strategy-to-Execution Workflow Rule
+
+For controlled implementation work, the project SHALL follow the
+following approved working flow unless a genuine architectural or
+governance dependency requires adjustment:
+
+Strategy / Scope Review
+        ↓
+Implementation Objective
+        ↓
+Claude Code Inspection / Implementation Prompt
+        ↓
+Claude Read-only Repository Inspection
+        ↓
+Claude Code Implementation
+        ↓
+Project Coordinator Local Run / Execution
+        ↓
+ChatGPT Review
+        ↓
+Bounded Refinement, if required
+        ↓
+Final Run
+        ↓
+Controlled Commit / Push
+        ↓
+Verified Outcome
+
+The purpose of this workflow is to move from an approved strategic
+decision to a verified project outcome with the minimum necessary
+intermediate steps.
+
+The Strategist SHALL:
+
+- present the complete relevant Decision Batch before implementation;
+- clearly distinguish MUST DECIDE NOW from CAN DEFER;
+- identify repository / technical inspection points explicitly;
+- provide the Claude Code inspection or implementation prompt together
+  with the relevant strategist package;
+- convert the approved scope into a concrete implementation objective;
+- review Claude's inspection or implementation report before accepting
+  technical conclusions;
+- refine the implementation only when the refinement materially
+  contributes to the approved objective;
+- proceed to final run and controlled repository closure once the
+  approved outcome is adequately demonstrated.
+
+The Project Coordinator SHALL remain the final authority for strategic
+scope approval and material architectural or governance decisions.
+
+Claude SHALL implement only the approved objective and SHALL NOT
+silently expand the scope through technical convenience, refactoring,
+architecture redesign, or additional requirements.
+
+A technical discovery made during implementation may trigger a return
+to Strategy / Scope Review only when it represents:
+
+- a genuine architectural dependency;
+- a material safety or governance issue;
+- an essential missing requirement;
+- a conflict with a Locked Decision; or
+- a blocker to achieving the approved outcome.
+
+Ordinary implementation defects, bounded corrections, or evidence gaps
+that do not change approved scope SHALL be handled within the existing
+implementation/review workflow.
+
+The workflow SHALL NOT be converted into an open-ended architecture
+cycle merely because additional technical observations can be made.
+
+Once the approved outcome has been adequately demonstrated and no
+material blocker remains, the project SHALL proceed toward final run
+and controlled commit/push rather than continuing refinement for its own
+sake.
+
+----
+WR-023 — Outcome-Bounded QA and No-Infinite-Remediation Rule
+
+Quality assurance SHALL be rigorous, explicit, traceable, and
+proportionate to the approved project objective.
+
+QA exists to establish whether the approved outcome has been adequately
+demonstrated.
+
+QA SHALL NOT become an independent objective.
+
+The Strategist SHALL distinguish between:
+
+1. Required correction
+   A defect or gap that prevents the approved outcome from being
+   demonstrated.
+
+2. Material refinement
+   A change that materially improves safety, correctness, traceability,
+   usability, or reliability required by the approved scope.
+
+3. Optional improvement
+   A desirable improvement that does not materially affect the approved
+   outcome.
+
+Only Required Corrections and materially necessary Refinements SHALL
+normally block completion of the current controlled objective.
+
+Optional Improvements SHALL NOT automatically create another remediation
+cycle and SHALL be deferred unless explicitly approved as part of the
+current scope.
+
+After each implementation/review cycle, the Strategist SHALL determine:
+
+- whether the approved objective is demonstrated;
+- whether any material blocker remains;
+- whether remaining issues are within approved scope;
+- whether another refinement cycle would materially contribute to the
+  ultimate project goal.
+
+If the approved objective is adequately demonstrated and no material
+blocker remains, the project SHALL stop the refinement cycle and proceed
+to the next governed milestone.
+
+The project SHALL NOT enter an infinite QA/remediation loop in pursuit
+of theoretical perfection, additional polish, newly discovered
+non-blocking improvements, or requirements that were not part of the
+approved objective.
+
+QA completion SHALL therefore be determined by:
+
+Approved Objective
+        ↓
+Required Acceptance Conditions
+        ↓
+Evidence of Adequate Demonstration
+        ↓
+No Material Blocker
+        ↓
+STOP REFINEMENT
+        ↓
+Proceed to Next Governed Milestone
+
+This rule does not permit known critical safety, governance, correctness,
+or reproducibility defects to be ignored merely because the current
+objective has otherwise been demonstrated.
+
+The ultimate project goal remains the governing context for determining
+whether additional work materially contributes to project completion,
+including the eventual controlled webapp deployment objective.
+---
 
 # 3. PROJECT ROLES
 
@@ -828,6 +974,22 @@ All reviews should focus on:
 - contribution to project objectives.
 
 Reviews should propose improvements rather than redesign previously approved architecture without sufficient justification.
+
+Review Completion Principle
+
+Review SHALL determine whether the approved objective has been
+adequately demonstrated and whether any material blocker remains.
+
+Review SHALL NOT automatically expand the current scope because
+additional improvements are technically possible.
+
+Where a finding does not materially affect the approved objective,
+safety, governance, correctness, traceability, or reproducibility,
+the finding SHOULD be classified as a deferred improvement rather than
+creating a new remediation cycle.
+
+The purpose of review is to enable controlled progression toward the
+project outcome, not to create indefinite refinement.
 
 ---
 
@@ -1067,3 +1229,44 @@ At final project closure, repository-wide canonicalization SHALL ensure
 that each active governed document has one canonical active version.
 Historical versions SHALL be retained only where required for
 traceability.
+
+## Version 2.0 (2nd times)
+
+Updated following validation of the Phase 6 Stage 2 Track 3 working
+workflow and formalization of the approved Strategy-to-Execution model.
+
+Added:
+
+- WR-022 — Approved Strategy-to-Execution Workflow Rule
+- WR-023 — Outcome-Bounded QA and No-Infinite-Remediation Rule
+
+WR-022 formalizes the approved working flow:
+
+Strategy / Scope Review
+→ Implementation Objective
+→ Claude Code Prompt
+→ Claude Inspection / Implementation
+→ Project Coordinator Run
+→ ChatGPT Review
+→ Bounded Refinement if Required
+→ Final Run
+→ Controlled Commit / Push
+→ Verified Outcome
+
+WR-023 establishes that QA shall remain rigorous and outcome-oriented
+without creating indefinite remediation or refinement loops.
+
+Clarified:
+
+- implementation findings may return to Strategy / Scope Review only
+  when they create a genuine architectural, governance, safety, or
+  material outcome dependency;
+- non-blocking improvements shall not automatically expand the current
+  scope;
+- completion shall be determined by adequate demonstration of the
+  approved objective and absence of material blockers;
+- the ultimate project goal remains the governing context for deciding
+  whether additional work materially contributes to project completion.
+
+No change to project authority, governance hierarchy, or existing
+Population Package workflow.
