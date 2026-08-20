@@ -212,6 +212,19 @@ _PAGE_TEMPLATE = """<!doctype html>
   }
   button.starter-chip:hover { border-color: var(--blue-500); color: var(--blue-700); }
 
+  .random-topic-button {
+    text-align: center;
+    background: #fff;
+    border: 1px solid var(--slate-200);
+    border-radius: 0.65rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--blue-600);
+    cursor: pointer;
+  }
+  .random-topic-button:hover { background: var(--blue-50); border-color: var(--blue-500); }
+
   #topic-search {
     width: 100%;
     padding: 0.45rem 0.6rem;
@@ -328,6 +341,8 @@ _PAGE_TEMPLATE = """<!doctype html>
   <div class="app-body">
     <aside class="nav-panel">
       <h2 class="nav-prompt">Not sure what to ask? Start with your situation.</h2>
+
+      <button type="button" id="random-topic-button" class="random-topic-button">Random Topic</button>
 
       <div class="panel-card">
         <p class="panel-label">Your Situation</p>
@@ -480,6 +495,35 @@ _PAGE_TEMPLATE = """<!doctype html>
 
       topicSearch.addEventListener("input", function () {
         renderTopics(topicSearch.value);
+      });
+
+      // Random Topic: a navigation convenience only. Picks one entry from
+      // the SAME CATALOG the Topic list already renders from (no second
+      // source of truth), then routes it through the exact same
+      // selectTopic() function manual Topic clicks use -- selectedCaseId
+      // is set the same way either way.
+      var randomTopicButton = document.getElementById("random-topic-button");
+      randomTopicButton.addEventListener("click", function () {
+        if (!CATALOG.length) {
+          return;
+        }
+        var item = CATALOG[Math.floor(Math.random() * CATALOG.length)];
+
+        topicPanel.hidden = false;
+        topicSearch.value = "";
+        renderTopics("");
+
+        var activeButton = null;
+        Array.prototype.forEach.call(
+          topicList.querySelectorAll(".topic-chip"),
+          function (el) {
+            if (el.textContent === item.pp_title) {
+              activeButton = el;
+            }
+          }
+        );
+
+        selectTopic(item, activeButton);
       });
 
       renderSituations();

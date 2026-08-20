@@ -103,6 +103,18 @@ def test_chat_page_contains_two_tier_topic_and_question_starter_structure():
     assert 'id="starter-list"' in html
 
 
+def test_chat_page_contains_a_random_topic_control_wired_to_the_existing_catalog_and_selection():
+    # B05: Random Topic is a navigation convenience only -- it must pick
+    # from the SAME CATALOG the Topic list renders from (no second source
+    # of truth) and route through the SAME selectTopic() function manual
+    # Topic clicks already use (no new selection path).
+    html = client.get("/chat").text
+
+    assert 'id="random-topic-button"' in html
+    assert "CATALOG[Math.floor(Math.random() * CATALOG.length)]" in html
+    assert "selectTopic(item, activeButton)" in html
+
+
 def test_chat_page_navigation_catalog_is_derived_from_the_real_manifest_projection():
     # Track 2: the catalog embedded in the page is NOT a small hand-written
     # list -- it is the real 239-case manifest projection (case_id,
