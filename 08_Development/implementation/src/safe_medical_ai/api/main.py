@@ -241,11 +241,19 @@ def _select_provider() -> LLMAdapter:
     return DeterministicLocalProvider()
 
 
-def _run_controlled_evaluation(request: ControlledEvaluationRequest):
+def _run_controlled_evaluation(request: ControlledEvaluationRequest, *, provider: LLMAdapter | None = None):
     """Resolve `request.case_id` and, only on success, run the existing
     governed CER path for the resolved PP. Returns a `CaseResolutionResult`
     (never `RESOLVED`) if resolution fails -- fail-closed, no fallback to
     any specific case.
+
+    `provider` is optional and defaults to the existing `_select_provider()`
+    choice (unchanged behavior for both existing HTTP callers, neither of
+    which pass it). B07's campaign harness (`campaign/harness.py`) is the
+    only caller that supplies it explicitly, so it can inject a specific
+    provider (e.g. the deterministic provider for reproducible tests)
+    without depending on process environment state -- this is the same
+    single execution path, not a second one.
     """
     resolution = _default_case_resolver().resolve(request.case_id)
     if resolution.outcome is not CaseResolutionOutcome.RESOLVED:
@@ -303,7 +311,7 @@ def _run_controlled_evaluation(request: ControlledEvaluationRequest):
             source_root,
             provenance_prefix="03_Clinical_Knowledge/population/population_packages",
         ),
-        provider=_select_provider(),
+        provider=provider if provider is not None else _select_provider(),
     ).run(cer_request)
 
 
