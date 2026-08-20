@@ -78,6 +78,9 @@ def test_chat_page_does_not_contain_pp_selection_or_navigation_logic():
 
 
 def test_chat_page_contains_situation_cards():
+    # B06 Test A: exactly the five locked/approved Situations are present,
+    # and the pre-B06 sixth Track 1C string (never an approved B06
+    # Situation) is not.
     html = client.get("/chat").text
 
     assert "Not sure what to ask? Start with your situation." in html
@@ -87,9 +90,42 @@ def test_chat_page_contains_situation_cards():
         "I'm preparing for surgery",
         "I'm concerned about recurrence",
         "I'm in follow-up",
-        "I want to understand my cancer",
     ):
         assert situation in html
+    assert "I want to understand my cancer" not in html
+
+
+def test_chat_page_situation_count_is_exactly_five():
+    # B06 Test A: the embedded governed mapping itself carries exactly
+    # five Situation entries -- not just five labels happening to appear
+    # in the HTML text. `"label"` only occurs once per Situation entry
+    # (mapping entries carry only situation_id/case_id, no label).
+    html = client.get("/chat").text
+
+    assert html.count('"label"') == 5
+
+
+def test_chat_page_situation_selection_filters_topics_to_the_governed_mapping():
+    # B06 Test D: a Situation click must filter the Topic list to only
+    # that Situation's governed case_ids, reusing the existing CATALOG
+    # and selectTopic() -- not an unfiltered reveal of all 239 entries
+    # (the pre-B06 Track 1C behavior).
+    html = client.get("/chat").text
+
+    assert "activeAllowedCaseIds = SITUATION_CASE_IDS[situation.situation_id]" in html
+    assert "renderTopics(filterText, allowedCaseIds)" in html
+    assert "if (allowedCaseIds && !allowedCaseIds[item.case_id])" in html
+
+
+def test_chat_page_random_topic_remains_unfiltered_by_situation():
+    # B06 Test I: Random Topic (B05) must keep drawing from the full,
+    # unfiltered CATALOG regardless of any Situation filter in effect --
+    # confirmed by the handler explicitly clearing activeAllowedCaseIds
+    # before rendering, and still calling the same selectTopic().
+    html = client.get("/chat").text
+
+    assert "activeAllowedCaseIds = null;" in html
+    assert "selectTopic(item, activeButton)" in html
 
 
 def test_chat_page_contains_two_tier_topic_and_question_starter_structure():

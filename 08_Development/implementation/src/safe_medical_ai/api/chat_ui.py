@@ -1,21 +1,25 @@
-"""Controlled Chat UI shell — Phase 6 Stage 2 Track 1A/1B/1C/2.
+"""Controlled Chat UI shell — Phase 6 Stage 2 Track 1A/1B/1C/2/3 (B05/B06).
 
 Browser-facing presentation boundary only: a static page (inline HTML/CSS/
 vanilla JS, no new frontend framework/dependency) that lets a user type and
 submit a question, and issues a request toward the backend chat boundary.
 
-This module contains no clinical reasoning, no PP-selection/navigation
-logic, no retrieval, no CER invocation, and no safety/validation logic —
-those remain governed backend concerns.
+This module contains no clinical reasoning, no CER invocation, no
+retrieval, and no safety/validation logic — those remain governed backend
+concerns. It does contain non-clinical navigation/filtering logic (Situation
+-> Topic), which is presentation/navigation only: it never resolves a
+`case_id`, never invokes the CER path itself, and never carries clinical
+content.
 
 Track 2 change: the page is no longer a single static string. `/chat`
-(see `api/main.py`) renders it via `render_chat_page(catalog)`, embedding
-a controlled navigation catalog derived from the same manifest projection
-`EvaluationCaseResolver` uses (`case_id`, `pp_title`, `controlled_question`
-only — never used for resolution/execution here, only for non-clinical
-display labels and pre-approved question-starter text). The catalog is
-read fresh by `main.py` on every `/chat` request; this module never reads
-the projection file itself and never hardcodes any specific case.
+(see `api/main.py`) renders it via `render_chat_page(catalog,
+situation_mapping)`, embedding a controlled navigation catalog derived
+from the same manifest projection `EvaluationCaseResolver` uses
+(`case_id`, `pp_title`, `controlled_question` only — never used for
+resolution/execution here, only for non-clinical display labels and
+pre-approved question-starter text). The catalog is read fresh by
+`main.py` on every `/chat` request; this module never reads the
+projection file itself and never hardcodes any specific case.
 
 `selectedCaseId` starts `null` — no implicit default case (Track 2 RC-5):
 it becomes non-null only once the user explicitly selects a Topic, which
@@ -26,12 +30,16 @@ required `case_id` field). Selecting a question starter only populates
 `#question-input`; it never submits the form or calls `/chat/query` on
 its own.
 
-Situation cards (Tier 1) are unchanged, generic orientation labels — the
-frozen manifest has no situation/category taxonomy, so a situation click
-reveals the same full, searchable Topic list (Tier 2) rather than a
-per-situation filtered subset; inventing such a filter would itself be a
-content-curation/categorization decision outside this task's scope (see
-`README.md` "Known simplification").
+B06 change: Situation cards (Tier 1) are now rendered from
+`situation_mapping["situations"]` (the five approved B06 Situations, see
+`data/B06_SITUATION_NAVIGATION_MAPPING_README.md`), and a Situation click
+filters the Topic list (Tier 2) to only that Situation's mapped
+`case_id`s via `situation_mapping["mappings"]`, instead of the prior
+Track 1C simplification where every situation click revealed the full,
+unfiltered 239-entry catalog. Random Topic (B05, `#random-topic-button`)
+is unaffected: it still draws from the full, unfiltered `CATALOG` and
+still calls the same `selectTopic()` every Topic chip and every Situation
+match already use.
 """
 
 from __future__ import annotations
@@ -39,14 +47,27 @@ from __future__ import annotations
 import json
 
 
-def render_chat_page(catalog: list[dict[str, str]]) -> str:
+def render_chat_page(catalog: list[dict[str, str]], situation_mapping: dict) -> str:
     """Render the Chat UI page, embedding `catalog` as the controlled
-    navigation data (Situation -> Topic -> Question Starter, Track 2)."""
+    navigation data (Situation -> Topic -> Question Starter) and
+    `situation_mapping` (B06) as the governed Situation -> Topic filter.
+
+    `situation_mapping` carries the five approved Situations and their
+    `(situation_id, case_id)` relationships (see
+    `data/B06_SITUATION_NAVIGATION_MAPPING_README.md`) -- it never carries
+    clinical content and never redefines `case_id`/PP identity, only
+    references it.
+    """
     # `</` inside title/question text (e.g. from manifest content) must not
     # be able to terminate the embedding <script> tag early.
     catalog_json = json.dumps(catalog).replace("</", "<\\/")
+    situation_mapping_json = json.dumps(situation_mapping).replace("</", "<\\/")
 
-    return _PAGE_TEMPLATE.replace("__CATALOG_JSON__", catalog_json)
+    return (
+        _PAGE_TEMPLATE.replace("__CATALOG_JSON__", catalog_json).replace(
+            "__SITUATION_MAPPING_JSON__", situation_mapping_json
+        )
+    )
 
 
 _PAGE_TEMPLATE = """<!doctype html>
@@ -393,17 +414,29 @@ _PAGE_TEMPLATE = """<!doctype html>
       // controlled_question. Never hard-coded, never a second manifest.
       var CATALOG = __CATALOG_JSON__;
 
-      // Deliberately generic orientation labels only -- the frozen manifest
-      // has no situation/category taxonomy, so every situation reveals the
-      // same full, searchable Topic list rather than an invented subset.
-      var SITUATIONS = [
-        "I was recently diagnosed",
-        "I'm receiving treatment",
-        "I'm preparing for surgery",
-        "I'm concerned about recurrence",
-        "I'm in follow-up",
-        "I want to understand my cancer"
-      ];
+      // B06: the five approved Situations and their governed Topic
+      // mapping, embedded server-side from the SAME single authoritative
+      // artifact main.py reads (see
+      // data/B06_SITUATION_NAVIGATION_MAPPING_README.md). Never
+      // hard-coded here, never a second mapping source.
+      var SITUATION_MAPPING = __SITUATION_MAPPING_JSON__;
+      var SITUATIONS = SITUATION_MAPPING.situations;
+
+      // situation_id -> { case_id: true, ... }, built once from the
+      // embedded mapping's (situation_id, case_id) pairs.
+      var SITUATION_CASE_IDS = {};
+      SITUATION_MAPPING.mappings.forEach(function (m) {
+        if (!SITUATION_CASE_IDS[m.situation_id]) {
+          SITUATION_CASE_IDS[m.situation_id] = {};
+        }
+        SITUATION_CASE_IDS[m.situation_id][m.case_id] = true;
+      });
+
+      // The Topic filter currently in effect (a SITUATION_CASE_IDS entry),
+      // or null when unfiltered (Random Topic, or no Situation chosen
+      // yet). Only renderSituations()'s click handler and the Random
+      // Topic handler below ever set this.
+      var activeAllowedCaseIds = null;
 
       var situationList = document.getElementById("situation-list");
       var topicPanel = document.getElementById("topic-panel");
@@ -428,29 +461,37 @@ _PAGE_TEMPLATE = """<!doctype html>
       }
 
       function renderSituations() {
-        SITUATIONS.forEach(function (label) {
+        SITUATIONS.forEach(function (situation) {
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "situation-card";
-          btn.textContent = label;
+          btn.textContent = situation.label;
           btn.setAttribute("aria-pressed", "false");
           btn.addEventListener("click", function () {
             Array.prototype.forEach.call(
               situationList.querySelectorAll(".situation-card"),
               function (el) { el.setAttribute("aria-pressed", el === btn ? "true" : "false"); }
             );
+            // Governed Situation -> Topic filter (B06): only this
+            // Situation's mapped case_ids are shown, via the same
+            // CATALOG/selectTopic() every other Topic entry point uses.
+            activeAllowedCaseIds = SITUATION_CASE_IDS[situation.situation_id] || {};
             topicPanel.hidden = false;
+            topicSearch.value = "";
             topicSearch.focus();
-            renderTopics("");
+            renderTopics("", activeAllowedCaseIds);
           });
           situationList.appendChild(btn);
         });
       }
 
-      function renderTopics(filterText) {
+      function renderTopics(filterText, allowedCaseIds) {
         clearChildren(topicList);
         var needle = filterText.trim().toLowerCase();
         CATALOG.filter(function (item) {
+          if (allowedCaseIds && !allowedCaseIds[item.case_id]) {
+            return false;
+          }
           return !needle || item.pp_title.toLowerCase().indexOf(needle) !== -1;
         }).forEach(function (item) {
           var btn = document.createElement("button");
@@ -494,14 +535,15 @@ _PAGE_TEMPLATE = """<!doctype html>
       }
 
       topicSearch.addEventListener("input", function () {
-        renderTopics(topicSearch.value);
+        renderTopics(topicSearch.value, activeAllowedCaseIds);
       });
 
-      // Random Topic: a navigation convenience only. Picks one entry from
-      // the SAME CATALOG the Topic list already renders from (no second
-      // source of truth), then routes it through the exact same
-      // selectTopic() function manual Topic clicks use -- selectedCaseId
-      // is set the same way either way.
+      // Random Topic: a navigation convenience only, unaffected by B06.
+      // Picks one entry from the SAME, unfiltered CATALOG the Topic list
+      // already renders from (no second source of truth), then routes it
+      // through the exact same selectTopic() function manual Topic
+      // clicks and Situation-filtered Topic clicks both use --
+      // selectedCaseId is set the same way in every case.
       var randomTopicButton = document.getElementById("random-topic-button");
       randomTopicButton.addEventListener("click", function () {
         if (!CATALOG.length) {
@@ -509,6 +551,7 @@ _PAGE_TEMPLATE = """<!doctype html>
         }
         var item = CATALOG[Math.floor(Math.random() * CATALOG.length)];
 
+        activeAllowedCaseIds = null;
         topicPanel.hidden = false;
         topicSearch.value = "";
         renderTopics("");

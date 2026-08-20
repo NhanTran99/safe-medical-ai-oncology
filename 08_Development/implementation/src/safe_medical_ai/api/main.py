@@ -82,6 +82,36 @@ def _default_case_resolver() -> EvaluationCaseResolver:
     return EvaluationCaseResolver(_projection_path())
 
 
+def _situation_mapping_path() -> Path:
+    repo_root = Path(__file__).resolve().parents[5]
+    return (
+        repo_root
+        / "08_Development"
+        / "implementation"
+        / "data"
+        / "b06_situation_navigation_mapping.json"
+    )
+
+
+def _load_situation_mapping() -> dict[str, list]:
+    """Load the B06 governed Situation -> Topic navigation mapping.
+
+    Navigation metadata only (see `data/B06_SITUATION_NAVIGATION_MAPPING_README.md`):
+    every `case_id` referenced still resolves solely through
+    `EvaluationCaseResolver` / the same manifest projection
+    `_load_navigation_catalog()` reads -- this file never becomes a second
+    PP/case authority, only a filter over the existing `CATALOG`.
+    """
+    try:
+        raw = json.loads(_situation_mapping_path().read_text(encoding="utf-8"))
+    except Exception:
+        return {"situations": [], "mappings": []}
+    return {
+        "situations": raw.get("situations", []),
+        "mappings": raw.get("mappings", []),
+    }
+
+
 def _load_navigation_catalog() -> list[dict[str, str]]:
     """Load the Chat UI's controlled navigation catalog from the same
     manifest projection `EvaluationCaseResolver` uses.
@@ -118,7 +148,7 @@ def chat_ui() -> HTMLResponse:
     imported module code.
     """
     return HTMLResponse(
-        content=render_chat_page(_load_navigation_catalog()),
+        content=render_chat_page(_load_navigation_catalog(), _load_situation_mapping()),
         headers={"Cache-Control": "no-store"},
     )
 

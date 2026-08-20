@@ -1,0 +1,701 @@
+{
+  "artifact_type": "B06_SITUATION_NAVIGATION_MAPPING",
+  "artifact_version": "2.0",
+  "description": "Governed patient-navigation metadata: maps each of the five locked B06 Situations to relevant approved Evaluation Case identities (EC-NNNN). Navigation metadata only -- not a second PP/case authority. Every case_id referenced here must resolve through the existing EvaluationCaseResolver / evaluation_case_manifest_projection.json.",
+  "review_methodology": "v2.0 (correction pass): every mapping in this file was reviewed against the governed PP content actually stored in the repository (01_CKO.md Educational Objectives / Clinical Question / Purpose / Scope-Included, not the pp_title alone), applying the D02 Minimum Relevance Rule. Mappings supported only by title similarity or generic/boilerplate metadata (e.g. the CKO 'Audience' field, which reads 'patients, caregivers, general public' on highly technical entries too and is therefore not sufficient evidence on its own) were removed or moved. See data/B06_SITUATION_NAVIGATION_MAPPING_README.md for the full methodology and the v1.0 -> v2.0 change log.",
+  "source_manifest": "PHASE6_STAGE2_EVALUATION_CASE_MANIFEST_v1.0_FROZEN.xlsx",
+  "source_manifest_version": "1.0-FROZEN",
+  "source_manifest_sha256": "29463ad268f2b9718201758a14b1c464d8d47e2691a83fd3e6cf6dd93714c167",
+  "situations": [
+    {
+      "situation_id": "SIT-01",
+      "label": "I was recently diagnosed"
+    },
+    {
+      "situation_id": "SIT-02",
+      "label": "I'm receiving treatment"
+    },
+    {
+      "situation_id": "SIT-03",
+      "label": "I'm preparing for surgery"
+    },
+    {
+      "situation_id": "SIT-04",
+      "label": "I'm concerned about recurrence"
+    },
+    {
+      "situation_id": "SIT-05",
+      "label": "I'm in follow-up"
+    }
+  ],
+  "mappings": [
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0001"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0002"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0003"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0004"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0005"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0006"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0007"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0008"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0009"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0009"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0010"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0010"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0011"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0012"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0013"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0014"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0015"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0016"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0017"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0018"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0019"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0020"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0021"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0022"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0023"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0024"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0028"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0029"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0031"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0032"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0033"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0034"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0035"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0038"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0040"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0041"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0042"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0046"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0046"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0047"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0047"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0048"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0049"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0050"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0051"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0052"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0053"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0054"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0055"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0056"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0063"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0064"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0065"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0066"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0066"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0068"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0069"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0069"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0070"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0070"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0071"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0071"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0073"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0073"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0074"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0074"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0075"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0075"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0076"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0076"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0077"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0077"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0078"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0079"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0080"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0081"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0082"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0083"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0084"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0085"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0086"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0087"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0088"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0089"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0090"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0091"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0092"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0093"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0093"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0094"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0095"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0096"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0097"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0097"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0098"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0099"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0100"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0149"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0155"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0156"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0158"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0159"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0165"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0166"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0167"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0168"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0175"
+    },
+    {
+      "situation_id": "SIT-01",
+      "case_id": "EC-0176"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0181"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0182"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0183"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0184"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0185"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0186"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0187"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0189"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0190"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0191"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0192"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0193"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0194"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0195"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0196"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0197"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0198"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0199"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0200"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0201"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0202"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0203"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0203"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0204"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0205"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0206"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0206"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0207"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0208"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0209"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0210"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0211"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0212"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0213"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0214"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0215"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0216"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0217"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0219"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0220"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0221"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0222"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0223"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0224"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0225"
+    },
+    {
+      "situation_id": "SIT-03",
+      "case_id": "EC-0226"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0226"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0227"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0228"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0229"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0230"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0231"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0231"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0236"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0236"
+    },
+    {
+      "situation_id": "SIT-04",
+      "case_id": "EC-0237"
+    },
+    {
+      "situation_id": "SIT-05",
+      "case_id": "EC-0237"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0238"
+    },
+    {
+      "situation_id": "SIT-02",
+      "case_id": "EC-0239"
+    }
+  ]
+}
