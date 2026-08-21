@@ -313,6 +313,8 @@ _PAGE_TEMPLATE = """<!doctype html>
   .chat-message.user { font-weight: 600; color: var(--slate-700); }
   .chat-message.assistant { color: var(--slate-600); }
   .chat-message.error { color: var(--red-600); }
+  .chat-sources { margin: -0.6rem 0 0.9rem; font-size: 0.78rem; font-style: italic; color: var(--slate-400); }
+  .chat-sources:last-child { margin-bottom: 0; }
 
   #followup-label {
     font-size: 0.78rem;
@@ -618,6 +620,23 @@ _PAGE_TEMPLATE = """<!doctype html>
         history.scrollTop = history.scrollHeight;
       }
 
+      // B09: `sources` follows the /chat/query response's three-state
+      // contract -- null means no evidence-based source concept applies
+      // to this answer (nothing rendered, unchanged prior behavior); an
+      // empty array means real evidence was used but no governed source
+      // label could be resolved (the honest "unavailable" fallback, never
+      // "No evidence" and never a PP ID); a populated array is the
+      // governed, human-readable Primary Source Set for this answer.
+      function appendSources(sources) {
+        var el = document.createElement("div");
+        el.className = "chat-sources";
+        el.textContent = sources.length === 0
+          ? "Evidence information unavailable"
+          : "Sources: " + sources.join(", ");
+        history.appendChild(el);
+        history.scrollTop = history.scrollHeight;
+      }
+
       function setLoading(isLoading) {
         input.disabled = isLoading;
         button.disabled = isLoading;
@@ -686,6 +705,9 @@ _PAGE_TEMPLATE = """<!doctype html>
           .then(function (data) {
             setLoading(false);
             appendMessage("assistant", data.answer);
+            if (data.sources !== null && data.sources !== undefined) {
+              appendSources(data.sources);
+            }
             // Only a real, completed exchange ever updates the bounded
             // follow-up context -- a failed/errored turn below never does,
             // so a prior good exchange is never overwritten with nothing.

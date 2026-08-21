@@ -15,9 +15,9 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from ..cases import CaseResolutionOutcome, CaseResolutionResult, EvaluationCaseResolver
-from ..cer import CERRequest, CERRuntime
+from ..cer import CEROutcome, CERRequest, CERResult, CERRuntime
 from ..evidence import EvidenceItemProvenance, RTEPAssemblyContext
-from ..integration import RuntimeConstraints
+from ..integration import EvidenceState, RuntimeConstraints
 from ..llm.base import LLMAdapter
 from ..llm.openai_provider import OpenAIProvider
 from ..models.output_contract import NavigationContextPlaceholder
@@ -112,6 +112,105 @@ def _load_situation_mapping() -> dict[str, list]:
     }
 
 
+def _primary_source_registry_path() -> Path:
+    repo_root = Path(__file__).resolve().parents[5]
+    return (
+        repo_root
+        / "08_Development"
+        / "implementation"
+        / "data"
+        / "b09_primary_source_registry.json"
+    )
+
+
+def _load_primary_source_registry() -> dict[str, str]:
+    """Load the B09 governed population_id -> Primary Source Set mapping.
+
+    Display metadata only (see `data/B09_PRIMARY_SOURCE_REGISTRY_README.md`):
+    this file never becomes a second PP/case authority -- it is consulted
+    only after `population_id` has already been resolved through the
+    existing retrieval path, purely to look up the human-readable source
+    label for display. Values are copied verbatim from the governed
+    Population Registry; nothing here is inferred, expanded, or invented.
+    """
+    try:
+        raw = json.loads(_primary_source_registry_path().read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return {
+        entry["population_id"]: entry["primary_source_set"]
+        for entry in raw.get("entries", [])
+        if entry.get("population_id") and entry.get("primary_source_set")
+    }
+
+
+def _format_primary_source_set(raw_primary_source_set: str) -> list[str]:
+    """Split a governed Primary Source Set value into its constituent
+    source labels, using the Registry's own `" + "` separator convention.
+
+    Never expands an abbreviation to a full guideline name, never infers,
+    and never invents additional text -- only surrounding whitespace is
+    trimmed from each token, so any stray trailing character already
+    present in the Registry value (a small number of entries end in a
+    stray ".") is preserved rather than silently "corrected".
+    """
+    return [token.strip() for token in raw_primary_source_set.split(" + ") if token.strip()]
+
+
+def _resolve_primary_source_set(result: CERResult) -> list[str] | None:
+    """B09: resolve the governed, human-readable Primary Source Set
+    associated with the evidence actually used to generate this answer.
+
+    Three-state result (never conflated, per B09's locked missing-source
+    behavior):
+
+    - `None`: no real generation evidence applies to this outcome (a
+      safety block, or a retrieval/assembly/integration/generation/
+      validation failure, or the locked EMPTY_EVIDENCE_RESPONSE branch --
+      that branch's fixed response text already discloses "no evidence was
+      retrieved", so no separate source note is added here).
+    - `[]` (empty list): real evidence WAS used for generation, but no
+      valid Primary Source Set mapping exists for its population_id in the
+      governed Registry (or the evidence chain's own identity could not be
+      confirmed -- see the `evidence_package_id` check below). The Chat UI
+      shows the honest "Evidence information unavailable" fallback for
+      this case, never a fabricated or PP-ID-based source label.
+    - non-empty list: the governed Primary Source Set values for the PP
+      whose evidence was actually used to generate this answer.
+
+    Provenance integrity: `response.evidence_package_id` is asserted equal
+    to the `evidence_package_id` of the RTEP this same result actually
+    assembled (`assembly_result.package.metadata`) before the
+    `population_id` used for the Registry lookup is trusted -- the same
+    identity the evidence chain already carries end to end (RTEP Assembly
+    -> Runtime Integration -> Generation), never re-derived here.
+    """
+    if result.outcome is not CEROutcome.COMPLETED:
+        return None
+
+    generation_result = result.generation_result
+    response = generation_result.response if generation_result is not None else None
+    if response is None or response.evidence_state is not EvidenceState.HAS_EVIDENCE:
+        return None
+
+    assembly_result = result.assembly_result
+    package = assembly_result.package if assembly_result is not None else None
+    retrieval_response = result.retrieval_response
+    if (
+        package is None
+        or retrieval_response is None
+        or response.evidence_package_id != package.metadata.evidence_package_id
+    ):
+        return []
+
+    population_id = retrieval_response.request.population_id
+    raw_primary_source_set = _load_primary_source_registry().get(population_id)
+    if not raw_primary_source_set:
+        return []
+
+    return _format_primary_source_set(raw_primary_source_set)
+
+
 def _load_navigation_catalog() -> list[dict[str, str]]:
     """Load the Chat UI's controlled navigation catalog from the same
     manifest projection `EvaluationCaseResolver` uses.
@@ -174,9 +273,18 @@ class ChatQueryResponse(BaseModel):
     value if resolution itself failed). `answer` is the governed generated
     content when one exists, or the governed stage message otherwise —
     never text invented by this endpoint.
+
+    `sources` (B09) is the governed, human-readable Primary Source Set for
+    the evidence actually used to generate `answer` -- see
+    `_resolve_primary_source_set()`'s three-state contract: `None` when no
+    real generation evidence applies to this outcome, `[]` when evidence
+    was used but no valid Registry mapping was found (Chat UI shows an
+    honest "unavailable" fallback), or a populated list of source labels.
+    Never a PP identifier.
     """
     answer: str
     status: str
+    sources: list[str] | None = None
 
 
 @app.post("/chat/query", response_model=ChatQueryResponse)
@@ -202,7 +310,11 @@ def chat_query(request: ChatQueryRequest) -> ChatQueryResponse:
     else:
         answer = result.message or "No response was produced for this request."
 
-    return ChatQueryResponse(answer=answer, status=result.outcome.value)
+    return ChatQueryResponse(
+        answer=answer,
+        status=result.outcome.value,
+        sources=_resolve_primary_source_set(result),
+    )
 
 
 class ControlledEvaluationRequest(BaseModel):

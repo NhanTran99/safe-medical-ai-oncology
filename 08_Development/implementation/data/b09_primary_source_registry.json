@@ -1,0 +1,967 @@
+{
+  "artifact_type": "B09_PRIMARY_SOURCE_REGISTRY",
+  "artifact_version": "1.0",
+  "description": "Governed PP ID -> human-readable Primary Source Set mapping, sourced verbatim from the Population Registry (never a second PP/case authority -- consulted only for display, after population_id has already been resolved through the existing EvaluationCaseResolver / retrieval path). Each value is copied exactly as recorded in the Registry's 'Primary Source Set' column, with no expansion of abbreviations, no inference, and no invented text.",
+  "source_registry": "Population_Registry_Working_Document.xlsx",
+  "source_registry_sheet": "Population Registry2",
+  "source_registry_column": "Primary Source Set",
+  "source_registry_row_count": 239,
+  "entries": [
+    {
+      "population_id": "PP-0001",
+      "primary_source_set": "NCI + ACS + NCCN Patient"
+    },
+    {
+      "population_id": "PP-0002",
+      "primary_source_set": "NCI + ACS + NCCN Patient + ESMO"
+    },
+    {
+      "population_id": "PP-0003",
+      "primary_source_set": "NCI + ACS + NCCN Patient + ESMO"
+    },
+    {
+      "population_id": "PP-0004",
+      "primary_source_set": "NCI PDQ Prevention + NCI Patient + ACS + NCCN Patient + ESMO"
+    },
+    {
+      "population_id": "PP-0005",
+      "primary_source_set": "NCI PDQ + NCI Patient + ACS + NCCN Patient + ESMO"
+    },
+    {
+      "population_id": "PP-0006",
+      "primary_source_set": "NCI PDQ + NCI Patient + ACS + NCCN Patient + ESMO"
+    },
+    {
+      "population_id": "PP-0007",
+      "primary_source_set": "NCI PDQ + NCI Patient + ACS + NCCN Patient + ESMO"
+    },
+    {
+      "population_id": "PP-0008",
+      "primary_source_set": "NCI PDQ + NCI Patient + ACS + NCCN Patient + ESMO"
+    },
+    {
+      "population_id": "PP-0009",
+      "primary_source_set": "NCI PDQ + NCI Patient + ACS + NCCN Patient + ESMO"
+    },
+    {
+      "population_id": "PP-0010",
+      "primary_source_set": "NCI PDQ + NCI Patient + ACS + NCCN Patient + ESMO"
+    },
+    {
+      "population_id": "PP-0011",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0012",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0013",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0014",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0015",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0016",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0017",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0018",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0019",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0020",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0021",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0022",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0023",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0024",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0025",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0026",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0027",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0028",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0029",
+      "primary_source_set": "NCCN + JNCCN + NCI PDQ + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0030",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0031",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0032",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0033",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0034",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0035",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0036",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0037",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0038",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0039",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0040",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0041",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0042",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0043",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0044",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0045",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0046",
+      "primary_source_set": "NCI + NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0047",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0048",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0049",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0050",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0051",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0052",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0053",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0054",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0055",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0056",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0057",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0058",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0059",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0060",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0061",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0062",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0063",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0064",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + RECIST 1.1"
+    },
+    {
+      "population_id": "PP-0065",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + RECIST 1.1"
+    },
+    {
+      "population_id": "PP-0066",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + RECIST 1.1"
+    },
+    {
+      "population_id": "PP-0067",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + RECIST 1.1"
+    },
+    {
+      "population_id": "PP-0068",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + RECIST 1.1"
+    },
+    {
+      "population_id": "PP-0069",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0070",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0071",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + SNMMI + RSNA"
+    },
+    {
+      "population_id": "PP-0072",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0073",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0074",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0075",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0076",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0077",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0078",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0079",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0080",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0081",
+      "primary_source_set": "NCI PDQ + ACS + NCCN + JNCCN + ESMO + ACR + RSNA"
+    },
+    {
+      "population_id": "PP-0082",
+      "primary_source_set": "NCI Dictionary + NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0083",
+      "primary_source_set": "NCI Dictionary + NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0084",
+      "primary_source_set": "NCI Dictionary + NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0085",
+      "primary_source_set": "NCI Dictionary + NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0086",
+      "primary_source_set": "NCI Dictionary + NCI PDQ + ACS + CAP + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0087",
+      "primary_source_set": "NCI PDQ + ACS + CAP + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0088",
+      "primary_source_set": "CAP + NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0089",
+      "primary_source_set": "NCI Dictionary + NCI PDQ + ACS + CAP + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0090",
+      "primary_source_set": "AJCC + UICC + NCI Dictionary + NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0091",
+      "primary_source_set": "AJCC + UICC + NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0092",
+      "primary_source_set": "AJCC + UICC + NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0093",
+      "primary_source_set": "NCCN + NCI PDQ + ACS + ESMO + AJCC + JNCCN"
+    },
+    {
+      "population_id": "PP-0094",
+      "primary_source_set": "AJCC + NCI PDQ + ACS + NCCN + JNCCN + ESMO"
+    },
+    {
+      "population_id": "PP-0095",
+      "primary_source_set": "NCI PDQ + NCCN + ACS + AJCC + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0096",
+      "primary_source_set": "NCI Dictionary & PDQ + NCCN + ASCO + ACS + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0097",
+      "primary_source_set": "NCI Dictionary & PDQ + NCCN + ASCO + CAP + ACS + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0098",
+      "primary_source_set": "NCI + NHGRI + NIH + NCCN + ASCO + ACS + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0099",
+      "primary_source_set": "NCI + NCCN + ASCO + CAP + ACS + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0100",
+      "primary_source_set": "FDA + NCI + NCCN + ASCO + CAP + ACS + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0101",
+      "primary_source_set": "NCI + NCCN + ASCO + CAP + AMP + ACS + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0102",
+      "primary_source_set": "NCI + NCCN + ASCO + CAP + AMP + ACS + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0103",
+      "primary_source_set": "NCI + NHGRI + NCCN + ASCO + CAP + AMP + ACS + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0104",
+      "primary_source_set": "NCI + NHGRI + NCCN + ASCO + CAP + AMP + ACS + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0105",
+      "primary_source_set": "NCI + NHGRI + NCCN + ASCO + CAP + AMP + ACS + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0106",
+      "primary_source_set": "NCI + NCCN + ASCO + CAP + AMP + ACS + ESMO + JNCCN"
+    },
+    {
+      "population_id": "PP-0107",
+      "primary_source_set": "ACMG + AMP + ClinGen + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0108",
+      "primary_source_set": "ACMG + AMP + ClinGen + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0109",
+      "primary_source_set": "ACMG + AMP + ClinGen + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0110",
+      "primary_source_set": "ACMG + AMP + ClinGen + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0111",
+      "primary_source_set": "ACMG + AMP + ClinGen + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0112",
+      "primary_source_set": "ACMG + AMP + ClinGen + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0113",
+      "primary_source_set": "ACMG + AMP + ClinGen + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0114",
+      "primary_source_set": "ACMG + AMP + ClinGen + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0115",
+      "primary_source_set": "ACMG + AMP + ClinGen + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0116",
+      "primary_source_set": "ACMG + AMP + ClinGen + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0117",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0118",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0119",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0120",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0121",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0122",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0123",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0124",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0125",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0126",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0127",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0128",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0129",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0130",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0131",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0132",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0133",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0134",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0135",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0136",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0137",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0138",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0139",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0140",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0141",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0142",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0143",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + ClinGen SVI Splicing Subgroup + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0144",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0145",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + ClinGen VCEPs + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0146",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + ClinGen VCEPs + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0147",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + ClinGen VCEPs + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0148",
+      "primary_source_set": "ACMG + AMP + ClinGen SVI + ClinGen VCEPs + CAP + NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0149",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0150",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0151",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0152",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0153",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0154",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0155",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0156",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0157",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0158",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0159",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0160",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0161",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0162",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0163",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0164",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0165",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0166",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0167",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0168",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0169",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0170",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0171",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0172",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0173",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0174",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0175",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0176",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0177",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0178",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0179",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0180",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0181",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0182",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0183",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0184",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0185",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0186",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0187",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0188",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0189",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0190",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0191",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0192",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0193",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0194",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0195",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0196",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0197",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0198",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0199",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0200",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0201",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0202",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0203",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0204",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0205",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0206",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0207",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0208",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0209",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0210",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0211",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0212",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0213",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0214",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0215",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0216",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0217",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0218",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0219",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0220",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0221",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0222",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0223",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0224",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0225",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0226",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0227",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0228",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0229",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0230",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0231",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0232",
+      "primary_source_set": "Vietnamese Ministry of Health (MoH) treatment and diagnosis guidelines+NCI + NCCN + ASCO + ACS + ESMO"
+    },
+    {
+      "population_id": "PP-0233",
+      "primary_source_set": "ESMO + ASCO + NCCN + NCI."
+    },
+    {
+      "population_id": "PP-0234",
+      "primary_source_set": "ESMO + ASCO + NCCN + NCI"
+    },
+    {
+      "population_id": "PP-0235",
+      "primary_source_set": "ESMO + ASCO + NCCN"
+    },
+    {
+      "population_id": "PP-0236",
+      "primary_source_set": "NCCN + ESMO + ASCO + NCI."
+    },
+    {
+      "population_id": "PP-0237",
+      "primary_source_set": "NCCN + ESMO + ASCO + NCI + ACS."
+    },
+    {
+      "population_id": "PP-0238",
+      "primary_source_set": "NCCN + ESMO + ASCO + NCI + ACS."
+    },
+    {
+      "population_id": "PP-0239",
+      "primary_source_set": "NCCN + ESMO + ASCO + NCI + ACS."
+    }
+  ]
+}

@@ -485,3 +485,130 @@ def test_chat_page_uses_request_time_case_id_not_live_selected_case_id_for_follo
     # The specific regression: selectedCaseId must never be read again
     # inside the response handler to set lastCaseId.
     assert "lastCaseId = selectedCaseId;" not in html
+
+
+# --- B09: bounded evidence transparency (Sources) ---------------------------
+
+
+def test_chat_query_response_includes_the_governed_primary_source_set():
+    # EC-0001 -> PP-0001; PP-0001's governed Registry value is
+    # "NCI + ACS + NCCN Patient" (Population Registry2 sheet, Primary
+    # Source Set column) -- proves a valid Registry mapping produces the
+    # expected human-readable source list.
+    response = client.post("/chat/query", json={"message": "What is Cancer?", "case_id": "EC-0001"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "COMPLETED"
+    assert body["sources"] == ["NCI", "ACS", "NCCN Patient"]
+
+
+def test_chat_query_sources_are_human_readable_never_a_pp_identifier():
+    response = client.post("/chat/query", json={"message": "What is gastric cancer?", "case_id": "EC-0002"})
+
+    body = response.json()
+    assert body["sources"]
+    for source in body["sources"]:
+        assert not source.startswith("PP-")
+        assert "PP-" not in source
+
+
+def test_chat_query_sources_correspond_to_the_population_id_actually_used():
+    # EC-0001 -> PP-0001 and EC-0147 -> PP-0147 have distinct governed
+    # Primary Source Set values -- the returned sources must track whichever
+    # PP's evidence actually produced the answer, never a fixed/shared value.
+    first = client.post("/chat/query", json={"message": "q1", "case_id": "EC-0001"}).json()
+    second = client.post("/chat/query", json={"message": "q2", "case_id": "EC-0147"}).json()
+
+    assert first["sources"] == ["NCI", "ACS", "NCCN Patient"]
+    assert second["sources"] == [
+        "ACMG",
+        "AMP",
+        "ClinGen SVI",
+        "ClinGen VCEPs",
+        "CAP",
+        "NCI",
+        "NCCN",
+        "ASCO",
+        "ACS",
+        "ESMO",
+    ]
+    assert first["sources"] != second["sources"]
+
+
+def test_chat_query_sources_is_none_when_case_resolution_fails():
+    # No evidence/PP identity is ever associated with an unresolved case --
+    # sources must be None (not [], which is reserved for "evidence was
+    # used but no valid source mapping exists"), and no separate UI note
+    # is warranted since the CaseResolutionResult message already explains
+    # the failure.
+    response = client.post("/chat/query", json={"message": "irrelevant", "case_id": "EC-9999"})
+
+    body = response.json()
+    assert body["status"] == "UNKNOWN_CASE"
+    assert body["sources"] is None
+
+
+def test_chat_query_sources_falls_back_honestly_when_no_registry_mapping_exists(monkeypatch):
+    # The real Registry has 239/239 coverage (no PP is naturally missing a
+    # mapping), so the "missing mapping" branch is exercised deterministically
+    # by monkeypatching the registry loader for this one request -- the rest
+    # of the real governed CER path (retrieval/assembly/integration/
+    # generation/validation) still runs unmodified and unmocked.
+    import safe_medical_ai.api.main as main_module
+
+    monkeypatch.setattr(main_module, "_load_primary_source_registry", lambda: {})
+
+    response = client.post("/chat/query", json={"message": "What is Cancer?", "case_id": "EC-0001"})
+
+    body = response.json()
+    assert body["status"] == "COMPLETED"
+    assert body["answer"]
+    # Real evidence was used for generation, but the (mocked) Registry has
+    # no mapping -- the empty-list "unavailable" state, never None (which
+    # would imply no evidence was used at all) and never a fabricated value.
+    assert body["sources"] == []
+
+
+def test_format_primary_source_set_splits_on_registry_separator_without_altering_tokens():
+    from safe_medical_ai.api.main import _format_primary_source_set
+
+    assert _format_primary_source_set("NCI + ACS + NCCN Patient + ESMO") == [
+        "NCI",
+        "ACS",
+        "NCCN Patient",
+        "ESMO",
+    ]
+    # A stray trailing "." already present in a small number of real
+    # Registry values is preserved verbatim, never silently "corrected" --
+    # only surrounding whitespace is trimmed.
+    assert _format_primary_source_set("NCCN + ESMO + ASCO + NCI.") == [
+        "NCCN",
+        "ESMO",
+        "ASCO",
+        "NCI.",
+    ]
+
+
+def test_chat_page_renders_sources_in_an_element_distinct_from_the_answer():
+    # Structural regression guard (this repository's established way of
+    # covering client-side JS behavior -- see the D-F2 test above): the
+    # Sources line must be its own element/class, not appended into the
+    # `.chat-message.assistant` bubble's text.
+    html = client.get("/chat").text
+
+    assert "chat-sources" in html
+    assert "function appendSources(sources)" in html
+    assert "data.sources" in html
+    assert "Evidence information unavailable" in html
+
+
+def test_chat_query_response_still_returns_answer_and_status_alongside_sources():
+    # Existing callers reading only `answer`/`status` remain unaffected --
+    # `sources` is a purely additive field.
+    response = client.post("/chat/query", json={"message": "What is gastric cancer?", "case_id": "EC-0002"})
+
+    body = response.json()
+    assert isinstance(body["answer"], str) and body["answer"]
+    assert isinstance(body["status"], str) and body["status"]
+    assert "sources" in body
