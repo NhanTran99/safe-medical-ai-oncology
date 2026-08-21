@@ -33,12 +33,15 @@ def test_summarize_campaign_coverage_over_an_empty_sequence():
 
 
 def test_summarize_campaign_coverage_counts_distinct_case_and_population_ids(tmp_path):
+    # B12: real, on-topic controlled_question per case_id -- a
+    # semantically meaningless placeholder is no longer sufficient once
+    # the selected-PP request-relevance boundary exists.
     path = tmp_path / "results.jsonl"
-    record_execution_result(execute_case("EC-0001", "q1"), path)
-    record_execution_result(execute_case("EC-0003", "q2"), path)
+    record_execution_result(execute_case("EC-0001", "What is Cancer?"), path)
+    record_execution_result(execute_case("EC-0003", "What is Gastric Adenocarcinoma?"), path)
     # A repeated execution of the same case_id/population_id must not
     # inflate the distinct counts, even though it does add a new record.
-    record_execution_result(execute_case("EC-0003", "q3"), path)
+    record_execution_result(execute_case("EC-0003", "What is Gastric Adenocarcinoma?"), path)
 
     summary = summarize_campaign_coverage(read_execution_results(path))
 
@@ -48,8 +51,11 @@ def test_summarize_campaign_coverage_counts_distinct_case_and_population_ids(tmp
 
 
 def test_summarize_campaign_coverage_excludes_unresolved_cases_from_population_count(tmp_path):
+    # B12: real, on-topic controlled_question for EC-0001 -- see the note
+    # above. EC-9999 below is untouched: it fails case resolution before
+    # the relevance check ever runs, so its placeholder text is unaffected.
     path = tmp_path / "results.jsonl"
-    record_execution_result(execute_case("EC-0001", "q1"), path)
+    record_execution_result(execute_case("EC-0001", "What is Cancer?"), path)
     # An unresolved case_id never reaches a population_id -- it must be
     # counted in total_execution_records and case_resolution_outcome_counts,
     # but never as a "distinct population" (None is not a PP identity).
@@ -64,9 +70,11 @@ def test_summarize_campaign_coverage_excludes_unresolved_cases_from_population_c
 
 
 def test_summarize_campaign_coverage_groups_by_existing_cer_and_validation_outcomes(tmp_path):
+    # B12: real, on-topic controlled_question per case_id -- see the note
+    # above.
     path = tmp_path / "results.jsonl"
-    record_execution_result(execute_case("EC-0001", "q1"), path)
-    record_execution_result(execute_case("EC-0003", "q2"), path)
+    record_execution_result(execute_case("EC-0001", "What is Cancer?"), path)
+    record_execution_result(execute_case("EC-0003", "What is Gastric Adenocarcinoma?"), path)
 
     summary = summarize_campaign_coverage(read_execution_results(path))
 
@@ -82,9 +90,11 @@ def test_summarize_campaign_coverage_is_pure_over_a_caller_supplied_subset(tmp_p
     # summarize_campaign_coverage never reads a file itself -- it can
     # summarize any caller-supplied sequence, including a subset of a
     # larger recorded set.
+    # B12: real, on-topic controlled_question per case_id -- see the note
+    # above.
     path = tmp_path / "results.jsonl"
-    record_execution_result(execute_case("EC-0001", "q1"), path)
-    record_execution_result(execute_case("EC-0003", "q2"), path)
+    record_execution_result(execute_case("EC-0001", "What is Cancer?"), path)
+    record_execution_result(execute_case("EC-0003", "What is Gastric Adenocarcinoma?"), path)
     all_results = read_execution_results(path)
 
     subset_summary = summarize_campaign_coverage(all_results[:1])

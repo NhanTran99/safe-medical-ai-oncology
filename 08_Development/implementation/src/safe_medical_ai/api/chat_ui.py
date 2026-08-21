@@ -315,6 +315,13 @@ _PAGE_TEMPLATE = """<!doctype html>
   .chat-message.error { color: var(--red-600); }
   .chat-sources { margin: -0.6rem 0 0.9rem; font-size: 0.78rem; font-style: italic; color: var(--slate-400); }
   .chat-sources:last-child { margin-bottom: 0; }
+  .chat-boundary {
+    margin: 0 0 0.9rem;
+    padding: 0.2rem 0;
+    font-size: 0.78rem;
+    color: var(--amber-800);
+  }
+  .chat-boundary:last-child { margin-bottom: 0; }
 
   #followup-label {
     font-size: 0.78rem;
@@ -637,6 +644,40 @@ _PAGE_TEMPLATE = """<!doctype html>
         history.scrollTop = history.scrollHeight;
       }
 
+      // B11: bounded, honest wording per distinct governed `status` value
+      // -- never the raw internal status token shown to the user, and
+      // never a single generic label collapsing every non-COMPLETED
+      // status into one undifferentiated "out of scope" message. The
+      // underlying `data.answer` text (already governed -- e.g.
+      // SAFE_FALLBACK's locked no-evidence text) is never rewritten by
+      // this notice; it is only an additional, clearly distinguishable
+      // element alongside it. Any status not explicitly listed here
+      // (there is none today, but this stays defensive) falls back to a
+      // bounded, non-specific notice rather than silently rendering
+      // nothing or exposing the raw status string.
+      var STATUS_BOUNDARY_MESSAGES = {
+        SAFE_FALLBACK: "No governed evidence was available to answer this question.",
+        UNKNOWN_CASE: "This question could not be matched to an approved topic.",
+        MALFORMED_CASE_ID: "This question could not be matched to an approved topic.",
+        PROJECTION_UNAVAILABLE: "This question could not be matched to an approved topic.",
+        RETRIEVAL_FAILURE: "This request could not be completed due to a system issue. Please try again.",
+        EVIDENCE_ASSEMBLY_FAILURE: "This request could not be completed due to a system issue. Please try again.",
+        INTEGRATION_FAILURE: "This request could not be completed due to a system issue. Please try again.",
+        GENERATION_FAILURE: "This request could not be completed due to a system issue. Please try again.",
+        VALIDATION_FAILURE: "This request could not be completed due to a system issue. Please try again.",
+        SAFETY_BLOCKED: "This request could not be completed.",
+        NOT_RELEVANT: "This request does not appear to relate to the selected topic."
+      };
+
+      function appendBoundaryNotice(status) {
+        var el = document.createElement("div");
+        el.className = "chat-boundary";
+        el.textContent = STATUS_BOUNDARY_MESSAGES[status] ||
+          "This response has a limitation that could not be described in more detail.";
+        history.appendChild(el);
+        history.scrollTop = history.scrollHeight;
+      }
+
       function setLoading(isLoading) {
         input.disabled = isLoading;
         button.disabled = isLoading;
@@ -704,22 +745,40 @@ _PAGE_TEMPLATE = """<!doctype html>
           })
           .then(function (data) {
             setLoading(false);
+            if (data.status === "COMPLETED") {
             appendMessage("assistant", data.answer);
+            }
+            // B11: a non-COMPLETED status (SAFE_FALLBACK, a resolution
+            // failure, a technical pipeline failure, etc.) still arrives
+            // here as a normal 200 response -- the boundary notice makes
+            // that distinction visible without altering data.answer
+            // itself (already governed text, e.g. SAFE_FALLBACK's locked
+            // no-evidence response).
+            if (data.status !== "COMPLETED") {
+              appendBoundaryNotice(data.status);
+            }
             if (data.sources !== null && data.sources !== undefined) {
               appendSources(data.sources);
             }
-            // Only a real, completed exchange ever updates the bounded
-            // follow-up context -- a failed/errored turn below never does,
-            // so a prior good exchange is never overwritten with nothing.
-            // lastCaseId is set from requestCaseId (captured above at
-            // send time), never from selectedCaseId here -- selectedCaseId
-            // may already have changed to a different topic while this
-            // request was pending, and the recorded context must stay
-            // associated with the case that actually produced it.
-            lastQuestion = question;
-            lastAnswer = data.answer;
-            lastCaseId = requestCaseId;
-            followupLabel.hidden = false;
+            // B11: only a real COMPLETED exchange ever updates the bounded
+            // follow-up context -- a non-COMPLETED status (this still
+            // arrives as a normal 200 response, not the .catch() below)
+            // must never be recorded as valid prior substantive context,
+            // so a later follow-up can never silently build on a
+            // SAFE_FALLBACK/failure response as if it were a real answer.
+            // A prior good exchange is also never overwritten with a
+            // non-COMPLETED one. lastCaseId is set from requestCaseId
+            // (captured above at send time), never from selectedCaseId
+            // here -- selectedCaseId may already have changed to a
+            // different topic while this request was pending, and the
+            // recorded context must stay associated with the case that
+            // actually produced it.
+            if (data.status === "COMPLETED") {
+              lastQuestion = question;
+              lastAnswer = data.answer;
+              lastCaseId = requestCaseId;
+              followupLabel.hidden = false;
+            }
           })
           .catch(function (err) {
             setLoading(false);

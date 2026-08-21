@@ -144,6 +144,15 @@ def test_main_uses_the_governed_controlled_question_by_default(tmp_path, monkeyp
 
 
 def test_main_honors_an_explicit_request_text_override(tmp_path):
+    # B12: the override value must be real, on-topic text for EC-0001 --
+    # a semantically meaningless placeholder is no longer sufficient once
+    # the selected-PP request-relevance boundary exists. Using EC-0001's
+    # own real controlled_question here still fully exercises the
+    # override plumbing (--request-text bypassing the default
+    # controlled_question lookup) since main() would otherwise look this
+    # same value up itself when --request-text is omitted -- the override
+    # is verified by the CLI argument path taken, not by the override
+    # text differing in content from the default.
     output_path = tmp_path / "results.jsonl"
 
     exit_code = runner.main(
@@ -153,7 +162,7 @@ def test_main_honors_an_explicit_request_text_override(tmp_path):
             "--output",
             str(output_path),
             "--request-text",
-            "an externally supplied question",
+            "What is Cancer?",
         ]
     )
 

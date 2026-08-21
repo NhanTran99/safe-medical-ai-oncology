@@ -5,8 +5,9 @@ to run the *existing* governed execution path
 (`api.main._run_controlled_evaluation`) for one approved `case_id`. It
 reuses every existing typed outcome vocabulary by reference
 (`CaseResolutionOutcome`, `SafetyAction`, `RetrievalOutcome`,
-`GenerationOutcome`, `CandidateValidationOutcome`, `CEROutcome`) rather
-than duplicating or reinterpreting any of them (D04/Principle 3).
+`GenerationOutcome`, `CandidateValidationOutcome`, `CEROutcome`,
+`RequestRelevanceOutcome`) rather than duplicating or reinterpreting any
+of them (D04/Principle 3).
 
 This module implements no execution logic itself (see `harness.py`) and
 carries no clinical content, clinical judgment, or clinical-quality score
@@ -24,6 +25,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from ..cases import CaseResolutionOutcome
 from ..cer import CEROutcome
 from ..generation import GenerationOutcome
+from ..relevance import RequestRelevanceOutcome
 from ..retrieval import RetrievalOutcome
 from ..safety import SafetyAction
 from ..validation import CandidateValidationOutcome
@@ -55,9 +57,15 @@ class CampaignExecutionResult(BaseModel):
     Every field that could not be established without either fabricating
     data or re-implementing/duplicating an existing boundary is left
     `None` rather than guessed -- e.g. `resolved_population_id` is `None`
-    whenever case resolution itself failed, and `repository_commit` is
-    `None` when it cannot be safely determined (see
-    `harness._best_effort_repository_commit`).
+    whenever case resolution itself failed, *or* whenever case resolution
+    succeeded but the request was `NOT_RELEVANT` to the resolved PP (see
+    `request_relevance_outcome` below) -- no population-level
+    retrieval/evidence/generation ever occurred for either reason, so
+    `resolved_population_id` stays `None` for both. `case_resolution_outcome`
+    still distinguishes the two: `RESOLVED` for a `NOT_RELEVANT` request
+    (identity resolution genuinely succeeded), any other value for a true
+    resolution failure. `repository_commit` is `None` when it cannot be
+    safely determined (see `harness._best_effort_repository_commit`).
     """
 
     model_config = ConfigDict(frozen=True)
@@ -91,6 +99,18 @@ class CampaignExecutionResult(BaseModel):
     provider_name: str | None = None
     validation_outcome: CandidateValidationOutcome | None = None
     cer_outcome: CEROutcome | None = None
+
+    # B12 compatibility amendment: the existing, already-governed
+    # RequestRelevanceOutcome (`relevance/`), reused by reference exactly
+    # like every other stage outcome above -- never reinterpreted as a
+    # CaseResolutionOutcome/CEROutcome value, and never merged with them.
+    # `None` when the request-relevance stage was never reached in a
+    # distinguishable way (i.e. for every pre-B12 execution shape: a true
+    # resolution failure, or a completed CER run where relevance
+    # implicitly permitted execution to proceed). Set to `NOT_RELEVANT`
+    # only for the one new short-circuit path `harness.py` added -- see
+    # its docstring for the exact construction.
+    request_relevance_outcome: RequestRelevanceOutcome | None = None
 
     # B10 reproducibility amendment: the existing evidence_package_id
     # (already produced by RTEP Assembly and carried unchanged through

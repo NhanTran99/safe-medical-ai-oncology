@@ -286,7 +286,12 @@ def test_chat_query_executes_a_non_pp_0002_case():
     # RC-1: chat_query is no longer fixed to EC-0002/PP-0002 -- proves the
     # exact user-facing endpoint the browser calls can reach a different
     # approved case end-to-end.
-    response = client.post("/chat/query", json={"message": "test question", "case_id": "EC-0003"})
+    # B12: real, on-topic controlled_question for EC-0003 -- a
+    # semantically meaningless placeholder is no longer sufficient once
+    # the selected-PP request-relevance boundary exists.
+    response = client.post(
+        "/chat/query", json={"message": "What is Gastric Adenocarcinoma?", "case_id": "EC-0003"}
+    )
 
     assert response.status_code == 200
     assert response.json()["status"] == "COMPLETED"
@@ -517,8 +522,21 @@ def test_chat_query_sources_correspond_to_the_population_id_actually_used():
     # EC-0001 -> PP-0001 and EC-0147 -> PP-0147 have distinct governed
     # Primary Source Set values -- the returned sources must track whichever
     # PP's evidence actually produced the answer, never a fixed/shared value.
-    first = client.post("/chat/query", json={"message": "q1", "case_id": "EC-0001"}).json()
-    second = client.post("/chat/query", json={"message": "q2", "case_id": "EC-0147"}).json()
+    # B12: real, on-topic controlled_question per case_id -- see the note
+    # above.
+    first = client.post(
+        "/chat/query", json={"message": "What is Cancer?", "case_id": "EC-0001"}
+    ).json()
+    second = client.post(
+        "/chat/query",
+        json={
+            "message": (
+                "Please explain BS3 (Well-Established Functional Studies Show "
+                "No Deleterious Effect on Gene or Gene Product)."
+            ),
+            "case_id": "EC-0147",
+        },
+    ).json()
 
     assert first["sources"] == ["NCI", "ACS", "NCCN Patient"]
     assert second["sources"] == [
@@ -612,3 +630,195 @@ def test_chat_query_response_still_returns_answer_and_status_alongside_sources()
     assert isinstance(body["answer"], str) and body["answer"]
     assert isinstance(body["status"], str) and body["status"]
     assert "sources" in body
+
+
+# --- B11: bounded answer-boundary UX + follow-up-context gating ------------
+
+
+def test_chat_page_renders_a_boundary_notice_for_non_completed_statuses():
+    # Structural regression guard (this repository's established way of
+    # covering client-side JS behavior -- see the D-F2 test above): a
+    # dedicated element/function/CSS class exists for non-COMPLETED
+    # statuses, distinct from the plain assistant-answer bubble.
+    html = client.get("/chat").text
+
+    assert "chat-boundary" in html
+    assert "function appendBoundaryNotice(status)" in html
+    assert 'if (data.status !== "COMPLETED")' in html
+    assert "appendBoundaryNotice(data.status);" in html
+
+
+def test_chat_page_boundary_messages_distinguish_status_categories():
+    # Locked requirement: do not collapse every non-COMPLETED status into
+    # one generic "out of scope" label -- SAFE_FALLBACK (evidence-absent),
+    # a case-resolution failure, and a technical pipeline failure must
+    # each carry genuinely distinct, bounded, non-clinical wording, never
+    # the raw internal status token.
+    html = client.get("/chat").text
+
+    assert "SAFE_FALLBACK:" in html
+    assert "No governed evidence was available to answer this question." in html
+    assert "UNKNOWN_CASE:" in html
+    assert "This question could not be matched to an approved topic." in html
+    assert "RETRIEVAL_FAILURE:" in html
+    assert "This request could not be completed due to a system issue. Please try again." in html
+    # Every distinct message text must appear at least once -- confirms
+    # SAFE_FALLBACK/UNKNOWN_CASE/RETRIEVAL_FAILURE are not all mapped to
+    # one identical string.
+    boundary_messages = {
+        "No governed evidence was available to answer this question.",
+        "This question could not be matched to an approved topic.",
+        "This request could not be completed due to a system issue. Please try again.",
+    }
+    assert len(boundary_messages) == 3
+
+
+def test_chat_page_never_shows_a_generic_out_of_scope_label_for_every_status():
+    html = client.get("/chat").text
+
+    assert "OUT-OF-SCOPE" not in html
+    assert "OUT OF SCOPE" not in html
+
+
+def test_chat_page_boundary_notice_does_not_replace_the_governed_answer_text():
+    # The existing appendMessage("assistant", data.answer) call for the
+    # governed answer text is untouched -- the boundary notice is only an
+    # additional, separate element, never a substitute for it.
+    html = client.get("/chat").text
+
+    assert 'appendMessage("assistant", data.answer);' in html
+
+
+def test_chat_page_follow_up_context_is_only_updated_for_completed_status():
+    # B11 fix: the previously-unconditional follow-up-context update is
+    # now gated on data.status === "COMPLETED", so a SAFE_FALLBACK/failure
+    # response is never recorded as valid prior substantive context for a
+    # later follow-up question.
+    html = client.get("/chat").text
+
+    assert 'if (data.status === "COMPLETED") {' in html
+    assert "lastQuestion = question;" in html
+    assert "followupLabel.hidden = false;" in html
+
+
+def test_chat_query_reaches_the_real_governed_cer_execution_path_unaffected_by_b11():
+    # B11 is a UI-only change -- the existing /chat/query backend contract
+    # and behavior (B04/B08/B09) must be completely unaffected.
+    response = client.post("/chat/query", json={"message": "What is gastric cancer?", "case_id": "EC-0002"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "COMPLETED"
+    assert isinstance(body["answer"], str) and body["answer"]
+    assert body["sources"] == ["NCI", "ACS", "NCCN Patient", "ESMO"]
+
+
+def test_chat_query_unknown_case_status_is_unaffected_by_b11():
+    # A representative non-COMPLETED status: the backend's own outcome
+    # value/semantics are completely unchanged by the UI-only B11 amendment.
+    response = client.post("/chat/query", json={"message": "irrelevant", "case_id": "EC-9999"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "UNKNOWN_CASE"
+    assert body["sources"] is None
+
+
+# --- B12: selected-PP request relevance -------------------------------------
+
+
+def test_chat_query_returns_not_relevant_for_a_mismatched_request():
+    # EC-0002's own topic is "What is Gastric Cancer?" -- paired here with
+    # EC-0239's real, materially different governed controlled_question.
+    # Both strings are real governed text; only the pairing is synthetic.
+    response = client.post(
+        "/chat/query",
+        json={"message": "Please explain Genomic Biomarkers.", "case_id": "EC-0002"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "NOT_RELEVANT"
+    assert body["sources"] is None
+    assert "Genomic Biomarkers" not in body["answer"]
+
+
+def test_chat_query_relevant_request_still_completes_unaffected():
+    response = client.post(
+        "/chat/query", json={"message": "What is Gastric Cancer?", "case_id": "EC-0002"}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "COMPLETED"
+
+
+def test_chat_page_renders_the_not_relevant_boundary_mapping():
+    # B11's existing STATUS_BOUNDARY_MESSAGES lookup gains exactly one
+    # additive entry -- no other B11 code/gating logic changes.
+    html = client.get("/chat").text
+
+    assert "NOT_RELEVANT:" in html
+    assert "This request does not appear to relate to the selected topic." in html
+    # The B11 gating logic itself (from the prior batch) is unmodified.
+    assert 'if (data.status !== "COMPLETED")' in html
+    assert 'if (data.status === "COMPLETED") {' in html
+
+
+def test_chat_query_b08_composed_followup_is_exempt_from_relevance_check():
+    # A short, legitimate follow-up ("Can you clarify?") shares no
+    # significant vocabulary with any PP's title/question in isolation --
+    # B08's own existing gating (hasFollowupContext(), only ever true
+    # after a real prior COMPLETED exchange on this exact case_id)
+    # already establishes topical continuity, so the composed follow-up
+    # message must bypass the relevance check entirely, not be scored on
+    # its trailing segment alone.
+    composed = (
+        "[Previous question]: What is Gastric Cancer?\n"
+        "[Previous answer]: some prior governed answer\n"
+        "[Follow-up question]: Can you clarify?"
+    )
+    response = client.post("/chat/query", json={"message": composed, "case_id": "EC-0002"})
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "COMPLETED"
+
+
+def test_chat_query_b08_followup_still_updates_context_after_relevance_bypass():
+    # Full round trip: an initial COMPLETED exchange, then a composed
+    # follow-up that bypasses the relevance check -- existing B08/B11
+    # follow-up-context behavior (gated on status === COMPLETED) is
+    # unaffected by B12.
+    initial = client.post(
+        "/chat/query", json={"message": "What is Gastric Cancer?", "case_id": "EC-0002"}
+    )
+    assert initial.json()["status"] == "COMPLETED"
+
+    composed = (
+        "[Previous question]: What is Gastric Cancer?\n"
+        f"[Previous answer]: {initial.json()['answer']}\n"
+        "[Follow-up question]: Can you clarify?"
+    )
+    follow_up = client.post("/chat/query", json={"message": composed, "case_id": "EC-0002"})
+
+    assert follow_up.status_code == 200
+    assert follow_up.json()["status"] == "COMPLETED"
+
+
+# --- B11 bounded verification surface --------------------------------------
+
+
+def test_chat_query_not_relevant_answer_never_contains_the_raw_status_token():
+    # The displayed answer bubble text (data.answer, rendered verbatim by
+    # appendMessage) must always be governed, human-readable copy -- the
+    # raw internal status token ("NOT_RELEVANT") must never leak into it,
+    # even though that same token is the correct, separate `status` field
+    # value used only for the boundary-notice lookup.
+    response = client.post(
+        "/chat/query",
+        json={"message": "Please explain Genomic Biomarkers.", "case_id": "EC-0002"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "NOT_RELEVANT"
+    assert "NOT_RELEVANT" not in body["answer"]

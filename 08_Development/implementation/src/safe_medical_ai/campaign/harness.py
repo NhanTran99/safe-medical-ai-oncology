@@ -30,6 +30,7 @@ from ..api.main import ControlledEvaluationRequest, _run_controlled_evaluation
 from ..cases import CaseResolutionOutcome, CaseResolutionResult
 from ..config import get_settings
 from ..llm.base import LLMAdapter
+from ..relevance import RequestRelevanceResult
 from ..trace import set_trace_id
 from .models import CampaignExecutionResult
 
@@ -129,6 +130,36 @@ def execute_case(
             case_id=case_id,
             resolved_population_id=None,
             case_resolution_outcome=outcome.outcome,
+            message=outcome.message,
+        )
+
+    if isinstance(outcome, RequestRelevanceResult):
+        # B12: case identity resolution genuinely succeeded (RESOLVED) --
+        # the request was blocked at the separate, later content-relevance
+        # stage, never at case resolution. No CER/retrieval/evidence/
+        # generation/provider work was attempted for this execution (the
+        # same hard block `/chat/query` and `/cer/evaluate` already get
+        # from `_run_controlled_evaluation` -- this harness call reused
+        # that exact same shared boundary, nothing reimplemented here).
+        # `resolved_population_id` stays `None`: no population-level
+        # result exists to report (see `CampaignExecutionResult`'s own
+        # docstring for why this is distinct from a true resolution
+        # failure despite both being `None` here).
+        logger.info(
+            "execute_case: request relevance %s case_id=%s execution_id=%s",
+            outcome.outcome.value,
+            case_id,
+            execution_id,
+        )
+        return CampaignExecutionResult(
+            execution_id=execution_id,
+            execution_timestamp=execution_timestamp,
+            trace_id=trace_id,
+            repository_commit=repository_commit,
+            case_id=case_id,
+            resolved_population_id=None,
+            case_resolution_outcome=CaseResolutionOutcome.RESOLVED,
+            request_relevance_outcome=outcome.outcome,
             message=outcome.message,
         )
 

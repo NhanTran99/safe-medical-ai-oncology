@@ -48,11 +48,12 @@ that one has occurred.**
   `EvidenceCaptureOutcome` (mechanical persistence status only). Every
   clinical/stage outcome field reuses an existing typed enum by reference
   (`CaseResolutionOutcome`, `SafetyAction`, `RetrievalOutcome`,
-  `GenerationOutcome`, `CandidateValidationOutcome`, `CEROutcome`) — none
-  is duplicated or reinterpreted.
+  `GenerationOutcome`, `CandidateValidationOutcome`, `CEROutcome`,
+  `RequestRelevanceOutcome`) — none is duplicated or reinterpreted.
 - `harness.py` — `execute_case(case_id, request_text, *, provider=None)`:
   one execution attempt, one result, always returned (even for a failed
-  resolution). `provider` is optional; omitting it preserves the existing
+  resolution or a `NOT_RELEVANT` request -- see "B12 compatibility" below).
+  `provider` is optional; omitting it preserves the existing
   `_select_provider()` default (deterministic unless
   `SMA_OPENAI_API_KEY` is configured), so calling this with no `provider`
   argument is deterministic and makes no real external API call.
@@ -123,6 +124,21 @@ per-case-request text either from the caller's own `--request-text`
 override or from that case's existing governed `controlled_question` (the
 same text already used by the Chat UI's navigation catalog) — never
 invented question text.
+
+## B12 compatibility: selected-PP request relevance
+
+`_run_controlled_evaluation()` (the shared boundary `execute_case()`
+calls) can now return a `relevance.RequestRelevanceResult` instead of a
+CER result, when the request was genuinely unrelated to the resolved PP
+(see `relevance/README.md`). `execute_case()` recognizes this exact
+outcome and returns a `CampaignExecutionResult` with
+`case_resolution_outcome=RESOLVED` (identity resolution genuinely
+succeeded), `request_relevance_outcome=NOT_RELEVANT`, and
+`resolved_population_id=None` (no population-level result exists to
+report) — never a fabricated retrieval/evidence/generation result, and
+never CER/retrieval/generation/provider work for that execution. This is
+a pure consumption of the already-decided governed outcome: no relevance
+logic is duplicated here.
 
 ## Example (illustrative only — this package does not run this itself)
 

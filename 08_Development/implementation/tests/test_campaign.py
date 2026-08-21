@@ -17,6 +17,7 @@ from safe_medical_ai.campaign import (
 from safe_medical_ai.cases import CaseResolutionOutcome
 from safe_medical_ai.cer import CEROutcome
 from safe_medical_ai.generation import GenerationOutcome
+from safe_medical_ai.relevance import RequestRelevanceOutcome
 from safe_medical_ai.validation import CandidateValidationOutcome
 
 
@@ -55,7 +56,15 @@ def test_execute_case_preserves_the_detailed_generation_outcome():
 
 
 def test_execute_case_preserves_retrieval_and_safety_outcomes():
-    result = execute_case("EC-0147", "test question")
+    # B12: real, on-topic controlled_question for EC-0147 -- a
+    # semantically meaningless placeholder is no longer sufficient once
+    # the selected-PP request-relevance boundary exists (see
+    # relevance/README.md's test-fixture contract note).
+    result = execute_case(
+        "EC-0147",
+        "Please explain BS3 (Well-Established Functional Studies Show "
+        "No Deleterious Effect on Gene or Gene Product).",
+    )
 
     assert result.retrieval_outcome is not None
     assert result.retrieval_outcome.value == "FOUND"
@@ -99,9 +108,11 @@ def test_read_execution_results_returns_empty_list_when_file_does_not_exist(tmp_
 
 
 def test_record_execution_result_is_append_only(tmp_path):
+    # B12: real, on-topic controlled_question per case_id -- see the note
+    # above.
     path = tmp_path / "results.jsonl"
-    first = record_execution_result(execute_case("EC-0001", "q1"), path)
-    second = record_execution_result(execute_case("EC-0002", "q2"), path)
+    first = record_execution_result(execute_case("EC-0001", "What is Cancer?"), path)
+    second = record_execution_result(execute_case("EC-0002", "What is Gastric Cancer?"), path)
 
     results = read_execution_results(path)
 
@@ -263,3 +274,52 @@ def test_execute_case_provider_model_reflects_configured_openai_model(monkeypatc
         assert result.provider_model == "gpt-5.4-mini-test"
     finally:
         get_settings.cache_clear()
+
+
+# --- B12 compatibility: NOT_RELEVANT never crashes the campaign harness ----
+
+
+def test_execute_case_handles_a_not_relevant_request_without_raising(tmp_path):
+    # Genuine regression coverage for the AttributeError this refinement
+    # fixes: before it, execute_case() assumed the shared boundary's
+    # return value always exposed `retrieval_response`, which a
+    # `RequestRelevanceResult` does not. EC-0002's own topic is
+    # "What is Gastric Cancer?" -- paired here with EC-0239's real,
+    # materially different governed controlled_question. Both strings are
+    # real, existing governed text already shipped in the frozen
+    # manifest; only the pairing is synthetic -- no clinical content is
+    # invented.
+    result = execute_case("EC-0002", "Please explain Genomic Biomarkers.")
+
+    assert result.case_resolution_outcome == CaseResolutionOutcome.RESOLVED
+    assert result.request_relevance_outcome == RequestRelevanceOutcome.NOT_RELEVANT
+    # No population-level result was ever produced -- these must all be
+    # None, never a fabricated retrieval/evidence/generation outcome.
+    assert result.resolved_population_id is None
+    assert result.cer_outcome is None
+    assert result.retrieval_outcome is None
+    assert result.retrieval_result_count is None
+    assert result.generation_outcome is None
+    assert result.validation_outcome is None
+    assert result.evidence_package_id is None
+    assert result.message
+
+    # The durable record round-trips through JSON Lines capture like any
+    # other result -- no special-casing needed in capture.py.
+    path = tmp_path / "results.jsonl"
+    captured = record_execution_result(result, path)
+    assert captured.evidence_capture_status == EvidenceCaptureOutcome.CAPTURED
+    read_back = read_execution_results(path)
+    assert read_back[0].request_relevance_outcome == RequestRelevanceOutcome.NOT_RELEVANT
+
+
+def test_execute_case_on_topic_request_is_unaffected_by_the_not_relevant_branch():
+    # The existing on-topic execution path is completely untouched --
+    # request_relevance_outcome simply stays None (that stage's outcome is
+    # not distinguishable from "not reached" for a completed CER run).
+    result = execute_case("EC-0002", "What is Gastric Cancer?")
+
+    assert result.case_resolution_outcome == CaseResolutionOutcome.RESOLVED
+    assert result.request_relevance_outcome is None
+    assert result.cer_outcome == CEROutcome.COMPLETED
+    assert result.resolved_population_id == "PP-0002"

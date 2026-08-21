@@ -21,6 +21,7 @@ from ..integration import EvidenceState, RuntimeConstraints
 from ..llm.base import LLMAdapter
 from ..llm.openai_provider import OpenAIProvider
 from ..models.output_contract import NavigationContextPlaceholder
+from ..relevance import RequestRelevanceOutcome, RequestRelevanceResult, evaluate_request_relevance
 from ..retrieval import FilesystemRepositorySource, RetrievalRequest
 from ..safety import RiskClass, SafetyInput
 
@@ -235,6 +236,46 @@ def _load_navigation_catalog() -> list[dict[str, str]]:
     ]
 
 
+def _load_case_relevance_targets() -> dict[str, tuple[str, str]]:
+    """`case_id -> (pp_title, controlled_question)` lookup for the
+    selected-PP request-relevance check (see `relevance/`).
+
+    Reuses `_load_navigation_catalog()`'s existing read of the same
+    manifest projection -- never a second/independent read of the
+    projection file, and never used for case *resolution* (that remains
+    `EvaluationCaseResolver`'s job alone).
+    """
+    return {
+        entry["case_id"]: (entry["pp_title"], entry["controlled_question"])
+        for entry in _load_navigation_catalog()
+    }
+
+
+#: The exact marker `chat_ui.py`'s submit handler composes a B08 follow-up
+#: request with (see its "[Follow-up question]: " + question construction).
+_FOLLOWUP_QUESTION_MARKER = "[Follow-up question]: "
+
+
+def _is_b08_composed_followup(request_text: str) -> bool:
+    """Whether `request_text` is a B08-composed follow-up message.
+
+    A B08-composed follow-up embeds fixed prior-context markers
+    ("[Previous question]: ... [Previous answer]: ... [Follow-up
+    question]: ..."), only ever constructed client-side when
+    `hasFollowupContext()` is true -- which itself requires a real prior
+    COMPLETED exchange on this exact `case_id` (B08/B11's own existing
+    gating; see `relevance/README.md`). Such a request's topical
+    continuity is therefore already established upstream of this check:
+    scoring only the short new-question segment in isolation (e.g. "Can
+    you clarify?") would almost always show zero shared topic vocabulary
+    and wrongly block a legitimate follow-up, so the relevance check is
+    not applied to it at all -- not weakened, just correctly scoped to
+    the class of request it was designed for (a fresh, non-follow-up
+    question against the selected PP).
+    """
+    return _FOLLOWUP_QUESTION_MARKER in request_text
+
+
 @app.get("/chat", response_class=HTMLResponse)
 def chat_ui() -> HTMLResponse:
     """Controlled Chat UI shell. Presentation only — no business logic.
@@ -301,6 +342,12 @@ def chat_query(request: ChatQueryRequest) -> ChatQueryResponse:
     if isinstance(outcome, CaseResolutionResult):
         return ChatQueryResponse(
             answer=outcome.message or "This request could not be resolved to an approved case.",
+            status=outcome.outcome.value,
+        )
+
+    if isinstance(outcome, RequestRelevanceResult):
+        return ChatQueryResponse(
+            answer=outcome.message or "This request does not appear to relate to the selected topic.",
             status=outcome.outcome.value,
         )
 
@@ -373,6 +420,27 @@ def _run_controlled_evaluation(request: ControlledEvaluationRequest, *, provider
 
     resolved_case = resolution.case
 
+    # Selected-PP request relevance (see `relevance/`): runs after case
+    # identity is resolved and before any retrieval/evidence/generation/
+    # provider work is attempted, so a NOT_RELEVANT request never reaches
+    # CERRequest/CERRuntime at all -- a genuine hard block, not a soft
+    # flag layered onto a real execution. `case_id` remains the sole
+    # identity authority (EvaluationCaseResolver, above, unchanged); this
+    # is a separate, narrower question about the request TEXT, not a
+    # second case/PP authority. B08-composed follow-ups are exempted --
+    # see `_is_b08_composed_followup`.
+    if not _is_b08_composed_followup(request.request_text):
+        pp_title, controlled_question = _load_case_relevance_targets().get(
+            request.case_id, (None, None)
+        )
+        relevance_result = evaluate_request_relevance(
+            request.request_text,
+            pp_title=pp_title,
+            controlled_question=controlled_question,
+        )
+        if relevance_result.outcome is RequestRelevanceOutcome.NOT_RELEVANT:
+            return relevance_result
+
     repo_root = Path(__file__).resolve().parents[5]
     source_root = (
         repo_root
@@ -441,6 +509,25 @@ def controlled_evaluate(request: ControlledEvaluationRequest):
         return {
             "outcome": "CASE_NOT_APPROVED",
             "case_resolution": outcome.outcome.value,
+            "message": outcome.message,
+            "safety": None,
+            "retrieval": None,
+            "retrieval_results": 0,
+            "assembly": None,
+            "integration": None,
+            "generation": None,
+            "validation": None,
+            "boundary": {
+                "mode": "RESEARCH / DEVELOPMENT / CONTROLLED EVALUATION ONLY",
+                "formal_validation": "NOT STARTED",
+                "execution_authorization": "NOT GRANTED",
+                "vc_clin": "DEFERRED",
+            },
+        }
+
+    if isinstance(outcome, RequestRelevanceResult):
+        return {
+            "outcome": outcome.outcome.value,
             "message": outcome.message,
             "safety": None,
             "retrieval": None,
