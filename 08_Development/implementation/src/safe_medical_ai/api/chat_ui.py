@@ -314,6 +314,13 @@ _PAGE_TEMPLATE = """<!doctype html>
   .chat-message.assistant { color: var(--slate-600); }
   .chat-message.error { color: var(--red-600); }
 
+  #followup-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--slate-600);
+    margin: 0 0 0.4rem;
+  }
+
   #chat-form { display: flex; gap: 0.6rem; }
   #question-input {
     flex: 1;
@@ -390,6 +397,8 @@ _PAGE_TEMPLATE = """<!doctype html>
 
     <main class="chat-main">
       <div id="chat-history" aria-live="polite"></div>
+
+      <p id="followup-label" hidden>Ask a follow-up question</p>
 
       <form id="chat-form">
         <textarea
@@ -508,6 +517,12 @@ _PAGE_TEMPLATE = """<!doctype html>
 
       function selectTopic(item, activeButton) {
         selectedCaseId = item.case_id;
+        // B08: selecting any topic (manually, via a Situation, or via
+        // Random Topic -- all funnel through this one function) starts a
+        // fresh interaction; the follow-up affordance only reappears once
+        // a real exchange completes on this newly selected case_id (see
+        // hasFollowupContext()).
+        followupLabel.hidden = true;
 
         Array.prototype.forEach.call(
           topicList.querySelectorAll(".topic-chip"),
@@ -576,6 +591,24 @@ _PAGE_TEMPLATE = """<!doctype html>
       var button = document.getElementById("send-button");
       var history = document.getElementById("chat-history");
       var status = document.getElementById("chat-status");
+      var followupLabel = document.getElementById("followup-label");
+
+      // B08: bounded, same-session-only follow-up context -- the single
+      // most recent exchange only, held purely in this page's JS memory.
+      // Never written to localStorage/sessionStorage/cookies/a server
+      // database, so it is lost on reload and never crosses sessions.
+      // Only ever set from a real completed exchange (never fabricated),
+      // and only ever used when the follow-up is asked about the SAME
+      // case_id that produced it -- switching Topic/Random Topic changes
+      // selectedCaseId, which makes hasFollowupContext() false again
+      // until a new exchange completes under the new case.
+      var lastQuestion = null;
+      var lastAnswer = null;
+      var lastCaseId = null;
+
+      function hasFollowupContext() {
+        return lastQuestion !== null && lastAnswer !== null && lastCaseId === selectedCaseId;
+      }
 
       function appendMessage(role, text) {
         var el = document.createElement("div");
@@ -612,10 +645,37 @@ _PAGE_TEMPLATE = """<!doctype html>
         input.value = "";
         setLoading(true);
 
+        // B08 race-condition fix: capture the case_id this specific
+        // request is actually being sent for, at send time. selectedCaseId
+        // itself is not disabled/locked while a request is pending (Topic/
+        // Situation/Random Topic selection remains clickable), so it can
+        // change before this request's response arrives. requestCaseId is
+        // a per-call local, unaffected by any later change to
+        // selectedCaseId, so both the outbound request and the eventual
+        // response handling stay associated with the case that was
+        // actually selected when THIS request was sent -- never whatever
+        // happens to be selected when the response later arrives.
+        var requestCaseId = selectedCaseId;
+
+        // B08: when this question follows a completed exchange on the
+        // SAME case_id, include that single bounded prior exchange so the
+        // user can naturally refer to it (e.g. "explain that part again")
+        // without restating it. The displayed history above always shows
+        // only the raw `question` the user typed -- this composed text is
+        // only what is sent through the existing governed request_text
+        // field, unchanged from every other question's contract.
+        var requestText = question;
+        if (hasFollowupContext()) {
+          requestText =
+            "[Previous question]: " + lastQuestion +
+            "\\n[Previous answer]: " + lastAnswer +
+            "\\n[Follow-up question]: " + question;
+        }
+
         fetch("/chat/query", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: question, case_id: selectedCaseId }),
+          body: JSON.stringify({ message: requestText, case_id: requestCaseId }),
         })
           .then(function (response) {
             if (!response.ok) {
@@ -626,6 +686,18 @@ _PAGE_TEMPLATE = """<!doctype html>
           .then(function (data) {
             setLoading(false);
             appendMessage("assistant", data.answer);
+            // Only a real, completed exchange ever updates the bounded
+            // follow-up context -- a failed/errored turn below never does,
+            // so a prior good exchange is never overwritten with nothing.
+            // lastCaseId is set from requestCaseId (captured above at
+            // send time), never from selectedCaseId here -- selectedCaseId
+            // may already have changed to a different topic while this
+            // request was pending, and the recorded context must stay
+            // associated with the case that actually produced it.
+            lastQuestion = question;
+            lastAnswer = data.answer;
+            lastCaseId = requestCaseId;
+            followupLabel.hidden = false;
           })
           .catch(function (err) {
             setLoading(false);

@@ -352,3 +352,136 @@ def test_existing_cer_evaluate_endpoint_behavior_is_unaffected_by_chat_integrati
 def test_health_endpoint_still_works():
     response = client.get("/health")
     assert response.status_code == 200
+
+
+# --- B08: bounded same-session follow-up ------------------------------------
+
+
+def test_chat_page_contains_a_hidden_followup_label():
+    # AC-01: the follow-up affordance exists, but is not shown until a
+    # real exchange has completed (RC-5-style: no implicit "you can follow
+    # up now" before anything has actually happened).
+    html = client.get("/chat").text
+
+    assert 'id="followup-label"' in html
+    assert "Ask a follow-up question" in html
+
+
+def test_chat_page_reveals_followup_label_only_after_a_completed_exchange():
+    html = client.get("/chat").text
+
+    assert '<p id="followup-label" hidden>Ask a follow-up question</p>' in html
+    assert "followupLabel.hidden = false;" in html
+
+
+def test_chat_page_resets_followup_label_on_topic_change():
+    # A newly selected topic (manual, Situation-filtered, or Random Topic
+    # -- all funnel through selectTopic()) must not carry over a stale
+    # "you're following up" affordance from a different case_id.
+    html = client.get("/chat").text
+
+    assert "followupLabel.hidden = true;" in html
+
+
+def test_chat_page_follow_up_context_is_gated_on_the_same_case_id():
+    # AC-03/AC-08: bounded context is only reused when the follow-up is
+    # asked about the SAME case_id that produced it -- never fabricated
+    # or carried across an unrelated topic/case.
+    html = client.get("/chat").text
+
+    assert "function hasFollowupContext()" in html
+    assert "lastCaseId === selectedCaseId" in html
+
+
+def test_chat_page_follow_up_composes_bounded_prior_exchange_only():
+    # AC-02/AC-03: the composed follow-up text carries exactly one prior
+    # question/answer pair -- not an unbounded history.
+    html = client.get("/chat").text
+
+    assert "[Previous question]" in html
+    assert "[Previous answer]" in html
+    assert "[Follow-up question]" in html
+
+
+def test_chat_page_follow_up_never_updates_context_on_a_failed_exchange():
+    # AC-08: a failed/errored turn must not overwrite the last known-good
+    # follow-up context with nothing.
+    html = client.get("/chat").text
+
+    then_index = html.index("lastQuestion = question;")
+    catch_index = html.index(".catch(function (err) {")
+    assert then_index < catch_index, (
+        "lastQuestion/lastAnswer must only be set in the success (.then) "
+        "branch, before the .catch branch"
+    )
+
+
+def test_chat_page_follow_up_still_uses_only_the_existing_chat_query_endpoint():
+    # AC-04/AC-05: no second/alternate endpoint or direct provider call is
+    # introduced for the follow-up path.
+    html = client.get("/chat").text
+
+    assert html.count('fetch("/chat/query"') == 1
+
+
+def test_chat_query_accepts_a_composed_follow_up_and_completes():
+    # Simulates exactly what the browser sends for a genuine follow-up
+    # (built the same way hasFollowupContext()'s composed text is) --
+    # proves the existing /chat/query contract requires no change: the
+    # bounded prior context is carried entirely inside the existing
+    # `message` field.
+    initial = client.post(
+        "/chat/query", json={"message": "What is TNM staging?", "case_id": "EC-0008"}
+    )
+    assert initial.status_code == 200
+    assert initial.json()["status"] == "COMPLETED"
+
+    composed = (
+        "[Previous question]: What is TNM staging?\n"
+        f"[Previous answer]: {initial.json()['answer']}\n"
+        "[Follow-up question]: I still don't understand this part."
+    )
+    follow_up = client.post(
+        "/chat/query", json={"message": composed, "case_id": "EC-0008"}
+    )
+
+    assert follow_up.status_code == 200
+    body = follow_up.json()
+    assert body["status"] == "COMPLETED"
+    assert body["answer"]
+
+
+def test_chat_page_uses_request_time_case_id_not_live_selected_case_id_for_followup_context():
+    # B08 race-condition regression (D-F2). selectedCaseId is never
+    # disabled/locked while a request is pending -- Topic/Situation/Random
+    # Topic controls remain clickable during setLoading(true) -- so the
+    # following sequence is possible:
+    #   1. Case A selected -> selectedCaseId = A.
+    #   2. Question A submitted. A per-request `requestCaseId` is captured
+    #      from selectedCaseId at THIS moment (A), before the fetch is
+    #      sent, and used for the outbound case_id.
+    #   3. While Case A's request is still pending, the user switches to
+    #      Case B -> selectedCaseId becomes B.
+    #   4. Case A's response arrives. If the response handler re-read the
+    #      live selectedCaseId here, lastCaseId would become B and Case
+    #      A's Q/A would be wrongly recorded as valid follow-up context
+    #      for Case B. The fix stores lastCaseId from the SAME
+    #      requestCaseId captured in step 2, so it stays A regardless of
+    #      what selectedCaseId has since become.
+    #   5. A later follow-up asked while Case B is selected must NOT
+    #      inherit Case A's Q/A: hasFollowupContext()'s
+    #      `lastCaseId(A) === selectedCaseId(B)` check correctly
+    #      evaluates false.
+    #
+    # This is a structural regression guard over the exact code shape
+    # that prevents the race (the existing test suite's established way
+    # of covering client-side JS behavior, since no async-DOM-timing test
+    # runner is part of this repository's existing test framework).
+    html = client.get("/chat").text
+
+    assert "var requestCaseId = selectedCaseId;" in html
+    assert "case_id: requestCaseId" in html
+    assert "lastCaseId = requestCaseId;" in html
+    # The specific regression: selectedCaseId must never be read again
+    # inside the response handler to set lastCaseId.
+    assert "lastCaseId = selectedCaseId;" not in html
