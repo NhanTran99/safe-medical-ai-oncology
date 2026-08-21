@@ -28,6 +28,7 @@ from pathlib import Path
 
 from ..api.main import ControlledEvaluationRequest, _run_controlled_evaluation
 from ..cases import CaseResolutionOutcome, CaseResolutionResult
+from ..config import get_settings
 from ..llm.base import LLMAdapter
 from ..trace import set_trace_id
 from .models import CampaignExecutionResult
@@ -58,6 +59,27 @@ def _best_effort_repository_commit() -> str | None:
     except Exception:
         logger.warning("execute_case: repository commit not safely available", exc_info=True)
         return None
+
+
+def _configured_provider_model(provider_name: str | None) -> str | None:
+    """B10 (I4): the exact configured model string, when applicable.
+
+    Only meaningful for `OpenAIProvider` -- `DeterministicLocalProvider`
+    has no configured model, so this is `None` for it (never a fabricated
+    placeholder). Read from the existing settings/configuration path
+    (`config.get_settings().openai_model`) rather than reaching into the
+    provider instance: `OpenAIProvider` is not amended to expose this, per
+    the locked I4 boundary ("Do NOT redesign OpenAIProvider").
+
+    This reflects the currently *configured* model, which matches what
+    was actually used whenever `provider` came from the existing
+    `_select_provider()` default (the path every existing caller of this
+    harness uses) -- a provider a caller explicitly injects with a
+    different model string is not separately distinguished here.
+    """
+    if provider_name != "OpenAIProvider":
+        return None
+    return get_settings().openai_model
 
 
 def execute_case(
@@ -117,6 +139,7 @@ def execute_case(
     generation_response = (
         result.generation_result.response if result.generation_result else None
     )
+    provider_name = generation_response.provider_name if generation_response else None
 
     logger.info(
         "execute_case: CER outcome=%s case_id=%s execution_id=%s",
@@ -139,8 +162,16 @@ def execute_case(
             len(result.retrieval_response.results) if result.retrieval_response else None
         ),
         generation_outcome=result.generation_result.outcome if result.generation_result else None,
-        provider_name=generation_response.provider_name if generation_response else None,
+        provider_name=provider_name,
         validation_outcome=result.validation_result.outcome if result.validation_result else None,
         cer_outcome=result.outcome,
+        # B10 (I3): the same evidence_package_id already threaded through
+        # RTEP Assembly -> Generation (see evidence/models.py's
+        # RuntimeEvidenceMetadata.evidence_package_id and
+        # generation/models.py's CandidateResponse.evidence_package_id) --
+        # not a second evidence-identity system, just this durable record
+        # now also carrying the identifier that was already there.
+        evidence_package_id=generation_response.evidence_package_id if generation_response else None,
+        provider_model=_configured_provider_model(provider_name),
         message=result.message,
     )

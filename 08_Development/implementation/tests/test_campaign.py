@@ -189,3 +189,77 @@ def test_record_execution_result_reports_write_failure_without_raising(tmp_path)
 
     assert captured.evidence_capture_status == EvidenceCaptureOutcome.WRITE_FAILED
     assert not bad_path.exists()
+
+
+# --- B10 (I3/I4): evidence_package_id and exact provider/model identity ----
+
+
+def test_execute_case_result_carries_the_existing_evidence_package_id(monkeypatch):
+    # Not a second/independent identifier: it must be exactly the same
+    # value RTEP Assembly produced and Generation carried forward for
+    # THIS SAME execution. A fresh uuid4() is generated on every call to
+    # `_run_controlled_evaluation` (RTEP assembly), so a *separate*
+    # reference call would never match by construction -- instead, spy on
+    # the harness's own dependency to capture the exact CERResult this one
+    # execute_case() call actually produced, and compare against that.
+    import safe_medical_ai.campaign.harness as harness_module
+
+    real_run_controlled_evaluation = harness_module._run_controlled_evaluation
+    captured = {}
+
+    def spy(*args, **kwargs):
+        result = real_run_controlled_evaluation(*args, **kwargs)
+        captured["result"] = result
+        return result
+
+    monkeypatch.setattr(harness_module, "_run_controlled_evaluation", spy)
+
+    result = execute_case("EC-0003", "What is Gastric Adenocarcinoma?")
+
+    assert result.evidence_package_id
+    assert (
+        result.evidence_package_id
+        == captured["result"].generation_result.response.evidence_package_id
+    )
+
+
+def test_execute_case_evidence_package_id_is_none_when_resolution_fails():
+    result = execute_case("EC-9999", "irrelevant question")
+
+    assert result.evidence_package_id is None
+
+
+def test_execute_case_provider_model_is_none_for_the_deterministic_provider():
+    # The default test-suite provider (see conftest.py) has no configured
+    # model -- provider_model must never be fabricated for it.
+    result = execute_case("EC-0003", "What is Gastric Adenocarcinoma?")
+
+    assert result.provider_name == "DeterministicLocalProvider"
+    assert result.provider_model is None
+
+
+def test_execute_case_provider_model_reflects_configured_openai_model(monkeypatch):
+    # No real OpenAI call is made: a lightweight stand-in LLMAdapter is
+    # injected directly (the same explicit-injection mechanism B07 already
+    # exercises), named "OpenAIProvider" only so its class name matches
+    # what harness._configured_provider_model() switches on -- it does not
+    # subclass or otherwise depend on the real llm.openai_provider module.
+    # This proves the model string is read from the existing settings/
+    # configuration path (config.get_settings().openai_model), never
+    # fabricated or guessed.
+    from safe_medical_ai.config import get_settings
+    from safe_medical_ai.llm.base import LLMAdapter
+
+    class OpenAIProvider(LLMAdapter):
+        def generate(self, *, request):
+            return "stand-in generated content"
+
+    monkeypatch.setenv("SMA_OPENAI_MODEL", "gpt-5.4-mini-test")
+    get_settings.cache_clear()
+    try:
+        result = execute_case("EC-0003", "What is Gastric Adenocarcinoma?", provider=OpenAIProvider())
+
+        assert result.provider_name == "OpenAIProvider"
+        assert result.provider_model == "gpt-5.4-mini-test"
+    finally:
+        get_settings.cache_clear()

@@ -92,6 +92,17 @@ class CampaignExecutionResult(BaseModel):
     validation_outcome: CandidateValidationOutcome | None = None
     cer_outcome: CEROutcome | None = None
 
+    # B10 reproducibility amendment: the existing evidence_package_id
+    # (already produced by RTEP Assembly and carried unchanged through
+    # Generation -- see evidence/models.py and generation/models.py) and
+    # the exact configured provider model string (existing
+    # config.Settings.openai_model), threaded into the durable record
+    # rather than only living transiently inside one execute_case() call.
+    # Both `None` whenever the underlying value does not apply/exist,
+    # never fabricated -- see harness.py for exactly when each is set.
+    evidence_package_id: str | None = None
+    provider_model: str | None = None
+
     # Mechanical capture status (D08) -- set by `capture.record_execution_result`,
     # not by the harness itself (a result is constructed before anyone has
     # attempted to persist it).

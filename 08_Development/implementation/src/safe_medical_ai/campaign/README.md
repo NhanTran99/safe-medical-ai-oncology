@@ -1,4 +1,4 @@
-# B07 Execution/Evidence Preparation Layer (Phase 6 Stage 2 Track 3, B07)
+# B07 Execution/Evidence Preparation Layer (Phase 6 Stage 2 Track 3, B07 + B10)
 
 ## What this is
 
@@ -62,6 +62,9 @@ that one has occurred.**
   (`CAPTURED` or `WRITE_FAILED` — never silently assumed). Append-only:
   an existing recorded line is never rewritten. `read_execution_results(path)`
   reads them back.
+- `coverage.py` (B10) — `summarize_campaign_coverage(results)`: a pure,
+  read-only aggregation over an already-recorded sequence of
+  `CampaignExecutionResult`s. See "B10: coverage aggregation" below.
 
 ## Reproducibility fields
 
@@ -74,14 +77,52 @@ distinguish repeated executions of the same `case_id` from each other.
 uses, so a campaign execution's logs correlate the same way an HTTP
 request's logs already do.
 
+B10 additionally threads through two fields that were already produced
+during execution but not previously carried into the durable record:
+`evidence_package_id` is exactly the same identifier RTEP Assembly
+produced and Generation carried forward (`evidence/models.py`'s
+`RuntimeEvidenceMetadata.evidence_package_id`, `generation/models.py`'s
+`CandidateResponse.evidence_package_id`) — not a second/independent
+evidence-identity system. `provider_model` is the exact configured model
+string (`config.get_settings().openai_model`) when the provider used was
+`OpenAIProvider`, and `None` for the deterministic provider (which has no
+configured model) — see `harness._configured_provider_model`.
+
 ## Where results live
 
 This package does not hardcode a default output location — the caller
-supplies `path` to `record_execution_result`/`read_execution_results`.
-Choosing and creating a permanent, governed location for campaign
-evidence (e.g. under `09_Evaluation/validation/phase6/`) is a decision
-for the future campaign-execution task itself, not this preparation
-layer — nothing under that directory is created by this package.
+supplies `path` to `record_execution_result`/`read_execution_results`,
+and B10's `scripts/run_campaign_execution.py` (below) keeps that the same
+way: its `--output` argument is required, with no default. Choosing and
+creating a permanent, governed location for campaign evidence (e.g. under
+`09_Evaluation/validation/phase6/`) remains a decision for a separately
+authorized campaign run, not this preparation layer or its runner —
+nothing under that directory is created by this package.
+
+## B10: coverage aggregation (`coverage.py`)
+
+`summarize_campaign_coverage(results)` is a pure, read-only function over
+an already-recorded sequence of `CampaignExecutionResult`s (typically
+`read_execution_results()`'s return value). It counts total records,
+distinct `case_id`/`resolved_population_id` values, and tallies the
+existing `case_resolution_outcome`/`cer_outcome`/`validation_outcome`
+vocabularies unchanged — it never re-executes anything, never reads a
+file itself, and never claims coverage of any case_id/population_id that
+is not present in the records it was given.
+
+## B10: dev-time orchestration runner (`scripts/run_campaign_execution.py`)
+
+A thin script, following the same convention as
+`scripts/generate_evaluation_case_manifest_projection.py` (plain
+`argparse`, never imported by the FastAPI runtime), that calls
+`execute_case()` and `record_execution_result()` once per externally
+supplied `case_id` (via `--case-id`/`--case-ids-file`) and prints a
+`summarize_campaign_coverage()` summary of the resulting `--output` file.
+It selects, samples, and defaults no case set of its own, and it prints
+per-case-request text either from the caller's own `--request-text`
+override or from that case's existing governed `controlled_question` (the
+same text already used by the Chat UI's navigation catalog) — never
+invented question text.
 
 ## Example (illustrative only — this package does not run this itself)
 
