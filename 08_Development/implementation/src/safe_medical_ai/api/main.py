@@ -276,9 +276,15 @@ def _is_b08_composed_followup(request_text: str) -> bool:
     return _FOLLOWUP_QUESTION_MARKER in request_text
 
 
+@app.get("/", response_class=HTMLResponse)
 @app.get("/chat", response_class=HTMLResponse)
 def chat_ui() -> HTMLResponse:
     """Controlled Chat UI shell. Presentation only — no business logic.
+
+    Registered at both `/` (primary public entry point) and `/chat`
+    (preserved for backward-compatible links/bookmarks) -- the same
+    handler, not a redirect and not a duplicated implementation, so both
+    paths always render identically and stay in sync by construction.
 
     `Cache-Control: no-store` is defensive only: it stops a browser from
     ever serving a stale cached copy of this page (with stale embedded

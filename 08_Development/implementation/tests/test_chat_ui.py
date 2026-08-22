@@ -25,6 +25,17 @@ def test_chat_route_returns_an_html_page():
     assert "text/html" in response.headers["content-type"]
 
 
+def test_root_route_renders_the_same_chat_page_as_chat():
+    # 0036: `/` is the same chat_ui() handler as `/chat` (stacked route
+    # decorators, not a redirect and not a duplicated implementation) --
+    # both must render identically, and `/chat` must keep working unchanged.
+    root_response = client.get("/")
+    chat_response = client.get("/chat")
+
+    assert root_response.status_code == 200
+    assert root_response.text == chat_response.text
+
+
 def test_chat_route_disables_browser_caching():
     # Defensive: a stale cached /chat response (with stale embedded catalog
     # data or stale navigation JS) must never be served from browser cache
