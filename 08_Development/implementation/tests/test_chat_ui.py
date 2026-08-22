@@ -369,13 +369,13 @@ def test_chat_page_contains_a_hidden_followup_label():
     html = client.get("/chat").text
 
     assert 'id="followup-label"' in html
-    assert "Ask a follow-up question" in html
+    assert "Continue exploring" in html
 
 
 def test_chat_page_reveals_followup_label_only_after_a_completed_exchange():
     html = client.get("/chat").text
 
-    assert '<p id="followup-label" hidden>Ask a follow-up question</p>' in html
+    assert '<p id="followup-label" hidden>Continue exploring</p>' in html
     assert "followupLabel.hidden = false;" in html
 
 

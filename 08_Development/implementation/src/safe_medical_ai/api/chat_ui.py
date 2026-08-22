@@ -144,6 +144,19 @@ _PAGE_TEMPLATE = """<!doctype html>
     padding: 0.3rem 0.75rem;
     white-space: nowrap;
   }
+  .about-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border-radius: 0.5rem;
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+  }
+  .about-toggle:hover { background: rgba(255, 255, 255, 0.18); }
+  .about-toggle:focus { outline: 2px solid #fff; outline-offset: 2px; }
 
   /* --- overall layout: fixed-width sidebar + main chat --------------- */
 
@@ -183,13 +196,21 @@ _PAGE_TEMPLATE = """<!doctype html>
     border-radius: 1rem;
     padding: 1rem 1.1rem;
   }
-  .panel-label {
+  .panel-label { margin: 0 0 0.6rem; }
+  .panel-label .step-number {
+    display: block;
     font-size: 0.62rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--slate-400);
-    margin: 0 0 0.6rem;
+  }
+  .panel-label .step-title {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--slate-600);
+    margin-top: 0.1rem;
   }
 
   .situation-list, .topic-list, .starter-list {
@@ -283,6 +304,116 @@ _PAGE_TEMPLATE = """<!doctype html>
   }
   .disclaimer strong { font-weight: 600; }
 
+  /* --- About drawer ---------------------------------------------------- */
+
+  .about-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 37, 64, 0.35);
+    z-index: 40;
+  }
+  .about-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(440px, 92vw);
+    background: #fff;
+    border-left: 1px solid var(--slate-200);
+    box-shadow: -4px 0 24px rgba(15, 23, 42, 0.12);
+    z-index: 41;
+    display: flex;
+    flex-direction: column;
+  }
+  .about-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--slate-200);
+    flex-shrink: 0;
+  }
+  .about-drawer-header h2 { font-size: 1rem; font-weight: 600; color: var(--slate-700); margin: 0; }
+  .about-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    line-height: 1;
+    color: var(--slate-400);
+    cursor: pointer;
+    padding: 0.25rem;
+  }
+  .about-close:hover { color: var(--slate-700); }
+  .about-close:focus { outline: 2px solid var(--blue-500); outline-offset: 2px; }
+
+  .about-drawer-body { padding: 1.25rem; overflow-y: auto; flex: 1; }
+  .about-section { margin: 0 0 1.5rem; }
+  .about-section:last-child { margin-bottom: 0; }
+  .about-section h3 {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate-400);
+    margin: 0 0 0.5rem;
+  }
+  .about-section p { font-size: 0.85rem; line-height: 1.55; color: var(--slate-600); margin: 0 0 0.5rem; }
+  .about-section p:last-child { margin-bottom: 0; }
+  .about-section ul, .about-section ol {
+    margin: 0 0 0.5rem;
+    padding-left: 1.15rem;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--slate-600);
+  }
+  .about-section li { margin: 0 0 0.3rem; }
+  .about-note { font-size: 0.78rem; font-style: italic; color: var(--slate-400); }
+
+  .about-scope-grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
+  @media (min-width: 480px) {
+    .about-scope-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .about-scope-card {
+    border: 1px solid var(--slate-200);
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.85rem;
+    background: var(--slate-50);
+  }
+  .about-scope-heading {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--slate-600);
+    margin: 0 0 0.5rem;
+  }
+  .about-scope-card ul { margin: 0; padding-left: 1.1rem; }
+  .about-scope-card li { font-size: 0.8rem; margin: 0 0 0.25rem; }
+  .about-scope-card li:last-child { margin-bottom: 0; }
+
+  .about-safety-label {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--slate-600);
+    background: var(--slate-100);
+    border-radius: 0.4rem;
+    padding: 0.2rem 0.5rem;
+    margin: 0 0 0.5rem;
+  }
+  .about-team-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--slate-700);
+    margin: 0 0 0.35rem;
+  }
+  .about-system-info { margin: 0; font-size: 0.85rem; color: var(--slate-600); }
+  .about-system-info dt { font-weight: 600; color: var(--slate-700); margin: 0.5rem 0 0.15rem; }
+  .about-system-info dt:first-child { margin-top: 0; }
+  .about-system-info dd { margin: 0; line-height: 1.5; }
+
   /* --- main chat area -------------------------------------------------- */
 
   main.chat-main {
@@ -291,6 +422,13 @@ _PAGE_TEMPLATE = """<!doctype html>
     flex-direction: column;
     padding: 1.25rem 1.5rem 1.5rem;
     min-width: 0;
+  }
+
+  #chat-history, #chat-form, #followup-label, #followup-suggestions, #chat-status {
+    max-width: 900px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   #chat-history {
@@ -311,10 +449,36 @@ _PAGE_TEMPLATE = """<!doctype html>
   .chat-message { margin: 0 0 0.9rem; white-space: pre-wrap; line-height: 1.5; font-size: 0.88rem; }
   .chat-message:last-child { margin-bottom: 0; }
   .chat-message.user { font-weight: 600; color: var(--slate-700); }
-  .chat-message.assistant { color: var(--slate-600); }
+  .chat-message.assistant { color: var(--slate-600); font-size: 1rem; line-height: 1.6; }
   .chat-message.error { color: var(--red-600); }
-  .chat-sources { margin: -0.6rem 0 0.9rem; font-size: 0.78rem; font-style: italic; color: var(--slate-400); }
+  .chat-answer-paragraph { margin: 0 0 0.75rem; }
+  .chat-answer-paragraph:last-child { margin-bottom: 0; }
+  .chat-answer-list { margin: 0 0 0.75rem; padding-left: 1.25rem; }
+  .chat-answer-list:last-child { margin-bottom: 0; }
+  .chat-answer-list li { margin: 0 0 0.35rem; }
+  .chat-answer-list li:last-child { margin-bottom: 0; }
+  .chat-sources { margin: -0.3rem 0 0.9rem; }
   .chat-sources:last-child { margin-bottom: 0; }
+  .chat-sources-label {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate-400);
+    margin: 0 0 0.35rem;
+  }
+  .chat-sources-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .source-chip {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--slate-600);
+    background: var(--slate-100);
+    border: 1px solid var(--slate-200);
+    border-radius: 0.4rem;
+    padding: 0.18rem 0.55rem;
+  }
+  .chat-sources-unavailable { font-size: 0.78rem; font-style: italic; color: var(--slate-400); margin: 0; }
   .chat-boundary {
     margin: 0 0 0.9rem;
     padding: 0.2rem 0;
@@ -329,6 +493,18 @@ _PAGE_TEMPLATE = """<!doctype html>
     color: var(--slate-600);
     margin: 0 0 0.4rem;
   }
+  .followup-suggestions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 0.5rem; }
+  .suggestion-chip {
+    background: #fff;
+    border: 1px solid var(--slate-200);
+    border-radius: 999px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.78rem;
+    color: var(--blue-600);
+    cursor: pointer;
+  }
+  .suggestion-chip:hover { background: var(--blue-50); border-color: var(--blue-500); }
+  .suggestion-chip:focus { outline: 2px solid var(--blue-500); outline-offset: 1px; }
 
   #chat-form { display: flex; gap: 0.6rem; }
   #question-input {
@@ -373,27 +549,28 @@ _PAGE_TEMPLATE = """<!doctype html>
       </div>
     </div>
     <span class="status-badge">Research / Controlled Evaluation</span>
+    <button type="button" id="about-toggle" class="about-toggle" aria-haspopup="dialog" aria-expanded="false" aria-controls="about-drawer">About &#9662;</button>
   </header>
 
   <div class="app-body">
     <aside class="nav-panel">
       <h2 class="nav-prompt">Not sure what to ask? Start with your situation.</h2>
 
-      <button type="button" id="random-topic-button" class="random-topic-button">Random Topic</button>
+      <button type="button" id="random-topic-button" class="random-topic-button">Explore a topic</button>
 
       <div class="panel-card">
-        <p class="panel-label">Your Situation</p>
+        <p class="panel-label"><span class="step-number">Step 1</span><span class="step-title">Your situation</span></p>
         <div id="situation-list" class="situation-list"></div>
       </div>
 
       <div id="topic-panel" class="panel-card" hidden>
-        <p class="panel-label">Approved Topic</p>
+        <p class="panel-label"><span class="step-number">Step 2</span><span class="step-title">Choose a topic</span></p>
         <input type="search" id="topic-search" placeholder="Search approved topics..." aria-label="Search approved topics">
         <div id="topic-list" class="topic-list"></div>
       </div>
 
       <div id="starter-panel" class="panel-card" hidden>
-        <p class="panel-label">Question Starter</p>
+        <p class="panel-label"><span class="step-number">Step 3</span><span class="step-title">Start exploring</span></p>
         <p id="selected-topic-note" class="selected-topic-note"></p>
         <div id="starter-list" class="starter-list"></div>
       </div>
@@ -407,7 +584,12 @@ _PAGE_TEMPLATE = """<!doctype html>
     <main class="chat-main">
       <div id="chat-history" aria-live="polite"></div>
 
-      <p id="followup-label" hidden>Ask a follow-up question</p>
+      <p id="followup-label" hidden>Continue exploring</p>
+      <div id="followup-suggestions" class="followup-suggestions" hidden>
+        <button type="button" class="suggestion-chip" data-suggestion="Explain more simply">Explain more simply</button>
+        <button type="button" class="suggestion-chip" data-suggestion="What does this mean?">What does this mean?</button>
+        <button type="button" class="suggestion-chip" data-suggestion="Tell me more">Tell me more</button>
+      </div>
 
       <form id="chat-form">
         <textarea
@@ -422,6 +604,110 @@ _PAGE_TEMPLATE = """<!doctype html>
       <div id="chat-status" role="status"></div>
     </main>
   </div>
+
+  <div id="about-backdrop" class="about-backdrop" hidden></div>
+  <aside id="about-drawer" class="about-drawer" hidden role="dialog" aria-modal="true" aria-labelledby="about-drawer-title">
+    <div class="about-drawer-header">
+      <h2 id="about-drawer-title">About this Research Interface</h2>
+      <button type="button" id="about-close" class="about-close" aria-label="Close About panel">&times;</button>
+    </div>
+    <div class="about-drawer-body">
+      <section class="about-section">
+        <h3>What is this</h3>
+        <p>Safe Medical AI Oncology is a research interface for exploring evidence-grounded oncology information through a controlled conversational experience.</p>
+        <p>The system is designed to help users, mostly patients, explore approved oncology topics, understand medical concepts in accessible language, and trace answers to curated evidence sources.</p>
+      </section>
+      <section class="about-section">
+        <h3>Objective</h3>
+        <p>To explore how evidence-grounded AI can support safer, understandable, and traceable access to oncology information while maintaining explicit boundaries between educational information and clinical decision-making.</p>
+      </section>
+      <section class="about-section">
+        <h3>Scope</h3>
+        <div class="about-scope-grid">
+          <div class="about-scope-card">
+            <p class="about-scope-heading">In scope</p>
+            <ul>
+              <li>Evidence-grounded oncology education</li>
+              <li>Approved knowledge topics</li>
+              <li>Patient-friendly explanations</li>
+              <li>Follow-up educational questions</li>
+              <li>Source transparency</li>
+              <li>Controlled research evaluation</li>
+            </ul>
+          </div>
+          <div class="about-scope-card">
+            <p class="about-scope-heading">Out of scope</p>
+            <ul>
+              <li>Diagnosis</li>
+              <li>Individual treatment recommendations</li>
+              <li>Patient-specific clinical decisions</li>
+              <li>Emergency medical advice</li>
+              <li>Clinical deployment</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <section class="about-section">
+        <h3>How to use</h3>
+        <ol>
+          <li><strong>Choose your situation</strong> &mdash; Select the context that best matches what you want to explore.</li>
+          <li><strong>Choose an approved topic</strong> &mdash; Start with a curated oncology topic.</li>
+          <li><strong>Read the answer</strong> &mdash; Review the explanation and its cited sources.</li>
+          <li><strong>Ask a follow-up</strong> &mdash; Ask for clarification or explore the topic further.</li>
+        </ol>
+        <p class="about-note">Please do not enter identifiable patient information or other sensitive personal data.</p>
+      </section>
+      <section class="about-section">
+        <h3>Evidence &amp; Sources</h3>
+        <p>Responses are generated from a curated oncology knowledge base populated from selected authoritative and clinically relevant sources.</p>
+        <p>Sources may include:</p>
+        <ul>
+          <li>NCI</li>
+          <li>NCCN Patient</li>
+          <li>ESMO</li>
+          <li>American Cancer Society</li>
+          <li>Other approved evidence materials</li>
+        </ul>
+      </section>
+      <section class="about-section">
+        <h3>Safety boundary</h3>
+        <p class="about-safety-label">Research / Controlled Evaluation</p>
+        <p>This interface has not been clinically validated and is not intended for diagnosis, treatment selection, or patient-specific clinical decision-making.</p>
+      </section>
+      <section class="about-section">
+        <h3>Research &amp; Evaluation</h3>
+        <p>This interface is developed as part of a controlled research workflow focusing on:</p>
+        <p>Evidence fidelity &middot; Safety boundaries &middot; Human interaction &middot; Traceability &middot; Validation</p>
+      </section>
+      <section class="about-section">
+        <h3>About the team</h3>
+        <p>This research project integrates perspectives from medicine, oncology, health informatics, computational methods, and AI system design.</p>
+        <p>The interface is developed as a research and controlled-evaluation platform for studying safe, evidence-grounded medical AI.</p>
+        <p class="about-team-label">Team members</p>
+        <ul>
+          <li>Nhan Tran, MD, MSc.</li>
+          <li>Quy Nguyen Hoang, MD, PhD.</li>
+        </ul>
+      </section>
+      <section class="about-section">
+        <h3>Model / System Information</h3>
+        <dl class="about-system-info">
+          <dt>System</dt>
+          <dd>Safe Medical AI Oncology</dd>
+          <dt>Interface type</dt>
+          <dd>Controlled research / evaluation interface</dd>
+          <dt>Knowledge approach</dt>
+          <dd>Evidence-grounded oncology knowledge from approved/curated sources</dd>
+          <dt>Interaction</dt>
+          <dd>Controlled conversational exploration of approved topics</dd>
+          <dt>Primary research concerns</dt>
+          <dd>Evidence fidelity, safety boundaries, traceability, human interaction, validation</dd>
+          <dt>Clinical status</dt>
+          <dd>Not clinically validated. Not for diagnosis. Not for treatment selection. Not for patient-specific clinical decision-making. Not clinically deployed.</dd>
+        </dl>
+      </section>
+    </div>
+  </aside>
 
   <script>
     (function () {
@@ -532,6 +818,7 @@ _PAGE_TEMPLATE = """<!doctype html>
         // a real exchange completes on this newly selected case_id (see
         // hasFollowupContext()).
         followupLabel.hidden = true;
+        followupSuggestions.hidden = true;
 
         Array.prototype.forEach.call(
           topicList.querySelectorAll(".topic-chip"),
@@ -601,6 +888,56 @@ _PAGE_TEMPLATE = """<!doctype html>
       var history = document.getElementById("chat-history");
       var status = document.getElementById("chat-status");
       var followupLabel = document.getElementById("followup-label");
+      var followupSuggestions = document.getElementById("followup-suggestions");
+
+      // Follow-up suggestion chips (fixed, non-clinical UI copy): populate
+      // the existing question input only -- same pattern as a question
+      // starter chip (selectTopic() above). Never submits the form, never
+      // calls fetch, never introduces new state.
+      Array.prototype.forEach.call(
+        document.querySelectorAll(".suggestion-chip"),
+        function (btn) {
+          btn.addEventListener("click", function () {
+            input.value = btn.getAttribute("data-suggestion");
+            input.focus();
+          });
+        }
+      );
+
+      // --- About drawer: presentation-only, no backend request -----------
+      var aboutToggle = document.getElementById("about-toggle");
+      var aboutDrawer = document.getElementById("about-drawer");
+      var aboutBackdrop = document.getElementById("about-backdrop");
+      var aboutClose = document.getElementById("about-close");
+
+      function openAboutDrawer() {
+        aboutDrawer.hidden = false;
+        aboutBackdrop.hidden = false;
+        aboutToggle.setAttribute("aria-expanded", "true");
+        aboutClose.focus();
+      }
+
+      function closeAboutDrawer() {
+        aboutDrawer.hidden = true;
+        aboutBackdrop.hidden = true;
+        aboutToggle.setAttribute("aria-expanded", "false");
+        aboutToggle.focus();
+      }
+
+      aboutToggle.addEventListener("click", function () {
+        if (aboutDrawer.hidden) {
+          openAboutDrawer();
+        } else {
+          closeAboutDrawer();
+        }
+      });
+      aboutClose.addEventListener("click", closeAboutDrawer);
+      aboutBackdrop.addEventListener("click", closeAboutDrawer);
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && !aboutDrawer.hidden) {
+          closeAboutDrawer();
+        }
+      });
 
       // B08: bounded, same-session-only follow-up context -- the single
       // most recent exchange only, held purely in this page's JS memory.
@@ -619,10 +956,101 @@ _PAGE_TEMPLATE = """<!doctype html>
         return lastQuestion !== null && lastAnswer !== null && lastCaseId === selectedCaseId;
       }
 
+      // P0: a small, bounded, safe Markdown-SUBSET renderer for assistant
+      // answer text only -- **bold**, *italic*, paragraph breaks, and
+      // simple "- "/"1. " lists. Builds DOM nodes directly via
+      // createElement/createTextNode/textContent throughout; never sets
+      // innerHTML with answer content and never evaluates anything, so
+      // governed-but-still-external LLM-generated text can never inject
+      // arbitrary markup. Not a general Markdown implementation -- only
+      // the bounded subset actually observed in answer content.
+      function appendInlineFormatted(parent, text) {
+        var pattern = /\\*\\*([^*]+)\\*\\*|\\*([^*]+)\\*/g;
+        var lastIndex = 0;
+        var match;
+        while ((match = pattern.exec(text)) !== null) {
+          if (match.index > lastIndex) {
+            parent.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+          }
+          if (match[1] !== undefined) {
+            var strong = document.createElement("strong");
+            strong.textContent = match[1];
+            parent.appendChild(strong);
+          } else {
+            var em = document.createElement("em");
+            em.textContent = match[2];
+            parent.appendChild(em);
+          }
+          lastIndex = pattern.lastIndex;
+        }
+        if (lastIndex < text.length) {
+          parent.appendChild(document.createTextNode(text.slice(lastIndex)));
+        }
+      }
+
+      function renderFormattedAnswer(container, text) {
+        var lines = String(text).split("\\n");
+        var i = 0;
+        while (i < lines.length) {
+          if (lines[i].trim() === "") {
+            i++;
+            continue;
+          }
+          var orderedMatch = /^\\s*\\d+\\.\\s+(.*)$/.exec(lines[i]);
+          var unorderedMatch = /^\\s*-\\s+(.*)$/.exec(lines[i]);
+          if (orderedMatch || unorderedMatch) {
+            var isOrdered = !!orderedMatch;
+            var listEl = document.createElement(isOrdered ? "ol" : "ul");
+            listEl.className = "chat-answer-list";
+            while (i < lines.length) {
+              var itemMatch = isOrdered
+                ? /^\\s*\\d+\\.\\s+(.*)$/.exec(lines[i])
+                : /^\\s*-\\s+(.*)$/.exec(lines[i]);
+              if (!itemMatch) {
+                break;
+              }
+              var li = document.createElement("li");
+              appendInlineFormatted(li, itemMatch[1]);
+              listEl.appendChild(li);
+              i++;
+            }
+            container.appendChild(listEl);
+            continue;
+          }
+
+          var paraLines = [];
+          while (
+            i < lines.length &&
+            lines[i].trim() !== "" &&
+            !/^\\s*-\\s+/.test(lines[i]) &&
+            !/^\\s*\\d+\\.\\s+/.test(lines[i])
+          ) {
+            paraLines.push(lines[i]);
+            i++;
+          }
+          var p = document.createElement("p");
+          p.className = "chat-answer-paragraph";
+          paraLines.forEach(function (paraLine, idx) {
+            if (idx > 0) {
+              p.appendChild(document.createElement("br"));
+            }
+            appendInlineFormatted(p, paraLine);
+          });
+          container.appendChild(p);
+        }
+        if (!container.hasChildNodes()) {
+          container.appendChild(document.createTextNode(text));
+        }
+      }
+
       function appendMessage(role, text) {
         var el = document.createElement("div");
         el.className = "chat-message " + role;
-        el.textContent = text;
+        if (role === "assistant") {
+          renderFormattedAnswer(el, text);
+        } else {
+          el.textContent = text;
+        }
         history.appendChild(el);
         history.scrollTop = history.scrollHeight;
       }
@@ -637,9 +1065,27 @@ _PAGE_TEMPLATE = """<!doctype html>
       function appendSources(sources) {
         var el = document.createElement("div");
         el.className = "chat-sources";
-        el.textContent = sources.length === 0
-          ? "Evidence information unavailable"
-          : "Sources: " + sources.join(", ");
+        if (sources.length === 0) {
+          var unavailable = document.createElement("p");
+          unavailable.className = "chat-sources-unavailable";
+          unavailable.textContent = "Evidence information unavailable";
+          el.appendChild(unavailable);
+        } else {
+          var label = document.createElement("p");
+          label.className = "chat-sources-label";
+          label.textContent = "Evidence Sources";
+          el.appendChild(label);
+
+          var chips = document.createElement("div");
+          chips.className = "chat-sources-chips";
+          sources.forEach(function (source) {
+            var chip = document.createElement("span");
+            chip.className = "source-chip";
+            chip.textContent = source;
+            chips.appendChild(chip);
+          });
+          el.appendChild(chips);
+        }
         history.appendChild(el);
         history.scrollTop = history.scrollHeight;
       }
@@ -778,6 +1224,7 @@ _PAGE_TEMPLATE = """<!doctype html>
               lastAnswer = data.answer;
               lastCaseId = requestCaseId;
               followupLabel.hidden = false;
+              followupSuggestions.hidden = false;
             }
           })
           .catch(function (err) {
