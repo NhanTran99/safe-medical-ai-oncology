@@ -349,14 +349,34 @@ _PAGE_TEMPLATE = """<!doctype html>
   .about-drawer-body { padding: 1.25rem; overflow-y: auto; flex: 1; }
   .about-section { margin: 0 0 1.5rem; }
   .about-section:last-child { margin-bottom: 0; }
-  .about-section h3 {
+  .about-section h3 { margin: 0; }
+  .about-accordion-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--slate-400);
-    margin: 0 0 0.5rem;
+    text-align: left;
+    cursor: pointer;
   }
+  .about-accordion-trigger:hover { color: var(--slate-600); }
+  .about-accordion-trigger:focus { outline: 2px solid var(--blue-500); outline-offset: 2px; }
+  .about-accordion-icon {
+    flex-shrink: 0;
+    margin-left: 0.75rem;
+    font-size: 0.7rem;
+    transition: transform 0.12s;
+  }
+  .about-accordion-trigger[aria-expanded="true"] .about-accordion-icon { transform: rotate(180deg); }
+  .about-accordion-panel { margin-top: 0.5rem; }
   .about-section p { font-size: 0.85rem; line-height: 1.55; color: var(--slate-600); margin: 0 0 0.5rem; }
   .about-section p:last-child { margin-bottom: 0; }
   .about-section ul, .about-section ol {
@@ -430,6 +450,14 @@ _PAGE_TEMPLATE = """<!doctype html>
     margin-left: auto;
     margin-right: auto;
   }
+  /* R2: align Continue-exploring/suggestions/the chat form's content edge
+     with #chat-history's own inner content edge (padding: 1rem 1.15rem
+     below) -- the shared max-width/centering above only aligns the outer
+     column, not the inset text inside the bordered #chat-history card. */
+  #followup-label, #followup-suggestions, #chat-form {
+    padding-left: 1.15rem;
+    padding-right: 1.15rem;
+  }
 
   #chat-history {
     border: 1px solid var(--slate-200);
@@ -448,7 +476,14 @@ _PAGE_TEMPLATE = """<!doctype html>
   }
   .chat-message { margin: 0 0 0.9rem; white-space: pre-wrap; line-height: 1.5; font-size: 0.88rem; }
   .chat-message:last-child { margin-bottom: 0; }
-  .chat-message.user { font-weight: 600; color: var(--slate-700); }
+  .chat-message.user {
+    font-weight: 600;
+    color: var(--slate-700);
+    background: var(--blue-50);
+    border: 1px solid var(--blue-500);
+    border-radius: 0.65rem;
+    padding: 0.55rem 0.8rem;
+  }
   .chat-message.assistant { color: var(--slate-600); font-size: 1rem; line-height: 1.6; }
   .chat-message.error { color: var(--red-600); }
   .chat-answer-paragraph { margin: 0 0 0.75rem; }
@@ -491,7 +526,7 @@ _PAGE_TEMPLATE = """<!doctype html>
     font-size: 0.78rem;
     font-weight: 600;
     color: var(--slate-600);
-    margin: 0 0 0.4rem;
+    margin-bottom: 0.4rem;
   }
   .followup-suggestions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 0.5rem; }
   .suggestion-chip {
@@ -613,84 +648,101 @@ _PAGE_TEMPLATE = """<!doctype html>
     </div>
     <div class="about-drawer-body">
       <section class="about-section">
-        <h3>What is this</h3>
-        <p>Safe Medical AI Oncology is a research interface for exploring evidence-grounded oncology information through a controlled conversational experience.</p>
-        <p>The system is designed to help users, mostly patients, explore approved oncology topics, understand medical concepts in accessible language, and trace answers to curated evidence sources.</p>
+        <h3><button type="button" class="about-accordion-trigger" aria-expanded="false" aria-controls="about-panel-1" id="about-trigger-1">What is this<span class="about-accordion-icon" aria-hidden="true">&#9662;</span></button></h3>
+        <div id="about-panel-1" class="about-accordion-panel" role="region" aria-labelledby="about-trigger-1" hidden>
+          <p>Safe Medical AI Oncology is a research interface for exploring evidence-grounded oncology information through a controlled conversational experience.</p>
+          <p>The system is designed to help users, mostly patients, explore approved oncology topics, understand medical concepts in accessible language, and trace answers to curated evidence sources.</p>
+        </div>
       </section>
       <section class="about-section">
-        <h3>Objective</h3>
-        <p>To explore how evidence-grounded AI can support safer, understandable, and traceable access to oncology information while maintaining explicit boundaries between educational information and clinical decision-making.</p>
+        <h3><button type="button" class="about-accordion-trigger" aria-expanded="false" aria-controls="about-panel-2" id="about-trigger-2">Objective<span class="about-accordion-icon" aria-hidden="true">&#9662;</span></button></h3>
+        <div id="about-panel-2" class="about-accordion-panel" role="region" aria-labelledby="about-trigger-2" hidden>
+          <p>To explore how evidence-grounded AI can support safer, understandable, and traceable access to oncology information while maintaining explicit boundaries between educational information and clinical decision-making.</p>
+        </div>
       </section>
       <section class="about-section">
-        <h3>Scope</h3>
-        <div class="about-scope-grid">
-          <div class="about-scope-card">
-            <p class="about-scope-heading">In scope</p>
-            <ul>
-              <li>Evidence-grounded oncology education</li>
-              <li>Approved knowledge topics</li>
-              <li>Patient-friendly explanations</li>
-              <li>Follow-up educational questions</li>
-              <li>Source transparency</li>
-              <li>Controlled research evaluation</li>
-            </ul>
-          </div>
-          <div class="about-scope-card">
-            <p class="about-scope-heading">Out of scope</p>
-            <ul>
-              <li>Diagnosis</li>
-              <li>Individual treatment recommendations</li>
-              <li>Patient-specific clinical decisions</li>
-              <li>Emergency medical advice</li>
-              <li>Clinical deployment</li>
-            </ul>
+        <h3><button type="button" class="about-accordion-trigger" aria-expanded="false" aria-controls="about-panel-3" id="about-trigger-3">Scope<span class="about-accordion-icon" aria-hidden="true">&#9662;</span></button></h3>
+        <div id="about-panel-3" class="about-accordion-panel" role="region" aria-labelledby="about-trigger-3" hidden>
+          <div class="about-scope-grid">
+            <div class="about-scope-card">
+              <p class="about-scope-heading">In scope</p>
+              <ul>
+                <li>Evidence-grounded oncology education</li>
+                <li>Approved knowledge topics</li>
+                <li>Patient-friendly explanations</li>
+                <li>Follow-up educational questions</li>
+                <li>Source transparency</li>
+                <li>Controlled research evaluation</li>
+              </ul>
+            </div>
+            <div class="about-scope-card">
+              <p class="about-scope-heading">Out of scope</p>
+              <ul>
+                <li>Diagnosis</li>
+                <li>Individual treatment recommendations</li>
+                <li>Patient-specific clinical decisions</li>
+                <li>Emergency medical advice</li>
+                <li>Clinical deployment</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
       <section class="about-section">
-        <h3>How to use</h3>
-        <ol>
-          <li><strong>Choose your situation</strong> &mdash; Select the context that best matches what you want to explore.</li>
-          <li><strong>Choose an approved topic</strong> &mdash; Start with a curated oncology topic.</li>
-          <li><strong>Read the answer</strong> &mdash; Review the explanation and its cited sources.</li>
-          <li><strong>Ask a follow-up</strong> &mdash; Ask for clarification or explore the topic further.</li>
-        </ol>
-        <p class="about-note">Please do not enter identifiable patient information or other sensitive personal data.</p>
+        <h3><button type="button" class="about-accordion-trigger" aria-expanded="false" aria-controls="about-panel-4" id="about-trigger-4">How to use<span class="about-accordion-icon" aria-hidden="true">&#9662;</span></button></h3>
+        <div id="about-panel-4" class="about-accordion-panel" role="region" aria-labelledby="about-trigger-4" hidden>
+          <ol>
+            <li><strong>Choose your situation</strong> &mdash; Select the context that best matches what you want to explore.</li>
+            <li><strong>Choose an approved topic</strong> &mdash; Start with a curated oncology topic.</li>
+            <li><strong>Read the answer</strong> &mdash; Review the explanation and its cited sources.</li>
+            <li><strong>Ask a follow-up</strong> &mdash; Ask for clarification or explore the topic further.</li>
+          </ol>
+          <p class="about-note">Please do not enter identifiable patient information or other sensitive personal data.</p>
+        </div>
       </section>
       <section class="about-section">
-        <h3>Evidence &amp; Sources</h3>
-        <p>Responses are generated from a curated oncology knowledge base populated from selected authoritative and clinically relevant sources.</p>
-        <p>Sources may include:</p>
-        <ul>
-          <li>NCI</li>
-          <li>NCCN Patient</li>
-          <li>ESMO</li>
-          <li>American Cancer Society</li>
-          <li>Other approved evidence materials</li>
-        </ul>
+        <h3><button type="button" class="about-accordion-trigger" aria-expanded="false" aria-controls="about-panel-5" id="about-trigger-5">Evidence &amp; Sources<span class="about-accordion-icon" aria-hidden="true">&#9662;</span></button></h3>
+        <div id="about-panel-5" class="about-accordion-panel" role="region" aria-labelledby="about-trigger-5" hidden>
+          <p>Responses are generated from a curated oncology knowledge base populated from selected authoritative and clinically relevant sources.</p>
+          <p>Sources may include:</p>
+          <ul>
+            <li>NCI</li>
+            <li>NCCN Patient</li>
+            <li>ESMO</li>
+            <li>American Cancer Society</li>
+            <li>Other approved evidence materials</li>
+          </ul>
+        </div>
       </section>
       <section class="about-section">
-        <h3>Safety boundary</h3>
-        <p class="about-safety-label">Research / Controlled Evaluation</p>
-        <p>This interface has not been clinically validated and is not intended for diagnosis, treatment selection, or patient-specific clinical decision-making.</p>
+        <h3><button type="button" class="about-accordion-trigger" aria-expanded="false" aria-controls="about-panel-6" id="about-trigger-6">Safety boundary<span class="about-accordion-icon" aria-hidden="true">&#9662;</span></button></h3>
+        <div id="about-panel-6" class="about-accordion-panel" role="region" aria-labelledby="about-trigger-6" hidden>
+          <p class="about-safety-label">Research / Controlled Evaluation</p>
+          <p>This interface has not been clinically validated and is not intended for diagnosis, treatment selection, or patient-specific clinical decision-making.</p>
+        </div>
       </section>
       <section class="about-section">
-        <h3>Research &amp; Evaluation</h3>
-        <p>This interface is developed as part of a controlled research workflow focusing on:</p>
-        <p>Evidence fidelity &middot; Safety boundaries &middot; Human interaction &middot; Traceability &middot; Validation</p>
+        <h3><button type="button" class="about-accordion-trigger" aria-expanded="false" aria-controls="about-panel-7" id="about-trigger-7">Research &amp; Evaluation<span class="about-accordion-icon" aria-hidden="true">&#9662;</span></button></h3>
+        <div id="about-panel-7" class="about-accordion-panel" role="region" aria-labelledby="about-trigger-7" hidden>
+          <p>This interface is developed as part of a controlled research workflow focusing on:</p>
+          <p>Evidence fidelity &middot; Safety boundaries &middot; Human interaction &middot; Traceability &middot; Validation</p>
+        </div>
       </section>
       <section class="about-section">
-        <h3>About the team</h3>
-        <p>This research project integrates perspectives from medicine, oncology, health informatics, computational methods, and AI system design.</p>
-        <p>The interface is developed as a research and controlled-evaluation platform for studying safe, evidence-grounded medical AI.</p>
-        <p class="about-team-label">Team members</p>
-        <ul>
-          <li>Nhan Tran, MD, MSc.</li>
-          <li>Quy Nguyen Hoang, MD, PhD.</li>
-        </ul>
+        <h3><button type="button" class="about-accordion-trigger" aria-expanded="false" aria-controls="about-panel-8" id="about-trigger-8">About the team<span class="about-accordion-icon" aria-hidden="true">&#9662;</span></button></h3>
+        <div id="about-panel-8" class="about-accordion-panel" role="region" aria-labelledby="about-trigger-8" hidden>
+          <p>This research project integrates perspectives from medicine, oncology, health informatics, computational methods, and AI system design.</p>
+          <p>The interface is developed as a research and controlled-evaluation platform for studying safe, evidence-grounded medical AI.</p>
+          <p class="about-team-label">Team members</p>
+          <ul>
+            <li>Nhan Tran, MD, MSc.</li>
+            <li>Quy Nguyen Hoang, MD, PhD.</li>
+          </ul>
+        </div>
       </section>
       <section class="about-section">
-        <h3>Model / System Information</h3>
+        <h3><button type="button" class="about-accordion-trigger" aria-expanded="false" aria-controls="about-panel-9" id="about-trigger-9">Model / System Information<span class="about-accordion-icon" aria-hidden="true">&#9662;</span></button></h3>
+        <div id="about-panel-9" class="about-accordion-panel" role="region" aria-labelledby="about-trigger-9" hidden>
         <dl class="about-system-info">
           <dt>System</dt>
           <dd>Safe Medical AI Oncology</dd>
@@ -705,6 +757,7 @@ _PAGE_TEMPLATE = """<!doctype html>
           <dt>Clinical status</dt>
           <dd>Not clinically validated. Not for diagnosis. Not for treatment selection. Not for patient-specific clinical decision-making. Not clinically deployed.</dd>
         </dl>
+        </div>
       </section>
     </div>
   </aside>
@@ -938,6 +991,22 @@ _PAGE_TEMPLATE = """<!doctype html>
           closeAboutDrawer();
         }
       });
+
+      // R3: each About section's heading is an accessible accordion
+      // trigger toggling its own panel only -- existing hidden/aria-*
+      // convention, no new interaction pattern. Content itself (inside
+      // each panel) is unchanged from the prior non-collapsible markup.
+      Array.prototype.forEach.call(
+        document.querySelectorAll(".about-accordion-trigger"),
+        function (trigger) {
+          trigger.addEventListener("click", function () {
+            var panel = document.getElementById(trigger.getAttribute("aria-controls"));
+            var expanded = trigger.getAttribute("aria-expanded") === "true";
+            trigger.setAttribute("aria-expanded", expanded ? "false" : "true");
+            panel.hidden = expanded;
+          });
+        }
+      );
 
       // B08: bounded, same-session-only follow-up context -- the single
       // most recent exchange only, held purely in this page's JS memory.

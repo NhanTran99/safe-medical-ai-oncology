@@ -804,6 +804,88 @@ def test_chat_query_b08_followup_still_updates_context_after_relevance_bypass():
     assert follow_up.json()["status"] == "COMPLETED"
 
 
+# --- R1-R3: bounded UI refinement (visual distinction, alignment, About accordion) --
+
+
+def test_chat_page_user_message_has_a_distinct_light_blue_treatment():
+    # R1: .chat-message.user gets a light-blue background + border, reusing
+    # existing design tokens -- .chat-message.assistant stays neutral/white.
+    html = client.get("/chat").text
+
+    assert "background: var(--blue-50);" in html
+    assert "border: 1px solid var(--blue-500);" in html
+
+
+def test_chat_page_followup_and_form_align_with_chat_history_inner_padding():
+    # R2: #followup-label/#followup-suggestions/#chat-form get the same
+    # horizontal padding as #chat-history's own inner content inset, so
+    # their content edges line up rather than only sharing the outer
+    # max-width column.
+    html = client.get("/chat").text
+
+    assert "#followup-label, #followup-suggestions, #chat-form {" in html
+    assert "padding-left: 1.15rem;" in html
+
+
+def test_chat_page_about_accordion_has_all_nine_headings_present():
+    # R3: all nine existing section headings remain present, unrenamed.
+    html = client.get("/chat").text
+
+    for heading in [
+        "What is this",
+        "Objective",
+        "Scope",
+        "How to use",
+        "Evidence &amp; Sources",
+        "Safety boundary",
+        "Research &amp; Evaluation",
+        "About the team",
+        "Model / System Information",
+    ]:
+        assert heading in html
+
+
+def test_chat_page_about_accordion_panels_start_collapsed():
+    # R3: every one of the nine panels is hidden by default (collapsed),
+    # and every trigger starts aria-expanded="false".
+    html = client.get("/chat").text
+
+    for n in range(1, 10):
+        assert f'id="about-panel-{n}" class="about-accordion-panel" role="region" aria-labelledby="about-trigger-{n}" hidden>' in html
+        assert f'aria-controls="about-panel-{n}" id="about-trigger-{n}"' in html
+        assert html.count(f'aria-expanded="false" aria-controls="about-panel-{n}"') == 1
+
+
+def test_chat_page_about_accordion_expand_collapse_is_wired():
+    # R3: a click handler toggles aria-expanded and the matching panel's
+    # hidden state -- represents the expand/collapse behavior itself.
+    html = client.get("/chat").text
+
+    assert 'document.querySelectorAll(".about-accordion-trigger")' in html
+    assert 'trigger.setAttribute("aria-expanded", expanded ? "false" : "true");' in html
+    assert "panel.hidden = expanded;" in html
+
+
+def test_chat_page_about_accordion_preserves_existing_content_verbatim():
+    # R3: representative existing facts from each kind of internal
+    # structure (plain paragraphs, the scope two-card grid, the ordered
+    # how-to-use list, the team list, and the Model/System <dl>) are still
+    # present, unrewritten -- proves content was wrapped, not replaced.
+    html = client.get("/chat").text
+
+    assert "Please do not enter identifiable patient information or other sensitive personal data." in html
+    assert "Evidence-grounded oncology education" in html
+    assert "Emergency medical advice" in html
+    assert "Choose your situation" in html
+    assert "Nhan Tran, MD, MSc." in html
+    assert "Quy Nguyen Hoang, MD, PhD." in html
+    assert "<dt>Clinical status</dt>" in html
+    assert (
+        "Not clinically validated. Not for diagnosis. Not for treatment selection. "
+        "Not for patient-specific clinical decision-making. Not clinically deployed."
+    ) in html
+
+
 # --- B11 bounded verification surface --------------------------------------
 
 
